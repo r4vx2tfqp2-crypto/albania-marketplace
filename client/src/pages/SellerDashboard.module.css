@@ -1,0 +1,142 @@
+.page { padding: 32px 0 60px; }
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 28px;
+}
+
+.title { font-family: var(--font-display); font-size: 28px; font-weight: 700; letter-spacing: -0.02em; }
+.sub { font-size: 14px; color: var(--text-3); margin-top: 2px; }
+
+.addBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--text-1);
+  color: #fff;
+  padding: 11px 20px;
+  border-radius: var(--radius-md);
+  font-size: 14px;
+  font-weight: 500;
+  transition: background 0.15s;
+}
+.addBtn:hover { background: var(--green); }
+
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 28px;
+}
+
+.metric {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+}
+
+.metricIcon {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+
+.metricVal { font-family: var(--font-display); font-size: 22px; font-weight: 700; color: var(--text-1); }
+.metricLabel { font-size: 13px; color: var(--text-3); margin-top: 3px; }
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.section {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  padding: 24px;
+}
+
+.sectionHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.sectionTitle { font-family: var(--font-display); font-size: 16px; font-weight: 700; }
+
+.seeAll {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  color: var(--text-3);
+  transition: color 0.15s;
+}
+.seeAll:hover { color: var(--text-1); }
+
+.ordersList { display: flex; flex-direction: column; gap: 1px; }
+
+.orderRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+}
+.orderRow:last-child { border-bottom: none; }
+
+.orderId { font-size: 13px; font-weight: 600; font-family: var(--font-display); color: var(--text-1); }
+.orderProduct { font-size: 12px; color: var(--text-2); margin-top: 2px; }
+.orderCustomer { font-size: 12px; color: var(--text-3); margin-top: 1px; }
+
+.statusBadge {
+  font-size: 11px;
+  font-weight: 500;
+  padding: 3px 9px;
+  border-radius: 20px;
+  display: inline-block;
+  margin-bottom: 4px;
+}
+
+.orderTotal { font-size: 13px; font-weight: 600; color: var(--text-1); text-align: right; }
+
+.productsList { display: flex; flex-direction: column; gap: 1px; }
+
+.productRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+}
+.productRow:last-child { border-bottom: none; }
+
+.productImg {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.productInfo { flex: 1; min-width: 0; }
+.productName { font-size: 13px; font-weight: 500; color: var(--text-1); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.productMeta { font-size: 11px; color: var(--text-3); margin-top: 2px; }
+.productPrice { font-size: 13px; font-weight: 600; font-family: var(--font-display); white-space: nowrap; }
+
+@media (max-width: 900px) {
+  .metrics { grid-template-columns: repeat(2, 1fr); }
+  .grid { grid-template-columns: 1fr; }
+}

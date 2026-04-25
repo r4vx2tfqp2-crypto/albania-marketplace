@@ -1,0 +1,203 @@
+.page { opacity: 0; transition: opacity 0.3s ease; }
+.page.visible { opacity: 1; }
+
+.hero {
+  background: var(--text-1);
+  color: #fff;
+  padding: 60px 20px;
+  margin-bottom: 0;
+}
+
+.heroContent {
+  max-width: var(--max-w);
+  margin: 0 auto;
+}
+
+.heroTag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--green);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+
+.heroTitle {
+  font-family: var(--font-display);
+  font-size: clamp(36px, 6vw, 60px);
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+  margin-bottom: 16px;
+  color: #fff;
+}
+
+.heroSub {
+  font-size: 16px;
+  color: rgba(255,255,255,0.6);
+  max-width: 480px;
+  margin-bottom: 32px;
+  line-height: 1.6;
+}
+
+.heroSearch {
+  display: flex;
+  align-items: center;
+  background: #fff;
+  border-radius: var(--radius-md);
+  padding: 6px 6px 6px 16px;
+  gap: 10px;
+  max-width: 560px;
+  box-shadow: var(--shadow-lg);
+}
+
+.searchIcon { color: var(--text-3); flex-shrink: 0; }
+
+.searchInput {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-size: 15px;
+  color: var(--text-1);
+  background: transparent;
+  min-width: 0;
+}
+.searchInput::placeholder { color: var(--text-3); }
+
+.searchBtn {
+  background: var(--text-1);
+  color: #fff;
+  padding: 10px 20px;
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  font-weight: 500;
+  font-family: var(--font-body);
+  white-space: nowrap;
+  transition: background 0.15s;
+}
+.searchBtn:hover { background: var(--green); }
+
+.section { padding: 40px 0 0; }
+
+.sectionHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.sectionTitleRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sectionTitle {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-1);
+  letter-spacing: -0.02em;
+}
+
+.seeAll {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  color: var(--text-3);
+  transition: color 0.15s;
+}
+.seeAll:hover { color: var(--text-1); }
+
+.catGrid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 10px;
+}
+
+.catCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 16px 8px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.catCard:hover {
+  border-color: var(--text-1);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-sm);
+}
+
+.catIcon { font-size: 24px; }
+.catLabel { font-size: 12px; font-weight: 500; color: var(--text-2); }
+
+.productGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.shopGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 12px;
+}
+
+.trustBanner {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin: 40px 0 32px;
+  padding: 24px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+}
+
+.trustItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.trustIcon {
+  font-size: 22px;
+  flex-shrink: 0;
+}
+
+.trustTitle {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-1);
+  margin-bottom: 1px;
+}
+
+.trustSub {
+  font-size: 12px;
+  color: var(--text-3);
+}
+
+@media (max-width: 900px) {
+  .catGrid { grid-template-columns: repeat(4, 1fr); }
+  .trustBanner { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 600px) {
+  .hero { padding: 36px 14px; }
+  .heroTitle { font-size: 30px; }
+  .heroSearch { flex-wrap: wrap; }
+  .catGrid { grid-template-columns: repeat(4, 1fr); }
+  .trustBanner { grid-template-columns: 1fr 1fr; padding: 16px; }
+  .productGrid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .shopGrid { grid-template-columns: 1fr; }
+  .section { padding: 24px 0 0; }
+}

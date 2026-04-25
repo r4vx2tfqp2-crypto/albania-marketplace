@@ -1,0 +1,78 @@
+.page { padding: 32px 0 60px; }
+
+.profileCard {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  padding: 24px;
+  margin-bottom: 20px;
+}
+
+.avatar {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: var(--surface-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.name { font-size: 16px; font-weight: 500; color: var(--text-1); }
+.email { font-size: 13px; color: var(--text-3); margin-top: 2px; }
+
+.signInBtn {
+  margin-left: auto;
+  background: var(--text-1);
+  color: #fff;
+  padding: 9px 18px;
+  border-radius: var(--radius-md);
+  font-size: 14px;
+  font-weight: 500;
+  transition: background 0.15s;
+  white-space: nowrap;
+}
+.signInBtn:hover { background: var(--green); }
+
+.menu {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+
+.menuItem {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+  transition: background 0.15s;
+}
+.menuItem:last-child { border-bottom: none; }
+.menuItem:hover { background: var(--surface-2); }
+
+.menuIcon {
+  width: 36px;
+  height: 36px;
+  background: var(--surface-2);
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: var(--text-2);
+}
+
+.menuInfo { flex: 1; }
+.menuLabel { font-size: 14px; font-weight: 500; color: var(--text-1); }
+.menuSub { font-size: 12px; color: var(--text-3); margin-top: 1px; }
+
+.appInfo { text-align: center; padding: 24px; }
+.appName { font-family: var(--font-display); font-size: 20px; font-weight: 800; color: var(--text-2); }
+.appVersion { font-size: 12px; color: var(--text-3); margin-top: 4px; }

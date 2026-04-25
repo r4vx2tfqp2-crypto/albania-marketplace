@@ -1,0 +1,188 @@
+.page { padding: 32px 0 40px; min-height: 100vh; }
+
+.title {
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin-bottom: 28px;
+}
+.count { color: var(--text-3); font-weight: 400; }
+
+.layout {
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  gap: 24px;
+  align-items: start;
+}
+
+.items { display: flex; flex-direction: column; gap: 10px; }
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+}
+
+.itemImage {
+  width: 72px;
+  height: 72px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  flex-shrink: 0;
+}
+
+.itemInfo { flex: 1; min-width: 0; }
+.itemName { font-size: 15px; font-weight: 500; color: var(--text-1); display: block; }
+.itemName:hover { color: var(--green-dark); }
+.itemSize { font-size: 12px; color: var(--text-3); margin-top: 2px; }
+.itemPrice { font-size: 14px; color: var(--text-2); margin-top: 4px; }
+
+.qtyControl {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+.qtyControl button {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-2);
+  transition: background 0.15s;
+}
+.qtyControl button:hover { background: var(--surface-2); }
+.qtyControl span {
+  width: 36px;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 500;
+  border-left: 1px solid var(--border);
+  border-right: 1px solid var(--border);
+}
+
+.itemTotal {
+  font-size: 15px;
+  font-weight: 600;
+  font-family: var(--font-display);
+  color: var(--text-1);
+  min-width: 80px;
+  text-align: right;
+}
+
+.removeBtn {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-3);
+  border-radius: var(--radius-sm);
+  transition: all 0.15s;
+}
+.removeBtn:hover { color: var(--red); background: var(--red-light); }
+
+.summary {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  padding: 24px;
+  position: sticky;
+  top: calc(var(--nav-h) + 20px);
+}
+
+.summaryTitle {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 20px;
+}
+
+.summaryRow {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  color: var(--text-2);
+  padding: 6px 0;
+}
+
+.summaryDivider { height: 1px; background: var(--border); margin: 12px 0; }
+
+.summaryTotal {
+  display: flex;
+  justify-content: space-between;
+  font-size: 17px;
+  font-weight: 600;
+  font-family: var(--font-display);
+  padding: 4px 0;
+  margin-bottom: 16px;
+}
+
+.cod {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--green-light);
+  color: var(--green-dark);
+  font-size: 13px;
+  font-weight: 500;
+  padding: 10px 14px;
+  border-radius: var(--radius-md);
+  margin-bottom: 16px;
+}
+
+.checkoutBtn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: var(--text-1);
+  color: #fff;
+  border-radius: var(--radius-md);
+  padding: 14px;
+  font-size: 15px;
+  font-weight: 500;
+  font-family: var(--font-body);
+  transition: background 0.15s;
+  margin-bottom: 12px;
+}
+.checkoutBtn:hover { background: var(--green); }
+
+.continueLink {
+  display: block;
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-3);
+  transition: color 0.15s;
+}
+.continueLink:hover { color: var(--text-1); }
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  text-align: center;
+  padding: 40px;
+  gap: 8px;
+}
+.emptyTitle { font-family: var(--font-display); font-size: 22px; font-weight: 700; }
+.emptySub { font-size: 14px; color: var(--text-3); }
+
+@media (max-width: 768px) {
+  .layout { grid-template-columns: 1fr; }
+  .qtyControl { display: none; }
+}

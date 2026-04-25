@@ -1,0 +1,222 @@
+.page { padding: 24px 0 40px; min-height: 100vh; }
+
+.back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  color: var(--text-3);
+  margin-bottom: 24px;
+  transition: color 0.15s;
+}
+.back:hover { color: var(--text-1); }
+
+.layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 48px;
+  margin-bottom: 48px;
+}
+
+.imageMain {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: var(--radius-xl);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+.imageEmoji { font-size: 120px; }
+
+.topMeta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.category {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-3);
+  text-transform: capitalize;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.name {
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text-1);
+  line-height: 1.2;
+  margin-bottom: 12px;
+}
+
+.ratingRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+.ratingVal { font-size: 14px; font-weight: 500; }
+.reviewCount { font-size: 13px; color: var(--text-3); }
+
+.price {
+  font-family: var(--font-display);
+  font-size: 32px;
+  font-weight: 800;
+  color: var(--text-1);
+  letter-spacing: -0.02em;
+  margin-bottom: 20px;
+}
+
+.sizeSection { margin-bottom: 20px; }
+.sizeLabel { font-size: 13px; font-weight: 500; color: var(--text-2); margin-bottom: 10px; }
+.sizes { display: flex; flex-wrap: wrap; gap: 8px; }
+
+.sizeBtn {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-strong);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-2);
+  transition: all 0.15s;
+}
+.sizeBtn:hover { border-color: var(--text-1); color: var(--text-1); }
+.sizeSelected { background: var(--text-1); color: #fff; border-color: var(--text-1); }
+
+.actions {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.addToCart {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  padding: 14px;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text-1);
+  transition: all 0.15s;
+  font-family: var(--font-body);
+}
+.addToCart:hover { background: var(--surface-2); }
+.addedSuccess { background: var(--green-light); border-color: var(--green); color: var(--green-dark); }
+.addToCart:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.saveBtn {
+  width: 50px;
+  height: 50px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-strong);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-3);
+  transition: all 0.15s;
+  flex-shrink: 0;
+}
+.saveBtn:hover { color: var(--pink); border-color: var(--pink); }
+.saveBtn.saved { color: var(--pink); border-color: var(--pink); background: #FFF0F5; }
+
+.buyNow {
+  width: 100%;
+  background: var(--text-1);
+  color: #fff;
+  border-radius: var(--radius-md);
+  padding: 14px;
+  font-size: 15px;
+  font-weight: 500;
+  font-family: var(--font-body);
+  transition: background 0.15s;
+  margin-bottom: 16px;
+}
+.buyNow:hover { background: var(--green); }
+
+.deliveryInfo {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+.deliveryItem {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--text-3);
+}
+
+.shopCard {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 14px;
+  margin-bottom: 20px;
+  transition: all 0.15s;
+}
+.shopCard:hover { border-color: var(--border-strong); box-shadow: var(--shadow-sm); }
+
+.shopAvatar {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.shopInfo { flex: 1; }
+.shopName { display: flex; align-items: center; gap: 5px; font-size: 14px; font-weight: 500; color: var(--text-1); margin-bottom: 3px; }
+.shopMeta { font-size: 12px; color: var(--text-3); }
+.visitShop { font-size: 13px; color: var(--text-3); white-space: nowrap; }
+
+.description { background: var(--surface-2); border-radius: var(--radius-lg); padding: 16px; }
+.descTitle { font-size: 13px; font-weight: 500; color: var(--text-2); margin-bottom: 8px; }
+.descText { font-size: 14px; color: var(--text-2); line-height: 1.7; }
+
+.reviewsSection { border-top: 1px solid var(--border); padding-top: 40px; }
+.reviewsTitle { font-family: var(--font-display); font-size: 22px; font-weight: 700; margin-bottom: 20px; }
+.reviewsList { display: flex; flex-direction: column; gap: 16px; }
+
+.review {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+}
+.reviewHeader { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.reviewAvatar {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: var(--surface-2); display: flex; align-items: center;
+  justify-content: center; font-weight: 600; font-size: 14px; flex-shrink: 0;
+}
+.reviewAuthor { font-size: 14px; font-weight: 500; color: var(--text-1); margin-bottom: 2px; }
+.reviewDate { margin-left: auto; font-size: 12px; color: var(--text-3); }
+.reviewText { font-size: 14px; color: var(--text-2); line-height: 1.6; }
+
+.notFound { padding: 80px; text-align: center; color: var(--text-3); }
+
+@media (max-width: 768px) {
+  .layout { grid-template-columns: 1fr; gap: 24px; }
+  .name { font-size: 22px; }
+  .price { font-size: 26px; }
+}
+.whatsappBtn { display: flex; align-items: center; justify-content: center; gap: 8px; background: #25D366; color: #fff; border-radius: var(--radius-md); padding: 13px; font-size: 15px; font-weight: 500; margin-bottom: 16px; transition: background 0.15s; } .whatsappBtn:hover { background: #1da851; }
