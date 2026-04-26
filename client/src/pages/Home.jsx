@@ -7,7 +7,6 @@ import ShopCard from '../components/ShopCard';
 import { supabase } from '../lib/supabase';
 import { categories } from '../data/mockData';
 import styles from './Home.module.css';
-import { useTranslation } from 'react-i18next';
 
 export default function Home() {
   const navigate = useNavigate();
