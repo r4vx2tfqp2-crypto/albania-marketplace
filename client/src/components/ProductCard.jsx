@@ -26,7 +26,7 @@ export default function ProductCard({ product, index = 0 }) {
            product.category === 'home' ? '🏠' : '🛍️'}
         </div>
         {product.trending && <span className="badge badge-deal" style={{ position:'absolute', top:10, left:10 }}>Trending</span>}
-        {!product.inStock && <span className="badge badge-out" style={{ position:'absolute', top:10, left:10 }}>Out of stock</span>}
+        {!(product.inStock ?? product.in_stock ?? true) && <span className="badge badge-out" style={{ position:'absolute', top:10, left:10 }}>Out of stock</span>}
         <button
           className={`${styles.saveBtn} ${saved ? styles.saved : ''}`}
           onClick={(e) => { e.preventDefault(); toggleSaved(product); }}
@@ -51,7 +51,7 @@ export default function ProductCard({ product, index = 0 }) {
           <button
             className={styles.addBtn}
             onClick={() => addToCart(product)}
-            disabled={!product.inStock}
+            disabled={!(product.inStock ?? product.in_stock ?? true)}
           >
             +
           </button>
