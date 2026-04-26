@@ -1,37 +1,34 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { supabase } from '../lib/supabase';
 import styles from './Orders.module.css';
 
 const ALL_STEPS = [
-  { key: 'confirmed', label: 'Confirmed' },
-  { key: 'packed', label: 'Packed' },
-  { key: 'picked_up', label: 'Picked up' },
-  { key: 'on_the_way', label: 'On the way' },
-  { key: 'delivered', label: 'Delivered' },
+  { key: 'confirmed', label_key: 'order_confirmed' },
+  { key: 'packed', label_key: 'packed' },
+  { key: 'picked_up', label_key: 'picked_up' },
+  { key: 'on_the_way', label_key: 'on_the_way' },
+  { key: 'delivered', label_key: 'delivered' },
 ];
 
-const STATUS_LABELS = {
-  confirmed: { label: 'Confirmed', color: 'var(--blue)', bg: 'var(--blue-light)' },
-  packed: { label: 'Packed', color: 'var(--amber)', bg: 'var(--amber-light)' },
-  picked_up: { label: 'Picked up', color: 'var(--amber)', bg: 'var(--amber-light)' },
-  on_the_way: { label: 'On the way', color: 'var(--blue)', bg: 'var(--blue-light)' },
-  delivered: { label: 'Delivered', color: 'var(--green)', bg: 'var(--green-light)' },
+const STATUS_COLORS = {
+  confirmed: { color: 'var(--blue)', bg: 'var(--blue-light)' },
+  packed: { color: 'var(--amber)', bg: 'var(--amber-light)' },
+  picked_up: { color: 'var(--amber)', bg: 'var(--amber-light)' },
+  on_the_way: { color: 'var(--blue)', bg: 'var(--blue-light)' },
+  delivered: { color: 'var(--green)', bg: 'var(--green-light)' },
 };
 
 export default function Orders() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
+  const { t } = useTranslation();
 
-  useEffect(() => {
-    fetchOrders();
-  }, []);
+  useEffect(() => { fetchOrders(); }, []);
 
   const fetchOrders = async () => {
-    const { data } = await supabase
-      .from('orders')
-      .select('*')
-      .order('created_at', { ascending: false });
+    const { data } = await supabase.from('orders').select('*').order('created_at', { ascending: false });
     setOrders(data || []);
     setLoading(false);
   };
@@ -43,43 +40,36 @@ export default function Orders() {
   return (
     <div className={styles.page}>
       <div className="container">
-        <h1 className={styles.title}>My orders</h1>
-
+        <h1 className={styles.title}>{t('my_orders')}</h1>
         {orders.length === 0 ? (
           <div className={styles.empty}>
             <div className={styles.emptyIcon}>📦</div>
-            <div className={styles.emptyTitle}>No orders yet</div>
-            <Link to="/" className="btn-primary" style={{ marginTop: 16 }}>Start shopping</Link>
+            <div className={styles.emptyTitle}>{t('no_orders')}</div>
+            <Link to="/" className="btn-primary" style={{ marginTop: 16 }}>{t('start_shopping')}</Link>
           </div>
         ) : (
           <div className={styles.ordersList}>
             {orders.map(order => {
-              const status = STATUS_LABELS[order.status] || STATUS_LABELS.confirmed;
+              const status = STATUS_COLORS[order.status] || STATUS_COLORS.confirmed;
               const currentIdx = ALL_STEPS.findIndex(s => s.key === order.status);
               return (
                 <div key={order.id} className={styles.orderCard}>
                   <div className={styles.orderHeader}>
                     <div>
                       <div className={styles.orderId}>#{order.id.slice(0, 8)}</div>
-                      <div className={styles.orderMeta}>
-                        {order.customer_name} · {order.customer_city} · {new Date(order.created_at).toLocaleDateString()}
-                      </div>
+                      <div className={styles.orderMeta}>{order.customer_name} · {order.customer_city} · {new Date(order.created_at).toLocaleDateString()}</div>
                     </div>
                     <span className={styles.statusBadge} style={{ background: status.bg, color: status.color }}>
-                      {status.label}
+                      {t(ALL_STEPS.find(s => s.key === order.status)?.label_key || 'order_confirmed')}
                     </span>
                   </div>
-
                   {order.items && (
                     <div className={styles.orderItems}>
                       {order.items.map((item, i) => (
-                        <div key={i} className={styles.orderItem}>
-                          {item.name} {item.size ? `(${item.size})` : ''} ×{item.qty}
-                        </div>
+                        <div key={i} className={styles.orderItem}>{item.name} {item.size ? `(${item.size})` : ''} ×{item.qty}</div>
                       ))}
                     </div>
                   )}
-
                   <div className={styles.progress}>
                     {ALL_STEPS.map((step, i) => {
                       const done = i <= currentIdx;
@@ -88,21 +78,16 @@ export default function Orders() {
                         <div key={step.key} className={styles.progressStep}>
                           <div className={`${styles.dot} ${done ? styles.dotDone : ''} ${active ? styles.dotActive : ''}`} />
                           <div className={`${styles.stepLabel} ${active ? styles.stepLabelActive : ''} ${done && !active ? styles.stepLabelDone : ''}`}>
-                            {step.label}
+                            {t(step.label_key)}
                           </div>
-                          {i < ALL_STEPS.length - 1 && (
-                            <div className={`${styles.line} ${i < currentIdx ? styles.lineDone : ''}`} />
-                          )}
+                          {i < ALL_STEPS.length - 1 && <div className={`${styles.line} ${i < currentIdx ? styles.lineDone : ''}`} />}
                         </div>
                       );
                     })}
                   </div>
-
                   <div className={styles.orderFooter}>
-                    <span className={styles.orderTotal}>Total: {formatPrice(order.total)}</span>
-                    {order.status === 'delivered' && (
-                      <button className={styles.reviewBtn}>Leave a review</button>
-                    )}
+                    <span className={styles.orderTotal}>{t('total')}: {formatPrice(order.total)}</span>
+                    {order.status === 'delivered' && <button className={styles.reviewBtn}>{t('leave_review')}</button>}
                   </div>
                 </div>
               );
