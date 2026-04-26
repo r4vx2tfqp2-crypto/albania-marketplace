@@ -1,3 +1,4 @@
+import { Helmet } from 'react-helmet-async';
 import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { Heart, ShoppingCart, ArrowLeft, CheckCircle, Truck, Shield } from 'lucide-react';
@@ -5,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { useCart } from '../context/CartContext';
 import { supabase } from '../lib/supabase';
 import styles from './Product.module.css';
+
 
 const COLORS = ['#E1F5EE','#E6F1FB','#FBEAF0','#FAEEDA','#EAF3DE','#EEEDFE'];
 const TEXT_COLORS = ['#0F6E56','#185FA5','#99355A','#854F0B','#3B6D11','#3C3489'];
@@ -79,7 +81,16 @@ export default function Product() {
               </div>
             )}
           </div>
-
+          
+          <Helmet>
+            <title>{product.name} — {shop?.name} | Tregu</title>
+            <meta name="description" content={`${product.name} — ${product.description?.slice(0, 150)} | Blej online në Tregu.store`} />
+            <meta property="og:title" content={`${product.name} | Tregu`} />
+            <meta property="og:description" content={product.description?.slice(0, 150)} />
+            {product.images?.[0] && <meta property="og:image" content={product.images[0]} />}
+            <meta property="og:url" content={`https://tregu.store/product/${product.id}`} />
+          </Helmet>
+          
           <div className={styles.infoSection}>
             <div className={styles.topMeta}>
               <span className={styles.category}>{product.category}</span>

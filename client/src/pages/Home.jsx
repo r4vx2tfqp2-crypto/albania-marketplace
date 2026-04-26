@@ -7,6 +7,7 @@ import ShopCard from '../components/ShopCard';
 import { supabase } from '../lib/supabase';
 import { categories } from '../data/mockData';
 import styles from './Home.module.css';
+import { Helmet } from 'react-helmet-async';
 
 export default function Home() {
   const navigate = useNavigate();
@@ -72,7 +73,12 @@ export default function Home() {
           </form>
         </div>
       </div>
-
+      
+      <Helmet>
+       <title>Tregu — Të gjitha dyqanet shqiptare në një vend</title>
+       <meta name="description" content="Zbulo produkte nga dyqane lokale të verifikuara në Shqipëri. Krahaso çmimet, porosit online, pagesa me dorëzim." />
+      </Helmet>
+      
       <div className="container">
         <section className={styles.section}>
           <div className={styles.sectionHead}>
