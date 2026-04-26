@@ -7,6 +7,8 @@ import { supabase } from '../lib/supabase';
 import styles from './Checkout.module.css';
 
 const CITIES = ['Tirana', 'Durrës', 'Shkodër', 'Vlorë', 'Korçë', 'Fier', 'Berat', 'Lushnjë'];
+const ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9ubmd1cG92eGFlcXVlcXBsaWt4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcxNTUzODUsImV4cCI6MjA5MjczMTM4NX0.aTiKdVjl02JenqpQzbg2qcniscHMJyml9LMdmRsqqKg';
+const FUNCTION_URL = 'https://onngupovxaequeqplikx.supabase.co/functions/v1/order-notification';
 
 export default function Checkout() {
   const { cartItems, cartTotal, cartCount } = useCart();
@@ -14,7 +16,9 @@ export default function Checkout() {
   const { t } = useTranslation();
   const [placed, setPlaced] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [form, setForm] = useState({ name: '', phone: '', address: '', city: 'Tirana', notes: '' });
+  const [form, setForm] = useState({
+    name: '', email: '', phone: '', address: '', city: 'Tirana', notes: ''
+  });
   const [errors, setErrors] = useState({});
 
   const deliveryFee = 300;
@@ -39,6 +43,7 @@ export default function Checkout() {
 
     const { data: orderData, error } = await supabase.from('orders').insert({
       customer_name: form.name,
+      customer_email: form.email,
       customer_phone: form.phone,
       customer_address: form.address,
       customer_city: form.city,
@@ -63,11 +68,16 @@ export default function Checkout() {
 
     // Send email notification
     try {
-      await supabase.functions.invoke('order-notification', {
-        body: { order: orderData }
+      await fetch(FUNCTION_URL, {
+        method: 'POST',
+        headers: {
+          'Authorization': 'Bearer ' + ANON_KEY,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ order: orderData }),
       });
     } catch (err) {
-      console.log('Email notification failed:', err);
+      console.log('Email error:', err);
     }
 
     setPlaced(true);
@@ -92,6 +102,7 @@ export default function Checkout() {
           <form onSubmit={handleSubmit} className={styles.form}>
             <div className={styles.formSection}>
               <h2 className={styles.sectionTitle}>{t('delivery_info')}</h2>
+
               <div className={styles.fieldRow}>
                 <div className={styles.field}>
                   <label className={styles.label}>{t('full_name')} *</label>
@@ -114,6 +125,18 @@ export default function Checkout() {
                   {errors.phone && <span className={styles.errorMsg}>{errors.phone}</span>}
                 </div>
               </div>
+
+              <div className={styles.field}>
+                <label className={styles.label}>Email (for delivery confirmation)</label>
+                <input
+                  className={styles.input}
+                  placeholder="you@example.com"
+                  type="email"
+                  value={form.email}
+                  onChange={e => setForm({...form, email: e.target.value})}
+                />
+              </div>
+
               <div className={styles.field}>
                 <label className={styles.label}>{t('address')} *</label>
                 <input
@@ -124,12 +147,14 @@ export default function Checkout() {
                 />
                 {errors.address && <span className={styles.errorMsg}>{errors.address}</span>}
               </div>
+
               <div className={styles.field}>
                 <label className={styles.label}>{t('city')} *</label>
                 <select className={styles.select} value={form.city} onChange={e => setForm({...form, city: e.target.value})}>
                   {CITIES.map(c => <option key={c}>{c}</option>)}
                 </select>
               </div>
+
               <div className={styles.field}>
                 <label className={styles.label}>{t('notes')}</label>
                 <textarea
@@ -140,6 +165,7 @@ export default function Checkout() {
                   onChange={e => setForm({...form, notes: e.target.value})}
                 />
               </div>
+
               {errors.submit && <div style={{ color: 'var(--red)', fontSize: 13 }}>{errors.submit}</div>}
             </div>
 
