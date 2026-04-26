@@ -185,6 +185,16 @@ export default function Home() {
             </div>
           </div>
         </section>
+        {/* Footer */}
+        <div style={{ borderTop: '1px solid var(--border)', padding: '24px 0', marginTop: 20, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
+          <div style={{ fontFamily: 'var(--font-display)', fontSize: 16, fontWeight: 700, color: 'var(--text-3)' }}>tregu</div>
+          <div style={{ display: 'flex', gap: 20 }}>
+            <a href="/legal" style={{ fontSize: 13, color: 'var(--text-3)' }}>Terms & Conditions</a>
+            <a href="/legal" style={{ fontSize: 13, color: 'var(--text-3)' }}>Privacy Policy</a>
+            <a href="/legal" style={{ fontSize: 13, color: 'var(--text-3)' }}>Copyright</a>
+         </div>
+         <div style={{ fontSize: 12, color: 'var(--text-3)' }}>© 2026 Tregu. All rights reserved.</div>
+        </div>
       </div>
     </div>
   );
