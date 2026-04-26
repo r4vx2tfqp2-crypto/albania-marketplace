@@ -1,0 +1,222 @@
+export default {
+    translation: {
+      // Navbar
+      search_placeholder: "Kërko produkte, dyqane…",
+      
+      // Home
+      hero_tag: "Tregu i Shqipërisë",
+      hero_title: "Të gjitha dyqanet\nshqiptare në një vend",
+      hero_sub: "Zbulo produkte nga dyqane lokale të verifikuara. Krahaso çmimet, lexo komente, porosit në sekonda.",
+      hero_search_btn: "Kërko",
+      browse_categories: "Shfleto sipas kategorisë",
+      trending_now: "Trending tani",
+      verified_shops: "Dyqane të verifikuara",
+      all_products: "Të gjitha produktet",
+      see_all: "Shiko të gjitha",
+      no_products_yet: "Asnjë produkt ende",
+      be_first: "Bëhu i pari që shton një produkt!",
+      add_first_product: "Shto produktin e parë",
+  
+      // Trust banner
+      verified_shops_title: "Dyqane të verifikuara",
+      verified_shops_sub: "Çdo shitës kontrollohet",
+      real_reviews: "Komente reale",
+      real_reviews_sub: "Nga blerës realë",
+      cash_delivery: "Pagesë me dorëzim",
+      cash_delivery_sub: "Paguaj kur merr",
+      nationwide: "Dërgim kombëtar",
+      nationwide_sub: "Të gjitha qytetet në Shqipëri",
+  
+      // Categories
+      cat_shoes: "Këpucë",
+      cat_clothes: "Rroba",
+      cat_electronics: "Elektronikë",
+      cat_beauty: "Bukuri",
+      cat_home: "Shtëpi",
+      cat_sports: "Sporte",
+      cat_gifts: "Dhurata",
+  
+      // Search
+      search_results: "rezultate",
+      no_products_found: "Asnjë produkt nuk u gjet",
+      no_shops_found: "Asnjë dyqan nuk u gjet",
+      try_different: "Provo një kërkim tjetër ose hiq disa filtra",
+      products: "Produkte",
+      shops: "Dyqane",
+      filters: "Filtrat",
+      all_cities: "Të gjitha qytetet",
+      verified_only: "Vetëm dyqane të verifikuara",
+      sort_relevance: "Relevanca",
+      sort_price_asc: "Çmimi: i ulët në të lartë",
+      sort_price_desc: "Çmimi: i lartë në të ulët",
+      sort_rating: "Më të vlerësuarat",
+      category: "Kategoria",
+      city: "Qyteti",
+      sort_by: "Rendit sipas",
+  
+      // Product page
+      back: "Kthehu",
+      in_stock: "Në stok",
+      out_of_stock: "Pa stok",
+      size: "Madhësia",
+      add_to_cart: "Shto në shportë",
+      added_to_cart: "U shtua në shportë!",
+      buy_now: "Bli tani",
+      contact_whatsapp: "Kontakto shitësin në WhatsApp",
+      cash_on_delivery: "Pagesa me dorëzim e disponueshme",
+      verified_seller: "Shitës i verifikuar",
+      visit_shop: "Vizito dyqanin →",
+      about_product: "Rreth këtij produkti",
+      reviews: "Komente",
+      trending: "Trending",
+  
+      // Shop page
+      products_tab: "Produkte",
+      reviews_tab: "Komente",
+      info_tab: "Informacion",
+      contact_whatsapp_shop: "Kontakto në WhatsApp",
+      no_products_shop: "Asnjë produkt ende në këtë dyqan.",
+      no_reviews: "Asnjë koment ende.",
+      location: "Vendndodhja",
+      phone: "Telefon",
+      status: "Statusi",
+      verified_seller_status: "✓ Shitës i verifikuar",
+      not_verified: "Ende i reverifikuar",
+      delivery_options: "Opsionet e dërgimit",
+  
+      // Cart
+      cart: "Shporta",
+      cart_empty: "Shporta juaj është bosh",
+      cart_empty_sub: "Shto disa produkte dhe do shfaqen këtu",
+      browse_products: "Shfleto produktet",
+      items: "artikuj",
+      subtotal: "Nëntotali",
+      delivery: "Dërgimi",
+      total: "Totali",
+      proceed_checkout: "Vazhdo me blerjen",
+      continue_shopping: "← Vazhdo blerjet",
+  
+      // Checkout
+      checkout: "Finalizimi",
+      delivery_info: "Informacioni i dërgimit",
+      full_name: "Emri i plotë",
+      phone_number: "Numri i telefonit",
+      address: "Adresa",
+      city: "Qyteti",
+      notes: "Shënime (opsionale)",
+      notes_placeholder: "Ndonjë udhëzim special…",
+      payment_method: "Mënyra e pagesës",
+      cash_delivery_title: "Pagesa me dorëzim",
+      cash_delivery_desc: "Paguaj kur merr porosinë",
+      card_payment: "Pagesa me kartë",
+      coming_soon: "Së shpejti",
+      place_order: "Vendos porosinë",
+      order_placed: "Porosia u vendos!",
+      order_placed_sub: "Do ta konfirmojmë porosinë tuaj së shpejti. Duke ridrejtuar tek porositë…",
+  
+      // Orders
+      my_orders: "Porositë e mia",
+      no_orders: "Asnjë porosi ende",
+      start_shopping: "Fillo blerjet",
+      order_confirmed: "Porosia konfirmuar",
+      packed: "E paketuar",
+      picked_up: "E marrë",
+      on_the_way: "Në rrugë",
+      delivered: "E dorëzuar",
+      leave_review: "Lër një koment",
+  
+      // Profile
+      guest_user: "Vizitor",
+      sign_in_prompt: "Kyçu për të hyrë në llogarinë tënde",
+      sign_in: "Kyçu",
+      sign_out: "Dil",
+      my_orders_menu: "Porositë e mia",
+      my_orders_sub: "Gjurmo dhe menaxho porositë",
+      saved_items: "Artikujt e ruajtur",
+      saved_items_sub: "Të preferuarat tuaja",
+      seller_dashboard: "Paneli i shitësit",
+      seller_dashboard_sub: "Menaxho dyqanin tënd",
+      settings: "Cilësimet",
+      settings_sub: "Preferencat e llogarisë",
+  
+      // Login
+      sign_in_title: "Kyçu",
+      register: "Regjistrohu",
+      email: "Email",
+      password: "Fjalëkalimi",
+      name: "Emri i plotë",
+      signing_in: "Duke u kyçur…",
+      creating_account: "Duke krijuar llogarinë…",
+      back_to_marketplace: "← Kthehu te tregu",
+  
+      // Seller
+      seller_dashboard_title: "Paneli i shitësit",
+      manage_shops: "Menaxho dyqanet dhe produktet tuaja",
+      add_shop: "+ Shto dyqan",
+      add_product: "+ Shto produkt",
+      total_revenue: "Të ardhura totale",
+      total_orders: "Porosi totale",
+      active_products: "Produkte aktive",
+      your_shops: "Dyqanet tuaja",
+      recent_orders: "Porositë e fundit",
+      your_products: "Produktet tuaja",
+      no_orders_yet: "Asnjë porosi ende",
+      no_products_yet_dash: "Asnjë produkt ende",
+      add_first: "shto produktin tënd të parë",
+  
+      // Add product
+      add_product_title: "Shto produkt",
+      shop: "Dyqani",
+      no_shops_yet: "Asnjë dyqan ende — krijo një dyqan fillimisht",
+      create_shop_first: "+ Krijo një dyqan fillimisht",
+      product_name: "Emri i produktit",
+      price: "Çmimi (ALL)",
+      description: "Përshkrimi",
+      describe_product: "Përshkruaj produktin tënd…",
+      mark_trending: "Shëno si trending",
+      publish: "Publiko produktin",
+      publishing: "Duke publikuar…",
+      product_published: "Produkti u publikua!",
+      cancel: "Anulo",
+  
+      // Add shop
+      create_shop: "Krijo dyqanin tënd",
+      shop_name: "Emri i dyqanit",
+      shop_description: "Përshkrimi",
+      tell_customers: "Tregoju klientëve çfarë shet…",
+      shop_color: "Ngjyra e dyqanit",
+      creating: "Duke krijuar…",
+      shop_created: "Dyqani u krijua!",
+  
+      // Settings
+      account_settings: "Cilësimet e llogarisë",
+      new_password: "Fjalëkalim i ri (lër bosh për të mbajtur aktualin)",
+      save_changes: "Ruaj ndryshimet",
+      saving: "Duke ruajtur…",
+      settings_saved: "Cilësimet u ruajtën me sukses!",
+  
+      // Legal
+      terms_title: "Kushtet dhe Rregullat",
+      privacy_title: "Politika e Privatësisë",
+      copyright_title: "E Drejta e Autorit",
+      last_updated: "Përditësuar së fundmi",
+      legal_footer: "Këto politika zbatohen për të gjithë përdoruesit e platformës Tregu.",
+  
+      // Footer
+      footer_rights: "© 2026 Tregu. Të gjitha të drejtat e rezervuara.",
+      terms: "Kushtet & Rregullat",
+      privacy: "Politika e Privatësisë",
+      copyright: "E Drejta e Autorit",
+  
+      // Favorites
+      saved_title: "Artikujt e ruajtur",
+      no_saved: "Asnjë artikull i ruajtur ende",
+      no_saved_sub: "Prekni zemrën në çdo produkt për ta ruajtur këtu",
+  
+      // Validation
+      enter_full_name: "Shkruaj emrin tënd të plotë",
+      enter_valid_phone: "Shkruaj një numër valid shqiptar (+355 69 123 4567)",
+      enter_full_address: "Shkruaj adresën tënde të plotë",
+      something_went_wrong: "Diçka shkoi keq. Provo përsëri.",
+    }
+  }

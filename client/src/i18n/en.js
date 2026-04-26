@@ -1,0 +1,222 @@
+export default {
+    translation: {
+      // Navbar
+      search_placeholder: "Search products, shops…",
+      
+      // Home
+      hero_tag: "Albania's marketplace",
+      hero_title: "All Albanian shops\nin one place",
+      hero_sub: "Discover products from verified local shops. Compare prices, read reviews, order in seconds.",
+      hero_search_btn: "Search",
+      browse_categories: "Browse by category",
+      trending_now: "Trending now",
+      verified_shops: "Verified shops",
+      all_products: "All products",
+      see_all: "See all",
+      no_products_yet: "No products yet",
+      be_first: "Be the first to add a product!",
+      add_first_product: "Add first product",
+  
+      // Trust banner
+      verified_shops_title: "Verified shops",
+      verified_shops_sub: "Every seller is checked",
+      real_reviews: "Real reviews",
+      real_reviews_sub: "From real buyers",
+      cash_delivery: "Cash on delivery",
+      cash_delivery_sub: "Pay when you receive",
+      nationwide: "Nationwide delivery",
+      nationwide_sub: "All cities in Albania",
+  
+      // Categories
+      cat_shoes: "Shoes",
+      cat_clothes: "Clothes",
+      cat_electronics: "Electronics",
+      cat_beauty: "Beauty",
+      cat_home: "Home",
+      cat_sports: "Sports",
+      cat_gifts: "Gifts",
+  
+      // Search
+      search_results: "results",
+      no_products_found: "No products found",
+      no_shops_found: "No shops found",
+      try_different: "Try a different search or remove some filters",
+      products: "Products",
+      shops: "Shops",
+      filters: "Filters",
+      all_cities: "All cities",
+      verified_only: "Verified shops only",
+      sort_relevance: "Relevance",
+      sort_price_asc: "Price: low to high",
+      sort_price_desc: "Price: high to low",
+      sort_rating: "Best rated",
+      category: "Category",
+      city: "City",
+      sort_by: "Sort by",
+  
+      // Product page
+      back: "Back",
+      in_stock: "In stock",
+      out_of_stock: "Out of stock",
+      size: "Size",
+      add_to_cart: "Add to cart",
+      added_to_cart: "Added to cart!",
+      buy_now: "Buy now",
+      contact_whatsapp: "Contact seller on WhatsApp",
+      cash_on_delivery: "Cash on delivery available",
+      verified_seller: "Verified seller",
+      visit_shop: "Visit shop →",
+      about_product: "About this product",
+      reviews: "Reviews",
+      trending: "Trending",
+  
+      // Shop page
+      products_tab: "Products",
+      reviews_tab: "Reviews",
+      info_tab: "Info",
+      contact_whatsapp_shop: "Contact on WhatsApp",
+      no_products_shop: "No products yet in this shop.",
+      no_reviews: "No reviews yet.",
+      location: "Location",
+      phone: "Phone",
+      status: "Status",
+      verified_seller_status: "✓ Verified seller",
+      not_verified: "Not yet verified",
+      delivery_options: "Delivery options",
+  
+      // Cart
+      cart: "Cart",
+      cart_empty: "Your cart is empty",
+      cart_empty_sub: "Add some products and they'll appear here",
+      browse_products: "Browse products",
+      items: "items",
+      subtotal: "Subtotal",
+      delivery: "Delivery",
+      total: "Total",
+      proceed_checkout: "Proceed to checkout",
+      continue_shopping: "← Continue shopping",
+  
+      // Checkout
+      checkout: "Checkout",
+      delivery_info: "Delivery information",
+      full_name: "Full name",
+      phone_number: "Phone",
+      address: "Address",
+      city: "City",
+      notes: "Notes (optional)",
+      notes_placeholder: "Any special instructions…",
+      payment_method: "Payment method",
+      cash_delivery_title: "Cash on delivery",
+      cash_delivery_desc: "Pay when you receive your order",
+      card_payment: "Card payment",
+      coming_soon: "Coming soon",
+      place_order: "Place order",
+      order_placed: "Order placed!",
+      order_placed_sub: "We'll confirm your order shortly. Redirecting to orders…",
+  
+      // Orders
+      my_orders: "My orders",
+      no_orders: "No orders yet",
+      start_shopping: "Start shopping",
+      order_confirmed: "Order confirmed",
+      packed: "Packed",
+      picked_up: "Picked up",
+      on_the_way: "On the way",
+      delivered: "Delivered",
+      leave_review: "Leave a review",
+  
+      // Profile
+      guest_user: "Guest User",
+      sign_in_prompt: "Sign in to access your account",
+      sign_in: "Sign in",
+      sign_out: "Sign out",
+      my_orders_menu: "My orders",
+      my_orders_sub: "Track and manage orders",
+      saved_items: "Saved items",
+      saved_items_sub: "Your favorites",
+      seller_dashboard: "Seller dashboard",
+      seller_dashboard_sub: "Manage your shop",
+      settings: "Settings",
+      settings_sub: "Account preferences",
+  
+      // Login
+      sign_in_title: "Sign in",
+      register: "Register",
+      email: "Email",
+      password: "Password",
+      name: "Full name",
+      signing_in: "Signing in…",
+      creating_account: "Creating account…",
+      back_to_marketplace: "← Back to marketplace",
+  
+      // Seller
+      seller_dashboard_title: "Seller Dashboard",
+      manage_shops: "Manage your shops and products",
+      add_shop: "+ Add shop",
+      add_product: "+ Add product",
+      total_revenue: "Total revenue",
+      total_orders: "Total orders",
+      active_products: "Active products",
+      your_shops: "Your shops",
+      recent_orders: "Recent orders",
+      your_products: "Your products",
+      no_orders_yet: "No orders yet",
+      no_products_yet_dash: "No products yet",
+      add_first: "add your first product",
+  
+      // Add product
+      add_product_title: "Add product",
+      shop: "Shop",
+      no_shops_yet: "No shops yet — create a shop first",
+      create_shop_first: "+ Create a shop first",
+      product_name: "Product name",
+      price: "Price (ALL)",
+      description: "Description",
+      describe_product: "Describe your product…",
+      mark_trending: "Mark as trending",
+      publish: "Publish product",
+      publishing: "Publishing…",
+      product_published: "Product published!",
+      cancel: "Cancel",
+  
+      // Add shop
+      create_shop: "Create your shop",
+      shop_name: "Shop name",
+      shop_description: "Description",
+      tell_customers: "Tell customers what you sell…",
+      shop_color: "Shop color",
+      creating: "Creating…",
+      shop_created: "Shop created!",
+  
+      // Settings
+      account_settings: "Account settings",
+      new_password: "New password (leave blank to keep current)",
+      save_changes: "Save changes",
+      saving: "Saving…",
+      settings_saved: "Settings saved successfully!",
+  
+      // Legal
+      terms_title: "Terms & Conditions",
+      privacy_title: "Privacy Policy",
+      copyright_title: "Copyright & Intellectual Property",
+      last_updated: "Last updated",
+      legal_footer: "These policies apply to all users of the Tregu platform.",
+  
+      // Footer
+      footer_rights: "© 2026 Tregu. All rights reserved.",
+      terms: "Terms & Conditions",
+      privacy: "Privacy Policy",
+      copyright: "Copyright",
+  
+      // Favorites
+      saved_title: "Saved items",
+      no_saved: "No saved items yet",
+      no_saved_sub: "Tap the heart on any product to save it here",
+  
+      // Validation
+      enter_full_name: "Enter your full name",
+      enter_valid_phone: "Enter a valid Albanian number (+355 69 123 4567)",
+      enter_full_address: "Enter your full address",
+      something_went_wrong: "Something went wrong. Please try again.",
+    }
+  }
