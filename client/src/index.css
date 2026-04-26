@@ -132,3 +132,52 @@ input, select, textarea { font-family: var(--font-body); }
   border: 1px solid var(--border);
   overflow: hidden;
 }
+/* ===== GLOBAL MOBILE FIXES ===== */
+@media (max-width: 768px) {
+
+  /* Prevent horizontal overflow */
+  * { box-sizing: border-box; }
+  body { overflow-x: hidden; }
+
+  /* Container */
+  .container { padding: 0 14px; }
+
+  /* Tables and grids that overflow */
+  .trustBanner { display: none; }
+
+  /* Hero */
+  .heroSearch { flex-direction: column; }
+
+  /* Product grid */
+  .productGrid { grid-template-columns: repeat(2, 1fr) !important; gap: 10px !important; }
+
+  /* Shop grid */
+  .shopGrid { grid-template-columns: 1fr !important; }
+
+  /* Cart layout */
+  .layout { grid-template-columns: 1fr !important; }
+
+  /* Checkout layout */
+  .fieldRow { grid-template-columns: 1fr !important; }
+
+  /* Seller dashboard metrics */
+  .metrics { grid-template-columns: repeat(2, 1fr) !important; }
+
+  /* Seller dashboard grid */
+  .grid { grid-template-columns: 1fr !important; }
+
+  /* Product page layout */
+  .layout { grid-template-columns: 1fr !important; gap: 20px !important; }
+
+  /* Order progress overflow */
+  .progress { overflow-x: auto; padding-bottom: 8px; }
+
+  /* Admin panel tabs */
+  div[style*="overflow-x"] { overflow-x: auto; }
+
+  /* Text overflow fixes */
+  h1, h2 { word-break: break-word; }
+  
+  /* Bottom nav safe area */
+  .nav { padding-bottom: env(safe-area-inset-bottom); }
+}

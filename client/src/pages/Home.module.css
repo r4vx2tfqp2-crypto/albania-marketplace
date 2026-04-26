@@ -193,11 +193,17 @@
 
 @media (max-width: 600px) {
   .hero { padding: 36px 14px; }
-  .heroTitle { font-size: 30px; }
-  .heroSearch { flex-wrap: wrap; }
-  .catGrid { grid-template-columns: repeat(4, 1fr); }
-  .trustBanner { grid-template-columns: 1fr 1fr; padding: 16px; }
+  .heroTitle { font-size: 28px; }
+  .heroSub { font-size: 14px; }
+  .heroSearch { flex-wrap: wrap; gap: 8px; }
+  .searchBtn { width: 100%; }
+  .catGrid { grid-template-columns: repeat(4, 1fr); gap: 6px; }
+  .catCard { padding: 10px 4px; }
+  .catIcon { font-size: 18px; }
+  .catLabel { font-size: 10px; }
+  .trustBanner { grid-template-columns: repeat(2, 1fr); padding: 14px; gap: 10px; }
   .productGrid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
   .shopGrid { grid-template-columns: 1fr; }
-  .section { padding: 24px 0 0; }
+  .section { padding: 20px 0 0; }
+  .sectionTitle { font-size: 17px; }
 }
