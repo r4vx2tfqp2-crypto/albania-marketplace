@@ -78,7 +78,7 @@ export default function Home() {
        <title>Tregu — Të gjitha dyqanet shqiptare në një vend</title>
        <meta name="description" content="Zbulo produkte nga dyqane lokale të verifikuara në Shqipëri. Krahaso çmimet, porosit online, pagesa me dorëzim." />
       </Helmet>
-      
+
       <div className="container">
         <section className={styles.section}>
           <div className={styles.sectionHead}>
@@ -159,7 +159,33 @@ export default function Home() {
             )}
           </>
         )}
-
+{/* Guarantees section */}
+<section className={styles.section}>
+  <div style={{ background: 'var(--green-light)', border: '1px solid #5DCAA5', borderRadius: 'var(--radius-xl)', padding: '32px' }}>
+    <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
+      <span style={{ fontSize: 24 }}>🛡️</span>
+      <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 20, fontWeight: 700, color: 'var(--green-dark)' }}>
+        Garancitë tona për shitësit
+      </h2>
+    </div>
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 16 }}>
+      {[
+        { icon: '🆓', title: 'Falas për 6 muajt e parë', text: 'Listimi është plotësisht falas gjatë fazës së lansimit' },
+        { icon: '🚫', title: 'Pa kontratë', text: 'Largohuni kur të doni, pa asnjë penalitet' },
+        { icon: '📢', title: 'Njoftim 30 ditë', text: 'Njoftim paraprak 30 ditë para çdo ndryshimi të çmimeve' },
+        { icon: '🔒', title: 'Pa akses bankar', text: 'Nuk kemi akses në llogarinë tuaj bankare asnjëherë' },
+      ].map((g, i) => (
+        <div key={i} style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
+          <span style={{ fontSize: 20, flexShrink: 0 }}>{g.icon}</span>
+          <div>
+            <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--green-dark)', marginBottom: 3 }}>{g.title}</div>
+            <div style={{ fontSize: 13, color: '#0F6E56', lineHeight: 1.5 }}>{g.text}</div>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
         <section className={styles.trustBanner}>
           <div className={styles.trustItem}>
             <span className={styles.trustIcon}>✓</span>
