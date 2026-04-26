@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Plus, TrendingUp, Package, DollarSign, Star, ArrowRight } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { supabase } from '../lib/supabase';
@@ -13,18 +13,26 @@ export default function SellerDashboard() {
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
   const { t } = useTranslation();
+  const navigate = useNavigate();
 
   useEffect(() => { fetchData(); }, []);
 
   const fetchData = async () => {
-    const [{ data: shopsData }, { data: ordersData }] = await Promise.all([
-      supabase.from('shops').select('*, products(*)'),
+    const [{ data: shopsData }, { data: ordersData }, { data: productsData }] = await Promise.all([
+      supabase.from('shops').select('*, products(*)').eq('user_id', user.id),
       supabase.from('orders').select('*').order('created_at', { ascending: false }).limit(5),
+      supabase.from('products').select('*').eq('user_id', user.id).order('created_at', { ascending: false }),
     ]);
     setShops(shopsData || []);
-    setProducts(shopsData?.flatMap(s => s.products || []) || []);
+    setProducts(productsData || []);
     setOrders(ordersData || []);
     setLoading(false);
+  };
+
+  const handleDeleteProduct = async (productId) => {
+    if (!window.confirm('Are you sure you want to delete this product?')) return;
+    await supabase.from('products').delete().eq('id', productId);
+    await fetchData();
   };
 
   const formatPrice = (p) => p?.toLocaleString('sq-AL') + ' L';
@@ -48,7 +56,7 @@ export default function SellerDashboard() {
             <h1 className={styles.title}>{t('seller_dashboard_title')}</h1>
             <p className={styles.sub}>{t('manage_shops')}</p>
           </div>
-          <div style={{ display: 'flex', gap: 10 }}>
+          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
             {user?.email === 'julsina76@gmail.com' && (
               <Link to="/admin" className={styles.addBtn} style={{ background: 'var(--amber-light)', color: '#854F0B', border: 'none' }}>
                 ⚙️ Admin Panel
@@ -56,6 +64,9 @@ export default function SellerDashboard() {
             )}
             <Link to="/seller/orders" className={styles.addBtn} style={{ background: 'var(--blue-light)', color: 'var(--blue)', border: 'none' }}>
               📦 {t('recent_orders')}
+            </Link>
+            <Link to="/seller/add-shop" className={styles.addBtn} style={{ background: 'var(--surface)', color: 'var(--text-1)', border: '1px solid var(--border-strong)' }}>
+              {t('add_shop')}
             </Link>
             <Link to="/seller/add-product" className={styles.addBtn}>
               <Plus size={16} /> {t('add_product')}
@@ -138,6 +149,20 @@ export default function SellerDashboard() {
                         <div className={styles.productMeta}>{p.in_stock ? t('in_stock') : t('out_of_stock')} · {p.category}</div>
                       </div>
                       <div className={styles.productPrice}>{p.price?.toLocaleString()} L</div>
+                      <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
+                        <button
+                          onClick={() => navigate(`/seller/edit-product/${p.id}`)}
+                          style={{ padding: '5px 10px', borderRadius: 8, border: '1px solid var(--border-strong)', fontSize: 12, cursor: 'pointer', background: 'var(--surface)', fontFamily: 'var(--font-body)', color: 'var(--text-2)' }}
+                        >
+                          ✏️ Edit
+                        </button>
+                        <button
+                          onClick={() => handleDeleteProduct(p.id)}
+                          style={{ padding: '5px 10px', borderRadius: 8, border: 'none', fontSize: 12, cursor: 'pointer', background: 'var(--red-light)', fontFamily: 'var(--font-body)', color: 'var(--red)' }}
+                        >
+                          🗑️
+                        </button>
+                      </div>
                     </div>
                   );
                 })}
