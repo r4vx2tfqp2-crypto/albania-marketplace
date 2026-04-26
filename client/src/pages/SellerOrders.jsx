@@ -33,32 +33,29 @@ export default function SellerOrders() {
   useEffect(() => { fetchOrders(); }, []);
 
   const fetchOrders = async () => {
-    // Get seller's shops first
-    const { data: shops } = await supabase
-      .from('shops')
+    const { data: productsData } = await supabase
+      .from('products')
       .select('id')
       .eq('user_id', user.id);
 
-    if (!shops || shops.length === 0) {
+    const myProductIds = (productsData || []).map(p => p.id);
+
+    if (myProductIds.length === 0) {
       setOrders([]);
       setLoading(false);
       return;
     }
 
-    const shopIds = shops.map(s => s.id);
-
-    // Get orders that contain products from seller's shops
     const { data } = await supabase
       .from('orders')
       .select('*')
       .order('created_at', { ascending: false });
 
-    // Filter orders that have items from this seller's shops
-    const sellerOrders = (data || []).filter(order =>
-        order.items?.some(item => shopIds.includes(item.shop_id))
-      );
+    const myOrders = (data || []).filter(order =>
+      order.items?.some(item => myProductIds.includes(item.id))
+    );
 
-    setOrders(sellerOrders.length > 0 ? sellerOrders : (data || []));
+    setOrders(myOrders);
     setLoading(false);
   };
 
@@ -100,9 +97,7 @@ export default function SellerOrders() {
                       <div className={styles.orderMeta}>
                         {order.customer_name} · {order.customer_phone} · {order.customer_city}
                       </div>
-                      <div className={styles.orderMeta}>
-                        {order.customer_address}
-                      </div>
+                      <div className={styles.orderMeta}>{order.customer_address}</div>
                       {order.notes && (
                         <div style={{ fontSize: 12, color: 'var(--text-3)', marginTop: 2 }}>
                           📝 {order.notes}
@@ -124,7 +119,6 @@ export default function SellerOrders() {
                     </div>
                   )}
 
-                  {/* Status update buttons */}
                   <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', margin: '12px 0', padding: '12px', background: 'var(--surface-2)', borderRadius: 'var(--radius-md)' }}>
                     <div style={{ fontSize: 12, color: 'var(--text-3)', width: '100%', marginBottom: 6 }}>Update status:</div>
                     {ALL_STEPS.map(step => (
@@ -133,11 +127,8 @@ export default function SellerOrders() {
                         onClick={() => updateStatus(order.id, step.key)}
                         disabled={updating === order.id || order.status === step.key}
                         style={{
-                          padding: '6px 12px',
-                          borderRadius: 20,
-                          border: '1px solid',
-                          fontSize: 12,
-                          fontWeight: 500,
+                          padding: '6px 12px', borderRadius: 20, border: '1px solid',
+                          fontSize: 12, fontWeight: 500,
                           cursor: order.status === step.key ? 'default' : 'pointer',
                           fontFamily: 'var(--font-body)',
                           borderColor: order.status === step.key ? 'var(--text-1)' : 'var(--border-strong)',
@@ -166,16 +157,17 @@ export default function SellerOrders() {
                       );
                     })}
                   </div>
-                  {/* PIN for driver */}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', background: 'var(--amber-light)', borderRadius: 10, marginBottom: 10 }}>
-                    <span style={{ fontSize: 13, color: '#854F0B' }}>🔑 Driver PIN:</span>
-                    <span style={{ fontSize: 22, fontWeight: 800, fontFamily: 'var(--font-display)', color: '#854F0B', letterSpacing: '0.2em' }}>{order.delivery_pin}</span>
-                    <span style={{ fontSize: 12, color: '#854F0B', marginLeft: 'auto' }}>Share with driver</span>
-                  </div>
 
                   <div className={styles.orderFooter}>
                     <span className={styles.orderTotal}>{t('total')}: {formatPrice(order.total)}</span>
                     <span style={{ fontSize: 12, color: 'var(--text-3)' }}>{new Date(order.created_at).toLocaleString()}</span>
+                  </div>
+
+                  {/* PIN for driver */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', background: 'var(--amber-light)', borderRadius: 10, marginTop: 10 }}>
+                    <span style={{ fontSize: 13, color: '#854F0B' }}>🔑 Driver PIN:</span>
+                    <span style={{ fontSize: 22, fontWeight: 800, fontFamily: 'var(--font-display)', color: '#854F0B', letterSpacing: '0.2em' }}>{order.delivery_pin}</span>
+                    <span style={{ fontSize: 12, color: '#854F0B', marginLeft: 'auto' }}>Share with driver</span>
                   </div>
                 </div>
               );
