@@ -46,13 +46,18 @@ export default function DeliveryConfirm() {
       .update({ status: 'delivered' })
       .eq('id', order.id);
 
-    // Send confirmation email via edge function
+    // Send confirmation email directly via fetch
     try {
-      await supabase.functions.invoke('order-notification', {
-        body: { 
+      await fetch('https://onngupovxaequeqplikx.supabase.co/functions/v1/order-notification', {
+        method: 'POST',
+        headers: {
+          'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9ubmd1cG92eGFlcXVlcXBsaWt4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcxNTUzODUsImV4cCI6MjA5MjczMTM4NX0.aTiKdVjl02JenqpQzbg2qcniscHMJyml9LMdmRsqqKg',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
           order: { ...order, status: 'delivered' },
           type: 'delivery_confirmed'
-        }
+        })
       });
     } catch (err) {
       console.log('Email error:', err);
