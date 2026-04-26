@@ -1,25 +1,45 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, MapPin, Phone, CheckCircle, Truck } from 'lucide-react';
+import { ArrowLeft, MapPin, CheckCircle, Truck } from 'lucide-react';
 import ProductCard from '../components/ProductCard';
-import { shops, products, reviews } from '../data/mockData';
+import { supabase } from '../lib/supabase';
 import styles from './Shop.module.css';
 
 export default function Shop() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [tab, setTab] = useState('products');
+  const [shop, setShop] = useState(null);
+  const [products, setProducts] = useState([]);
+  const [reviews, setReviews] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const shop = shops.find(s => s.id === id);
+  useEffect(() => {
+    fetchShop();
+  }, [id]);
+
+  const fetchShop = async () => {
+    const [{ data: shopData }, { data: productsData }, { data: reviewsData }] = await Promise.all([
+      supabase.from('shops').select('*').eq('id', id).single(),
+      supabase.from('products').select('*').eq('shop_id', id),
+      supabase.from('reviews').select('*').eq('shop_id', id),
+    ]);
+    setShop(shopData);
+    setProducts(productsData || []);
+    setReviews(reviewsData || []);
+    setLoading(false);
+  };
+
+  if (loading) return <div style={{ padding: 80, textAlign: 'center', color: 'var(--text-3)' }}>Loading…</div>;
   if (!shop) return <div style={{ padding: 80, textAlign: 'center', color: 'var(--text-3)' }}>Shop not found</div>;
 
-  const shopProducts = products.filter(p => p.shopId === id);
-  const shopReviews = reviews.filter(r => r.shopId === id);
+  const whatsappMessage = `Hi! I found your shop "${shop.name}" on Tregu and I'd like to know more.`;
+  const whatsappPhone = shop?.phone?.replace(/\s+/g, '').replace('+', '');
+  const whatsappUrl = `https://wa.me/${whatsappPhone}?text=${encodeURIComponent(whatsappMessage)}`;
 
   return (
     <div className={styles.page}>
-      {/* Header */}
-      <div className={styles.header} style={{ '--shop-color': shop.color }}>
+      <div className={styles.header}>
         <div className="container">
           <button className={styles.back} onClick={() => navigate(-1)}>
             <ArrowLeft size={16} /> Back
@@ -43,12 +63,17 @@ export default function Shop() {
                   <MapPin size={13} strokeWidth={2} /> {shop.location}
                 </span>
                 <span className={styles.metaItem}>
-                  <span className="stars">★</span> {shop.rating} ({shop.reviewCount} reviews)
+                  <span className="stars">★</span> {shop.rating} ({shop.review_count} reviews)
                 </span>
-                <span className={styles.metaItem}>
-                  <Truck size={13} strokeWidth={2} /> {shop.deliveryOptions.join(', ')}
-                </span>
+                {shop.delivery_options && (
+                  <span className={styles.metaItem}>
+                    <Truck size={13} strokeWidth={2} /> {shop.delivery_options.join(', ')}
+                  </span>
+                )}
               </div>
+              <button className={styles.whatsappBtn} onClick={() => window.open(whatsappUrl, '_blank')}>
+                <span>💬</span> Contact on WhatsApp
+              </button>
             </div>
           </div>
         </div>
@@ -63,21 +88,25 @@ export default function Shop() {
               onClick={() => setTab(t)}
             >
               {t.charAt(0).toUpperCase() + t.slice(1)}
-              {t === 'products' && ` (${shopProducts.length})`}
-              {t === 'reviews' && ` (${shopReviews.length})`}
+              {t === 'products' && ` (${products.length})`}
+              {t === 'reviews' && ` (${reviews.length})`}
             </button>
           ))}
         </div>
 
         {tab === 'products' && (
-          <div className={styles.productsGrid}>
-            {shopProducts.map((p, i) => <ProductCard key={p.id} product={p} index={i} />)}
-          </div>
+          products.length > 0 ? (
+            <div className={styles.productsGrid}>
+              {products.map((p, i) => <ProductCard key={p.id} product={p} index={i} />)}
+            </div>
+          ) : (
+            <div className={styles.empty}>No products yet in this shop.</div>
+          )
         )}
 
         {tab === 'reviews' && (
           <div className={styles.reviewsList}>
-            {shopReviews.length > 0 ? shopReviews.map(r => (
+            {reviews.length > 0 ? reviews.map(r => (
               <div key={r.id} className={styles.review}>
                 <div className={styles.reviewHeader}>
                   <div className={styles.reviewAvatar}>{r.author[0]}</div>
@@ -85,12 +114,12 @@ export default function Shop() {
                     <div className={styles.reviewAuthor}>{r.author}</div>
                     <div className="stars">{'★'.repeat(r.rating)}</div>
                   </div>
-                  <div className={styles.reviewDate}>{r.date}</div>
+                  <div className={styles.reviewDate}>{new Date(r.created_at).toLocaleDateString()}</div>
                 </div>
                 <p className={styles.reviewText}>{r.text}</p>
               </div>
             )) : (
-              <div className={styles.empty}>No reviews yet for this shop.</div>
+              <div className={styles.empty}>No reviews yet.</div>
             )}
           </div>
         )}
@@ -108,10 +137,6 @@ export default function Shop() {
             <div className={styles.infoCard}>
               <div className={styles.infoLabel}>Category</div>
               <div className={styles.infoValue}>{shop.category}</div>
-            </div>
-            <div className={styles.infoCard}>
-              <div className={styles.infoLabel}>Delivery options</div>
-              <div className={styles.infoValue}>{shop.deliveryOptions.join(' · ')}</div>
             </div>
             <div className={styles.infoCard}>
               <div className={styles.infoLabel}>Status</div>

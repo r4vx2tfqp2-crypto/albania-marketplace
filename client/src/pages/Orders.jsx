@@ -1,29 +1,10 @@
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { supabase } from '../lib/supabase';
 import styles from './Orders.module.css';
 
-const mockOrders = [
-  {
-    id: '#2847',
-    date: '2024-03-15',
-    items: ['Nike Air Max 270 (Size 42)'],
-    shop: 'SportShop Tirana',
-    total: 3500,
-    status: 'on_the_way',
-    steps: ['confirmed', 'packed', 'picked_up', 'on_the_way']
-  },
-  {
-    id: '#2831',
-    date: '2024-03-10',
-    items: ['Summer Floral Dress (M)', 'Linen Blazer (L)'],
-    shop: 'Fashion Zone',
-    total: 5000,
-    status: 'delivered',
-    steps: ['confirmed', 'packed', 'picked_up', 'on_the_way', 'delivered']
-  }
-];
-
 const ALL_STEPS = [
-  { key: 'confirmed', label: 'Order confirmed' },
+  { key: 'confirmed', label: 'Confirmed' },
   { key: 'packed', label: 'Packed' },
   { key: 'picked_up', label: 'Picked up' },
   { key: 'on_the_way', label: 'On the way' },
@@ -39,14 +20,32 @@ const STATUS_LABELS = {
 };
 
 export default function Orders() {
-  const formatPrice = (p) => p.toLocaleString('sq-AL') + ' L';
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchOrders();
+  }, []);
+
+  const fetchOrders = async () => {
+    const { data } = await supabase
+      .from('orders')
+      .select('*')
+      .order('created_at', { ascending: false });
+    setOrders(data || []);
+    setLoading(false);
+  };
+
+  const formatPrice = (p) => p?.toLocaleString('sq-AL') + ' L';
+
+  if (loading) return <div style={{ padding: 80, textAlign: 'center', color: 'var(--text-3)' }}>Loading…</div>;
 
   return (
     <div className={styles.page}>
       <div className="container">
         <h1 className={styles.title}>My orders</h1>
 
-        {mockOrders.length === 0 ? (
+        {orders.length === 0 ? (
           <div className={styles.empty}>
             <div className={styles.emptyIcon}>📦</div>
             <div className={styles.emptyTitle}>No orders yet</div>
@@ -54,28 +53,33 @@ export default function Orders() {
           </div>
         ) : (
           <div className={styles.ordersList}>
-            {mockOrders.map(order => {
-              const status = STATUS_LABELS[order.status];
+            {orders.map(order => {
+              const status = STATUS_LABELS[order.status] || STATUS_LABELS.confirmed;
               const currentIdx = ALL_STEPS.findIndex(s => s.key === order.status);
               return (
                 <div key={order.id} className={styles.orderCard}>
                   <div className={styles.orderHeader}>
                     <div>
-                      <div className={styles.orderId}>{order.id}</div>
-                      <div className={styles.orderMeta}>{order.shop} · {order.date}</div>
+                      <div className={styles.orderId}>#{order.id.slice(0, 8)}</div>
+                      <div className={styles.orderMeta}>
+                        {order.customer_name} · {order.customer_city} · {new Date(order.created_at).toLocaleDateString()}
+                      </div>
                     </div>
                     <span className={styles.statusBadge} style={{ background: status.bg, color: status.color }}>
                       {status.label}
                     </span>
                   </div>
 
-                  <div className={styles.orderItems}>
-                    {order.items.map((item, i) => (
-                      <div key={i} className={styles.orderItem}>{item}</div>
-                    ))}
-                  </div>
+                  {order.items && (
+                    <div className={styles.orderItems}>
+                      {order.items.map((item, i) => (
+                        <div key={i} className={styles.orderItem}>
+                          {item.name} {item.size ? `(${item.size})` : ''} ×{item.qty}
+                        </div>
+                      ))}
+                    </div>
+                  )}
 
-                  {/* Progress */}
                   <div className={styles.progress}>
                     {ALL_STEPS.map((step, i) => {
                       const done = i <= currentIdx;

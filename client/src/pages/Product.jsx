@@ -1,8 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { Heart, ShoppingCart, ArrowLeft, CheckCircle, Truck, Shield } from 'lucide-react';
 import { useCart } from '../context/CartContext';
-import { products, shops, reviews } from '../data/mockData';
+import { supabase } from '../lib/supabase';
 import styles from './Product.module.css';
 
 const COLORS = ['#E1F5EE','#E6F1FB','#FBEAF0','#FAEEDA','#EAF3DE','#EEEDFE'];
@@ -12,17 +12,44 @@ export default function Product() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { addToCart, toggleSaved, isSaved } = useCart();
-
-  const product = products.find(p => p.id === id);
-  if (!product) return <div className={styles.notFound}>Product not found</div>;
-
-  const shop = shops.find(s => s.id === product.shopId);
-  const productReviews = reviews.filter(r => r.productId === id);
-  const idx = products.indexOf(product) % COLORS.length;
-  const saved = isSaved(product.id);
-
-  const [selectedSize, setSelectedSize] = useState(product.sizes[0] || null);
+  const [product, setProduct] = useState(null);
+  const [shop, setShop] = useState(null);
+  const [reviews, setReviews] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedSize, setSelectedSize] = useState(null);
   const [added, setAdded] = useState(false);
+
+  useEffect(() => {
+    fetchProduct();
+  }, [id]);
+
+  const fetchProduct = async () => {
+    const { data } = await supabase
+      .from('products')
+      .select('*, shops(*)')
+      .eq('id', id)
+      .single();
+
+    if (data) {
+      setProduct(data);
+      setShop(data.shops);
+      setSelectedSize(data.sizes?.[0] || null);
+    }
+
+    const { data: reviewsData } = await supabase
+      .from('reviews')
+      .select('*')
+      .eq('product_id', id);
+
+    setReviews(reviewsData || []);
+    setLoading(false);
+  };
+
+  if (loading) return <div style={{ padding: 80, textAlign: 'center', color: 'var(--text-3)' }}>Loading…</div>;
+  if (!product) return <div style={{ padding: 80, textAlign: 'center', color: 'var(--text-3)' }}>Product not found</div>;
+
+  const saved = isSaved(product.id);
+  const idx = 0;
 
   const handleAddToCart = () => {
     addToCart(product, selectedSize);
@@ -60,20 +87,20 @@ export default function Product() {
           <div className={styles.infoSection}>
             <div className={styles.topMeta}>
               <span className={styles.category}>{product.category}</span>
-              {!product.inStock && <span className="badge badge-out">Out of stock</span>}
+              {!product.in_stock && <span className="badge badge-out">Out of stock</span>}
             </div>
 
             <h1 className={styles.name}>{product.name}</h1>
 
             <div className={styles.ratingRow}>
-              <span className="stars">{'★'.repeat(Math.round(product.rating))}</span>
-              <span className={styles.ratingVal}>{product.rating}</span>
-              <span className={styles.reviewCount}>({product.reviewCount} reviews)</span>
+              <span className="stars">{'★'.repeat(Math.round(product.rating || 0))}</span>
+              <span className={styles.ratingVal}>{product.rating || 0}</span>
+              <span className={styles.reviewCount}>({product.review_count || 0} reviews)</span>
             </div>
 
             <div className={styles.price}>{formatPrice(product.price)}</div>
 
-            {product.sizes.length > 0 && (
+            {product.sizes?.length > 0 && (
               <div className={styles.sizeSection}>
                 <div className={styles.sizeLabel}>Size</div>
                 <div className={styles.sizes}>
@@ -94,7 +121,7 @@ export default function Product() {
               <button
                 className={`${styles.addToCart} ${added ? styles.addedSuccess : ''}`}
                 onClick={handleAddToCart}
-                disabled={!product.inStock}
+                disabled={!product.in_stock}
               >
                 <ShoppingCart size={16} />
                 {added ? 'Added to cart!' : 'Add to cart'}
@@ -126,21 +153,23 @@ export default function Product() {
               </div>
             </div>
 
-            <Link to={`/shop/${shop?.id}`} className={styles.shopCard}>
-              <div className={styles.shopAvatar} style={{ background: shop?.color + '22', color: shop?.color }}>
-                {shop?.initials}
-              </div>
-              <div className={styles.shopInfo}>
-                <div className={styles.shopName}>
-                  {shop?.name}
-                  {shop?.verified && <CheckCircle size={13} strokeWidth={2} style={{ color: 'var(--green)' }} />}
+            {shop && (
+              <Link to={`/shop/${shop.id}`} className={styles.shopCard}>
+                <div className={styles.shopAvatar} style={{ background: shop.color + '22', color: shop.color }}>
+                  {shop.initials}
                 </div>
-                <div className={styles.shopMeta}>
-                  <span className="stars">★</span> {shop?.rating} · {shop?.location}
+                <div className={styles.shopInfo}>
+                  <div className={styles.shopName}>
+                    {shop.name}
+                    {shop.verified && <CheckCircle size={13} strokeWidth={2} style={{ color: 'var(--green)' }} />}
+                  </div>
+                  <div className={styles.shopMeta}>
+                    <span className="stars">★</span> {shop.rating} · {shop.location}
+                  </div>
                 </div>
-              </div>
-              <span className={styles.visitShop}>Visit shop →</span>
-            </Link>
+                <span className={styles.visitShop}>Visit shop →</span>
+              </Link>
+            )}
 
             <div className={styles.description}>
               <div className={styles.descTitle}>About this product</div>
@@ -149,11 +178,11 @@ export default function Product() {
           </div>
         </div>
 
-        {productReviews.length > 0 && (
+        {reviews.length > 0 && (
           <div className={styles.reviewsSection}>
             <h2 className={styles.reviewsTitle}>Reviews</h2>
             <div className={styles.reviewsList}>
-              {productReviews.map(r => (
+              {reviews.map(r => (
                 <div key={r.id} className={styles.review}>
                   <div className={styles.reviewHeader}>
                     <div className={styles.reviewAvatar}>{r.author[0]}</div>
@@ -161,7 +190,7 @@ export default function Product() {
                       <div className={styles.reviewAuthor}>{r.author}</div>
                       <div className="stars">{'★'.repeat(r.rating)}</div>
                     </div>
-                    <div className={styles.reviewDate}>{r.date}</div>
+                    <div className={styles.reviewDate}>{new Date(r.created_at).toLocaleDateString()}</div>
                   </div>
                   <p className={styles.reviewText}>{r.text}</p>
                 </div>
