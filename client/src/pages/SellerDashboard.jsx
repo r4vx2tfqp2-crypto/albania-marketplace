@@ -2,10 +2,12 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Plus, TrendingUp, Package, DollarSign, Star, ArrowRight } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { useAuth } from '../context/AuthContext';
 import styles from './SellerDashboard.module.css';
 
 export default function SellerDashboard() {
   const [shops, setShops] = useState([]);
+  const { user } = useAuth();
   const [products, setProducts] = useState([]);
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -50,9 +52,11 @@ export default function SellerDashboard() {
             <p className={styles.sub}>Manage your shops and products</p>
           </div>
           <div style={{ display: 'flex', gap: 10 }}>
-          <Link to="/admin/subscriptions" className={styles.addBtn} style={{ background: 'var(--amber-light)', color: '#854F0B', border: 'none' }}>
-            💳 Subscriptions
-          </Link>
+          {user?.email === 'julsina76@gmail.com' && (
+            <Link to="/admin/subscriptions" className={styles.addBtn} style={{ background: 'var(--amber-light)', color: '#854F0B', border: 'none' }}>
+              💳 Subscriptions
+            </Link>
+          )}
             <Link to="/seller/add-shop" className={styles.addBtn} style={{ background: 'var(--surface)', color: 'var(--text-1)', border: '1px solid var(--border-strong)' }}>
               + Add shop
             </Link>
