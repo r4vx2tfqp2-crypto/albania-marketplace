@@ -3,13 +3,24 @@ import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')
 const SITE_URL = 'https://albania-marketplace.vercel.app'
 
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+}
+
 serve(async (req) => {
+  // Handle CORS preflight
+  if (req.method === 'OPTIONS') {
+    return new Response('ok', { headers: corsHeaders })
+  }
+
   try {
     const body = await req.text()
-    if (!body) return new Response(JSON.stringify({ error: 'Empty body' }), { status: 400 })
+    if (!body) return new Response(JSON.stringify({ error: 'Empty body' }), { status: 400, headers: corsHeaders })
 
     const { order, type } = JSON.parse(body)
-    if (!order) return new Response(JSON.stringify({ error: 'No order data' }), { status: 400 })
+    if (!order) return new Response(JSON.stringify({ error: 'No order data' }), { status: 400, headers: corsHeaders })
 
     const itemsList = order.items?.map((i: any) =>
       `• ${i.name} ${i.size ? `(${i.size})` : ''} x${i.qty} — ${i.price?.toLocaleString()} L`
@@ -18,7 +29,6 @@ serve(async (req) => {
     const emails = []
 
     if (type === 'delivery_confirmed') {
-      // Email 1: Admin notification
       emails.push({
         from: 'Tregu <onboarding@resend.dev>',
         to: 'julsina76@gmail.com',
@@ -49,7 +59,6 @@ serve(async (req) => {
         `
       })
 
-      // Email 2: Customer confirmation request
       if (order.customer_email) {
         emails.push({
           from: 'Tregu <onboarding@resend.dev>',
@@ -62,32 +71,24 @@ serve(async (req) => {
               </div>
               <div style="background: #F7F6F3; padding: 24px; border-radius: 0 0 12px 12px;">
                 <p style="font-size: 16px; color: #1A1916; margin-bottom: 16px;">Hi <strong>${order.customer_name}</strong>,</p>
-                <p style="font-size: 15px; color: #5C5A55; margin-bottom: 24px;">Your order #${order.id?.slice(0, 8)} has been marked as delivered. Did you receive it?</p>
-                
+                <p style="font-size: 15px; color: #5C5A55; margin-bottom: 24px;">Your order has been marked as delivered. Did you receive it?</p>
                 <div style="background: #fff; padding: 16px; border-radius: 8px; margin-bottom: 24px;">
-                  <p style="margin: 0; font-size: 14px; color: #1A1916;">${itemsList}</p>
+                  <p style="margin: 0; font-size: 14px;">${itemsList}</p>
                   <div style="border-top: 1px solid #eee; margin-top: 10px; padding-top: 10px;">
                     <strong>Total: ${order.total?.toLocaleString()} L</strong>
                   </div>
                 </div>
-
                 <div style="text-align: center; margin-bottom: 16px;">
                   <a href="${SITE_URL}/confirm-delivery?order=${order.id}&confirm=yes" 
                     style="background: #1D9E75; color: #fff; padding: 14px 32px; border-radius: 10px; text-decoration: none; font-size: 16px; font-weight: 600; display: inline-block;">
                     ✓ Yes, I received it!
                   </a>
                 </div>
-
                 <div style="text-align: center;">
-                  <a href="${SITE_URL}/confirm-delivery?order=${order.id}&confirm=no" 
-                    style="color: #E24B4A; font-size: 14px; text-decoration: none;">
+                  <a href="${SITE_URL}/confirm-delivery?order=${order.id}&confirm=no" style="color: #E24B4A; font-size: 14px; text-decoration: none;">
                     ✕ No, I have a problem
                   </a>
                 </div>
-
-                <p style="font-size: 12px; color: #9A9890; margin-top: 24px; text-align: center;">
-                  Thank you for shopping on Tregu — Albania's marketplace
-                </p>
               </div>
             </div>
           `
@@ -95,7 +96,6 @@ serve(async (req) => {
       }
 
     } else {
-      // New order email to admin
       emails.push({
         from: 'Tregu <onboarding@resend.dev>',
         to: 'julsina76@gmail.com',
@@ -129,7 +129,6 @@ serve(async (req) => {
       })
     }
 
-    // Send all emails
     const results = await Promise.all(
       emails.map(email =>
         fetch('https://api.resend.com/emails', {
@@ -146,14 +145,14 @@ serve(async (req) => {
     console.log('Emails sent:', JSON.stringify(results))
 
     return new Response(JSON.stringify({ success: true, results }), {
-      headers: { 'Content-Type': 'application/json' },
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })
 
   } catch (err) {
     console.error('Error:', err.message)
     return new Response(JSON.stringify({ error: err.message }), {
       status: 500,
-      headers: { 'Content-Type': 'application/json' },
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })
   }
 })
