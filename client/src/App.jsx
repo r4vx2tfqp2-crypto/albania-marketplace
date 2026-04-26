@@ -15,6 +15,7 @@ import Profile from './pages/Profile';
 import SellerDashboard from './pages/SellerDashboard';
 import SellerOrders from './pages/SellerOrders';
 import DeliveryConfirm from './pages/DeliveryConfirm';
+import ConfirmDelivery from './pages/ConfirmDelivery';
 import AddProduct from './pages/AddProduct';
 import AddShop from './pages/AddShop';
 import AdminSubscriptions from './pages/AdminSubscriptions';
@@ -44,6 +45,7 @@ export default function App() {
         <BrowserRouter>
           <Routes>
             <Route path="/onboarding" element={<Onboarding />} />
+            <Route path="/confirm-delivery" element={<ConfirmDelivery />} />
             <Route path="/delivery" element={<DeliveryConfirm />} />
             <Route path="/login" element={<Login />} />
             <Route path="/*" element={<MainLayout />} />
