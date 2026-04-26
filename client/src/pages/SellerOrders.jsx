@@ -166,6 +166,12 @@ export default function SellerOrders() {
                       );
                     })}
                   </div>
+                  {/* PIN for driver */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', background: 'var(--amber-light)', borderRadius: 10, marginBottom: 10 }}>
+                    <span style={{ fontSize: 13, color: '#854F0B' }}>🔑 Driver PIN:</span>
+                    <span style={{ fontSize: 22, fontWeight: 800, fontFamily: 'var(--font-display)', color: '#854F0B', letterSpacing: '0.2em' }}>{order.delivery_pin}</span>
+                    <span style={{ fontSize: 12, color: '#854F0B', marginLeft: 'auto' }}>Share with driver</span>
+                  </div>
 
                   <div className={styles.orderFooter}>
                     <span className={styles.orderTotal}>{t('total')}: {formatPrice(order.total)}</span>

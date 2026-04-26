@@ -35,6 +35,8 @@ export default function Checkout() {
     if (!validate()) return;
     setLoading(true);
 
+    const pin = Math.floor(1000 + Math.random() * 9000).toString();
+
     const { data: orderData, error } = await supabase.from('orders').insert({
       customer_name: form.name,
       customer_phone: form.phone,
@@ -43,6 +45,7 @@ export default function Checkout() {
       notes: form.notes,
       total,
       status: 'confirmed',
+      delivery_pin: pin,
       items: cartItems.map(i => ({
         id: i.id,
         name: i.name,
