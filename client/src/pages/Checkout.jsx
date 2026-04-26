@@ -34,7 +34,8 @@ export default function Checkout() {
     e.preventDefault();
     if (!validate()) return;
     setLoading(true);
-    const { error } = await supabase.from('orders').insert({
+
+    const { data: orderData, error } = await supabase.from('orders').insert({
       customer_name: form.name,
       customer_phone: form.phone,
       customer_address: form.address,
@@ -42,9 +43,30 @@ export default function Checkout() {
       notes: form.notes,
       total,
       status: 'confirmed',
-      items: cartItems.map(i => ({ id: i.id, name: i.name, price: i.price, qty: i.qty, size: i.selectedSize })),
-    });
-    if (error) { setErrors({ submit: t('something_went_wrong') }); setLoading(false); return; }
+      items: cartItems.map(i => ({
+        id: i.id,
+        name: i.name,
+        price: i.price,
+        qty: i.qty,
+        size: i.selectedSize,
+      })),
+    }).select().single();
+
+    if (error) {
+      setErrors({ submit: t('something_went_wrong') });
+      setLoading(false);
+      return;
+    }
+
+    // Send email notification
+    try {
+      await supabase.functions.invoke('order-notification', {
+        body: { order: orderData }
+      });
+    } catch (err) {
+      console.log('Email notification failed:', err);
+    }
+
     setPlaced(true);
     setTimeout(() => navigate('/orders'), 2500);
   };
@@ -70,18 +92,33 @@ export default function Checkout() {
               <div className={styles.fieldRow}>
                 <div className={styles.field}>
                   <label className={styles.label}>{t('full_name')} *</label>
-                  <input className={`${styles.input} ${errors.name ? styles.inputError : ''}`} placeholder="Erion Brahimi" value={form.name} onChange={e => setForm({...form, name: e.target.value})} />
+                  <input
+                    className={`${styles.input} ${errors.name ? styles.inputError : ''}`}
+                    placeholder="Erion Brahimi"
+                    value={form.name}
+                    onChange={e => setForm({...form, name: e.target.value})}
+                  />
                   {errors.name && <span className={styles.errorMsg}>{errors.name}</span>}
                 </div>
                 <div className={styles.field}>
                   <label className={styles.label}>{t('phone_number')} *</label>
-                  <input className={`${styles.input} ${errors.phone ? styles.inputError : ''}`} placeholder="+355 69 123 4567" value={form.phone} onChange={e => setForm({...form, phone: e.target.value})} />
+                  <input
+                    className={`${styles.input} ${errors.phone ? styles.inputError : ''}`}
+                    placeholder="+355 69 123 4567"
+                    value={form.phone}
+                    onChange={e => setForm({...form, phone: e.target.value})}
+                  />
                   {errors.phone && <span className={styles.errorMsg}>{errors.phone}</span>}
                 </div>
               </div>
               <div className={styles.field}>
                 <label className={styles.label}>{t('address')} *</label>
-                <input className={`${styles.input} ${errors.address ? styles.inputError : ''}`} placeholder="Rruga Myslym Shyri, Nr. 14" value={form.address} onChange={e => setForm({...form, address: e.target.value})} />
+                <input
+                  className={`${styles.input} ${errors.address ? styles.inputError : ''}`}
+                  placeholder="Rruga Myslym Shyri, Nr. 14"
+                  value={form.address}
+                  onChange={e => setForm({...form, address: e.target.value})}
+                />
                 {errors.address && <span className={styles.errorMsg}>{errors.address}</span>}
               </div>
               <div className={styles.field}>
@@ -92,10 +129,17 @@ export default function Checkout() {
               </div>
               <div className={styles.field}>
                 <label className={styles.label}>{t('notes')}</label>
-                <textarea className={styles.textarea} placeholder={t('notes_placeholder')} rows={3} value={form.notes} onChange={e => setForm({...form, notes: e.target.value})} />
+                <textarea
+                  className={styles.textarea}
+                  placeholder={t('notes_placeholder')}
+                  rows={3}
+                  value={form.notes}
+                  onChange={e => setForm({...form, notes: e.target.value})}
+                />
               </div>
               {errors.submit && <div style={{ color: 'var(--red)', fontSize: 13 }}>{errors.submit}</div>}
             </div>
+
             <div className={styles.formSection}>
               <h2 className={styles.sectionTitle}>{t('payment_method')}</h2>
               <div className={styles.paymentOption}>
@@ -114,6 +158,7 @@ export default function Checkout() {
                 </div>
               </div>
             </div>
+
             <button type="submit" className={styles.placeOrder} disabled={loading}>
               {loading ? '…' : `${t('place_order')} — ${formatPrice(total)}`}
             </button>
