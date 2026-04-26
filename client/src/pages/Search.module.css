@@ -157,3 +157,11 @@
 .emptyIcon { font-size: 48px; margin-bottom: 16px; }
 .emptyTitle { font-size: 18px; font-weight: 500; color: var(--text-1); margin-bottom: 8px; }
 .emptySub { font-size: 14px; color: var(--text-3); }
+@media (max-width: 768px) {
+  .productGrid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .shopGrid { grid-template-columns: 1fr; }
+  .filterPanel { padding: 14px; }
+  .tabs { overflow-x: auto; padding-bottom: 2px; }
+  .tab { white-space: nowrap; font-size: 13px; padding: 10px 12px; }
+  .filterToggle { margin-left: auto; white-space: nowrap; flex-shrink: 0; }
+}
