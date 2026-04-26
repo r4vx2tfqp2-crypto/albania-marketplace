@@ -6,7 +6,7 @@ const menuItems = [
   { icon: Package, label: 'My orders', sub: 'Track and manage orders', to: '/orders' },
   { icon: Heart, label: 'Saved items', sub: 'Your favorites', to: '/favorites' },
   { icon: Store, label: 'Seller dashboard', sub: 'Manage your shop', to: '/seller' },
-  { icon: Settings, label: 'Settings', sub: 'Account preferences', to: '#' },
+  { icon: Settings, label: 'Settings', sub: 'Account preferences', to: '/settings' },
 ];
 
 export default function Profile() {

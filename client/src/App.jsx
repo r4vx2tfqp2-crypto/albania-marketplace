@@ -1,71 +1,73 @@
-import { Link, useNavigate } from 'react-router-dom';
-import { Package, Heart, Settings, Store, ChevronRight, User, LogOut } from 'lucide-react';
-import { useAuth } from '../context/AuthContext';
-import styles from './Profile.module.css';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { CartProvider } from './context/CartContext';
+import { AuthProvider, useAuth } from './context/AuthContext';
+import Navbar from './components/Navbar';
+import BottomNav from './components/BottomNav';
+import Home from './pages/Home';
+import Search from './pages/Search';
+import Product from './pages/Product';
+import Shop from './pages/Shop';
+import Cart from './pages/Cart';
+import Checkout from './pages/Checkout';
+import Orders from './pages/Orders';
+import Favorites from './pages/Favorites';
+import Profile from './pages/Profile';
+import SellerDashboard from './pages/SellerDashboard';
+import AddProduct from './pages/AddProduct';
+import AddShop from './pages/AddShop';
+import Settings from './pages/Settings';
+import Onboarding from './pages/Onboarding';
+import Login from './pages/Login';
 
-export default function Profile() {
-  const { user, signOut } = useAuth();
-  const navigate = useNavigate();
+function ProtectedRoute({ children }) {
+  const { user, loading } = useAuth();
+  if (loading) return <div style={{ padding: 80, textAlign: 'center', color: 'var(--text-3)' }}>Loading…</div>;
+  if (!user) return <Navigate to="/login" replace />;
+  return children;
+}
 
-  const handleSignOut = async () => {
-    await signOut();
-    navigate('/');
-  };
-
-  const menuItems = [
-    { icon: Package, label: 'My orders', sub: 'Track and manage orders', to: '/orders' },
-    { icon: Heart, label: 'Saved items', sub: 'Your favorites', to: '/favorites' },
-    { icon: Store, label: 'Seller dashboard', sub: 'Manage your shop', to: '/seller' },
-    { icon: Settings, label: 'Settings', sub: 'Account preferences', to: '#' },
-  ];
-
+export default function App() {
   return (
-    <div className={styles.page}>
-      <div className="container">
-        <div className={styles.profileCard}>
-          <div className={styles.avatar}>
-            <User size={28} strokeWidth={1.5} style={{ color: 'var(--text-3)' }} />
-          </div>
-          <div>
-            {user ? (
-              <>
-                <div className={styles.name}>{user.user_metadata?.name || 'Seller'}</div>
-                <div className={styles.email}>{user.email}</div>
-              </>
-            ) : (
-              <>
-                <div className={styles.name}>Guest User</div>
-                <div className={styles.email}>Sign in to access your account</div>
-              </>
-            )}
-          </div>
-          {user ? (
-            <button onClick={handleSignOut} className={styles.signInBtn} style={{ background: 'var(--red-light)', color: 'var(--red)' }}>
-              <LogOut size={14} /> Sign out
-            </button>
-          ) : (
-            <Link to="/login" className={styles.signInBtn}>Sign in</Link>
-          )}
-        </div>
+    <AuthProvider>
+      <CartProvider>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/onboarding" element={<Onboarding />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/*" element={<MainLayout />} />
+          </Routes>
+        </BrowserRouter>
+      </CartProvider>
+    </AuthProvider>
+  );
+}
 
-        <div className={styles.menu}>
-          {menuItems.map(({ icon: Icon, label, sub, to }) => (
-            <Link key={label} to={to} className={styles.menuItem}>
-              <div className={styles.menuIcon}><Icon size={18} strokeWidth={1.8} /></div>
-              <div className={styles.menuInfo}>
-                <div className={styles.menuLabel}>{label}</div>
-                <div className={styles.menuSub}>{sub}</div>
-              </div>
-              <ChevronRight size={16} style={{ color: 'var(--text-3)' }} />
-            </Link>
-          ))}
-        </div>
-
-        <div className={styles.appInfo}>
-          <div className={styles.appName}>tregu</div>
-          <div className={styles.appVersion}>Version 1.0.0 — Albania's marketplace</div>
-        </div>
-      </div>
+function MainLayout() {
+  return (
+    <div style={{ paddingBottom: '72px' }}>
+      <Navbar />
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/search" element={<Search />} />
+        <Route path="/product/:id" element={<Product />} />
+        <Route path="/shop/:id" element={<Shop />} />
+        <Route path="/cart" element={<Cart />} />
+        <Route path="/checkout" element={<Checkout />} />
+        <Route path="/orders" element={<Orders />} />
+        <Route path="/favorites" element={<Favorites />} />
+        <Route path="/profile" element={<Profile />} />
+        <Route path="/seller" element={
+          <ProtectedRoute><SellerDashboard /></ProtectedRoute>
+        } />
+        <Route path="/seller/add-product" element={
+          <ProtectedRoute><AddProduct /></ProtectedRoute>
+        } />
+        <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+        <Route path="/seller/add-shop" element={
+          <ProtectedRoute><AddShop /></ProtectedRoute>
+        } />
+      </Routes>
+      <BottomNav />
     </div>
   );
 }
