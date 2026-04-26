@@ -1,11 +1,5 @@
 {
-  "outputDirectory": "client/dist",
   "buildCommand": "cd client && npm install && npm run build",
-  "framework": null,
-  "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "/index.html"
-    }
-  ]
+  "outputDirectory": "client/dist",
+  "framework": null
 }
