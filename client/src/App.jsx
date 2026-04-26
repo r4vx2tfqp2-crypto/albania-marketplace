@@ -13,6 +13,7 @@ import Orders from './pages/Orders';
 import Favorites from './pages/Favorites';
 import Profile from './pages/Profile';
 import SellerDashboard from './pages/SellerDashboard';
+import SellerOrders from './pages/SellerOrders';
 import AddProduct from './pages/AddProduct';
 import AddShop from './pages/AddShop';
 import AdminSubscriptions from './pages/AdminSubscriptions';
@@ -75,6 +76,7 @@ function MainLayout() {
         <Route path="/admin" element={<AdminRoute><AdminPanel /></AdminRoute>} />
         <Route path="/admin/subscriptions" element={<AdminRoute><AdminSubscriptions /></AdminRoute>} />
         <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+        <Route path="/seller/orders" element={<ProtectedRoute><SellerOrders /></ProtectedRoute>} />
         <Route path="/seller/add-shop" element={
           <ProtectedRoute><AddShop /></ProtectedRoute>
         } />

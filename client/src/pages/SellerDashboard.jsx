@@ -54,8 +54,8 @@ export default function SellerDashboard() {
                 ⚙️ Admin Panel
               </Link>
             )}
-            <Link to="/seller/add-shop" className={styles.addBtn} style={{ background: 'var(--surface)', color: 'var(--text-1)', border: '1px solid var(--border-strong)' }}>
-              {t('add_shop')}
+            <Link to="/seller/orders" className={styles.addBtn} style={{ background: 'var(--blue-light)', color: 'var(--blue)', border: 'none' }}>
+              📦 {t('recent_orders')}
             </Link>
             <Link to="/seller/add-product" className={styles.addBtn}>
               <Plus size={16} /> {t('add_product')}
