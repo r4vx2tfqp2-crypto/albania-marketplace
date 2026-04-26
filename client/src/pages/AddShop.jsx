@@ -25,6 +25,8 @@ export default function AddShop() {
     setLoading(true);
     setError('');
 
+    const { data: { user } } = await supabase.auth.getUser();
+
     const { error } = await supabase.from('shops').insert({
       name: form.name,
       description: form.description,
@@ -37,6 +39,7 @@ export default function AddShop() {
       rating: 0,
       review_count: 0,
       delivery_options: ['Cash on delivery'],
+      user_id: user.id,
     });
 
     if (error) {
