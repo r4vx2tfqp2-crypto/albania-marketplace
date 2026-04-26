@@ -3,22 +3,37 @@ import { useNavigate } from 'react-router-dom';
 import { Search, ArrowRight, TrendingUp, Zap } from 'lucide-react';
 import ProductCard from '../components/ProductCard';
 import ShopCard from '../components/ShopCard';
-import { products, shops, categories } from '../data/mockData';
+import { supabase } from '../lib/supabase';
+import { categories } from '../data/mockData';
 import styles from './Home.module.css';
 
 export default function Home() {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [visible, setVisible] = useState(false);
+  const [trendingProducts, setTrendingProducts] = useState([]);
+  const [featuredShops, setFeaturedShops] = useState([]);
+  const [allProducts, setAllProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const t = setTimeout(() => setVisible(true), 50);
+    fetchData();
     return () => clearTimeout(t);
   }, []);
 
-  const trendingProducts = products.filter(p => p.trending).slice(0, 4);
-  const verifiedShops = shops.filter(s => s.verified).slice(0, 4);
-  const allProducts = products.slice(0, 8);
+  const fetchData = async () => {
+    setLoading(true);
+    const [{ data: trending }, { data: shops }, { data: products }] = await Promise.all([
+      supabase.from('products').select('*, shops(*)').eq('trending', true).limit(4),
+      supabase.from('shops').select('*').eq('verified', true).limit(4),
+      supabase.from('products').select('*, shops(*)').limit(8),
+    ]);
+    setTrendingProducts(trending || []);
+    setFeaturedShops(shops || []);
+    setAllProducts(products || []);
+    setLoading(false);
+  };
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -27,8 +42,6 @@ export default function Home() {
 
   return (
     <div className={`${styles.page} ${visible ? styles.visible : ''}`}>
-
-      {/* Hero */}
       <div className={styles.hero}>
         <div className={styles.heroContent}>
           <div className={styles.heroTag}>
@@ -56,8 +69,6 @@ export default function Home() {
       </div>
 
       <div className="container">
-
-        {/* Categories */}
         <section className={styles.section}>
           <div className={styles.sectionHead}>
             <h2 className={styles.sectionTitle}>Browse by category</h2>
@@ -76,55 +87,74 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Trending */}
-        <section className={styles.section}>
-          <div className={styles.sectionHead}>
-            <div className={styles.sectionTitleRow}>
-              <TrendingUp size={16} strokeWidth={2} style={{ color: 'var(--amber)' }} />
-              <h2 className={styles.sectionTitle}>Trending now</h2>
-            </div>
-            <button className={styles.seeAll} onClick={() => navigate('/search?sort=trending')}>
-              See all <ArrowRight size={14} />
-            </button>
+        {loading ? (
+          <div style={{ textAlign: 'center', padding: '60px', color: 'var(--text-3)' }}>
+            Loading…
           </div>
-          <div className={styles.productGrid}>
-            {trendingProducts.map((p, i) => (
-              <ProductCard key={p.id} product={p} index={i} />
-            ))}
-          </div>
-        </section>
+        ) : (
+          <>
+            {trendingProducts.length > 0 && (
+              <section className={styles.section}>
+                <div className={styles.sectionHead}>
+                  <div className={styles.sectionTitleRow}>
+                    <TrendingUp size={16} strokeWidth={2} style={{ color: 'var(--amber)' }} />
+                    <h2 className={styles.sectionTitle}>Trending now</h2>
+                  </div>
+                  <button className={styles.seeAll} onClick={() => navigate('/search?sort=trending')}>
+                    See all <ArrowRight size={14} />
+                  </button>
+                </div>
+                <div className={styles.productGrid}>
+                  {trendingProducts.map((p, i) => (
+                    <ProductCard key={p.id} product={p} index={i} />
+                  ))}
+                </div>
+              </section>
+            )}
 
-        {/* Featured Shops */}
-        <section className={styles.section}>
-          <div className={styles.sectionHead}>
-            <h2 className={styles.sectionTitle}>Verified shops</h2>
-            <button className={styles.seeAll} onClick={() => navigate('/search?tab=shops')}>
-              See all <ArrowRight size={14} />
-            </button>
-          </div>
-          <div className={styles.shopGrid}>
-            {verifiedShops.map(shop => (
-              <ShopCard key={shop.id} shop={shop} />
-            ))}
-          </div>
-        </section>
+            {featuredShops.length > 0 && (
+              <section className={styles.section}>
+                <div className={styles.sectionHead}>
+                  <h2 className={styles.sectionTitle}>Verified shops</h2>
+                  <button className={styles.seeAll} onClick={() => navigate('/search?tab=shops')}>
+                    See all <ArrowRight size={14} />
+                  </button>
+                </div>
+                <div className={styles.shopGrid}>
+                  {featuredShops.map(shop => (
+                    <ShopCard key={shop.id} shop={shop} />
+                  ))}
+                </div>
+              </section>
+            )}
 
-        {/* All products */}
-        <section className={styles.section}>
-          <div className={styles.sectionHead}>
-            <h2 className={styles.sectionTitle}>All products</h2>
-            <button className={styles.seeAll} onClick={() => navigate('/search')}>
-              See all <ArrowRight size={14} />
-            </button>
-          </div>
-          <div className={styles.productGrid}>
-            {allProducts.map((p, i) => (
-              <ProductCard key={p.id} product={p} index={i} />
-            ))}
-          </div>
-        </section>
+            {allProducts.length > 0 && (
+              <section className={styles.section}>
+                <div className={styles.sectionHead}>
+                  <h2 className={styles.sectionTitle}>All products</h2>
+                  <button className={styles.seeAll} onClick={() => navigate('/search')}>
+                    See all <ArrowRight size={14} />
+                  </button>
+                </div>
+                <div className={styles.productGrid}>
+                  {allProducts.map((p, i) => (
+                    <ProductCard key={p.id} product={p} index={i} />
+                  ))}
+                </div>
+              </section>
+            )}
 
-        {/* Trust Banner */}
+            {allProducts.length === 0 && trendingProducts.length === 0 && (
+              <div style={{ textAlign: 'center', padding: '60px 20px' }}>
+                <div style={{ fontSize: 48, marginBottom: 16 }}>🏪</div>
+                <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 22, marginBottom: 8 }}>No products yet</h2>
+                <p style={{ color: 'var(--text-3)', marginBottom: 24 }}>Be the first to add a product!</p>
+                <button className="btn-primary" onClick={() => navigate('/seller/add-product')}>Add first product</button>
+              </div>
+            )}
+          </>
+        )}
+
         <section className={styles.trustBanner}>
           <div className={styles.trustItem}>
             <span className={styles.trustIcon}>✓</span>
@@ -155,7 +185,6 @@ export default function Home() {
             </div>
           </div>
         </section>
-
       </div>
     </div>
   );

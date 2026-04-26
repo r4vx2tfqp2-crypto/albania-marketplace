@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CheckCircle } from 'lucide-react';
 import { useCart } from '../context/CartContext';
+import { supabase } from '../lib/supabase';
 import styles from './Checkout.module.css';
 
 const CITIES = ['Tirana', 'Durrës', 'Shkodër', 'Vlorë', 'Korçë', 'Fier', 'Berat', 'Lushnjë'];
@@ -10,6 +11,7 @@ export default function Checkout() {
   const { cartItems, cartTotal, cartCount } = useCart();
   const navigate = useNavigate();
   const [placed, setPlaced] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({ name: '', phone: '', address: '', city: 'Tirana', notes: '' });
   const [errors, setErrors] = useState({});
 
@@ -26,9 +28,34 @@ export default function Checkout() {
     return Object.keys(e).length === 0;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validate()) return;
+    setLoading(true);
+
+    const { error } = await supabase.from('orders').insert({
+      customer_name: form.name,
+      customer_phone: form.phone,
+      customer_address: form.address,
+      customer_city: form.city,
+      notes: form.notes,
+      total: total,
+      status: 'confirmed',
+      items: cartItems.map(i => ({
+        id: i.id,
+        name: i.name,
+        price: i.price,
+        qty: i.qty,
+        size: i.selectedSize,
+      })),
+    });
+
+    if (error) {
+      setErrors({ submit: 'Something went wrong. Please try again.' });
+      setLoading(false);
+      return;
+    }
+
     setPlaced(true);
     setTimeout(() => navigate('/orders'), 2500);
   };
@@ -94,6 +121,7 @@ export default function Checkout() {
                 <label className={styles.label}>Notes (optional)</label>
                 <textarea className={styles.textarea} placeholder="Any special instructions…" rows={3} value={form.notes} onChange={e => setForm({...form, notes: e.target.value})} />
               </div>
+              {errors.submit && <div style={{ color: 'var(--red)', fontSize: 13 }}>{errors.submit}</div>}
             </div>
 
             <div className={styles.formSection}>
@@ -115,8 +143,8 @@ export default function Checkout() {
               </div>
             </div>
 
-            <button type="submit" className={styles.placeOrder}>
-              Place order — {formatPrice(total)}
+            <button type="submit" className={styles.placeOrder} disabled={loading}>
+              {loading ? 'Placing order…' : `Place order — ${formatPrice(total)}`}
             </button>
           </form>
 
