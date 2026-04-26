@@ -170,7 +170,7 @@ export default function Home() {
     </div>
     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 16 }}>
       {[
-        { icon: '🆓', title: 'Falas për 6 muajt e parë', text: 'Listimi është plotësisht falas gjatë fazës së lansimit' },
+        { icon: '🆓', title: 'Falas për 6 muajt e parë', text: 'Listimi është plotësisht falas gjatë fazës së lansimit. Për 5 dyqanet e para — falas përgjithmonë!' },
         { icon: '🚫', title: 'Pa kontratë', text: 'Largohuni kur të doni, pa asnjë penalitet' },
         { icon: '📢', title: 'Njoftim 30 ditë', text: 'Njoftim paraprak 30 ditë para çdo ndryshimi të çmimeve' },
         { icon: '🔒', title: 'Pa akses bankar', text: 'Nuk kemi akses në llogarinë tuaj bankare asnjëherë' },
