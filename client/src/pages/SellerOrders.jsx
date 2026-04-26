@@ -162,7 +162,82 @@ export default function SellerOrders() {
                     <span className={styles.orderTotal}>{t('total')}: {formatPrice(order.total)}</span>
                     <span style={{ fontSize: 12, color: 'var(--text-3)' }}>{new Date(order.created_at).toLocaleString()}</span>
                   </div>
-
+                  {/* Tracking number */}
+<div style={{ marginTop: 10, padding: '12px 14px', background: 'var(--surface-2)', borderRadius: 10 }}>
+  <div style={{ fontSize: 12, color: 'var(--text-3)', marginBottom: 8 }}>Numri i gjurmimit</div>
+  <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 8 }}>
+    {['Albanian Courier', 'DHL', 'Posta Shqiptare', 'Tjeter'].map(c => (
+      <button
+        key={c}
+        onClick={async () => {
+          await supabase.from('orders').update({ courier_name: c }).eq('id', order.id);
+          await fetchOrders();
+        }}
+        style={{
+          padding: '4px 10px', borderRadius: 20, fontSize: 12, cursor: 'pointer',
+          fontFamily: 'var(--font-body)', border: '1px solid var(--border-strong)',
+          background: order.courier_name === c ? 'var(--text-1)' : 'transparent',
+          color: order.courier_name === c ? '#fff' : 'var(--text-2)',
+        }}
+      >
+        {c}
+      </button>
+    ))}
+  </div>
+  <div style={{ display: 'flex', gap: 8 }}>
+    <input
+      defaultValue={order.tracking_number || ''}
+      placeholder="Shkruaj numrin e gjurmimit..."
+      onBlur={async (e) => {
+        if (e.target.value !== order.tracking_number) {
+          await supabase.from('orders').update({ tracking_number: e.target.value }).eq('id', order.id);
+          await fetchOrders();
+        }
+      }}
+      style={{
+        flex: 1, padding: '8px 12px', borderRadius: 8, border: '1px solid var(--border-strong)',
+        fontSize: 13, fontFamily: 'var(--font-body)', background: 'var(--surface)', color: 'var(--text-1)',
+      }}
+    />
+    {order.tracking_number && (
+      <a
+        href={
+          order.courier_name === 'Albanian Courier' ? `https://al.albaniancourier.al/en/track/?code=${order.tracking_number}` :
+          order.courier_name === 'DHL' ? `https://www.dhl.com/al-en/home/tracking.html?tracking-id=${order.tracking_number}` :
+          order.courier_name === 'Posta Shqiptare' ? `https://www.postashqiptare.al/gjurmo` :
+          `https://www.google.com/search?q=${order.tracking_number}+tracking`
+        }
+        target="_blank"
+        rel="noopener noreferrer"
+        style={{
+          padding: '8px 12px', borderRadius: 8, background: 'var(--green)', color: '#fff',
+          fontSize: 12, fontWeight: 500, textDecoration: 'none', whiteSpace: 'nowrap',
+        }}
+      >
+        Gjurmo →
+      </a>
+    )}
+  </div>
+  {!order.courier_name && (
+    <div style={{ marginTop: 10, padding: '10px 12px', background: 'var(--blue-light)', borderRadius: 8 }}>
+      <div style={{ fontSize: 12, fontWeight: 500, color: 'var(--blue)', marginBottom: 6 }}>Nuk ke korrier?</div>
+      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+        <a href="https://al.albaniancourier.al" target="_blank" rel="noopener noreferrer"
+          style={{ fontSize: 12, color: 'var(--blue)', textDecoration: 'none', padding: '4px 10px', border: '1px solid var(--blue)', borderRadius: 20 }}>
+          Albanian Courier →
+        </a>
+        <a href="https://www.dhl.com/al-en" target="_blank" rel="noopener noreferrer"
+          style={{ fontSize: 12, color: 'var(--blue)', textDecoration: 'none', padding: '4px 10px', border: '1px solid var(--blue)', borderRadius: 20 }}>
+          DHL Albania →
+        </a>
+        <a href="tel:+35542259777"
+          style={{ fontSize: 12, color: 'var(--blue)', textDecoration: 'none', padding: '4px 10px', border: '1px solid var(--blue)', borderRadius: 20 }}>
+          Posta Shqiptare →
+        </a>
+      </div>
+    </div>
+  )}
+</div>
                   {/* PIN for driver */}
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', background: 'var(--amber-light)', borderRadius: 10, marginTop: 10 }}>
                     <span style={{ fontSize: 13, color: '#854F0B' }}>🔑 Driver PIN:</span>

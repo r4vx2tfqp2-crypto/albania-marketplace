@@ -123,6 +123,27 @@ export default function Orders() {
                       );
                     })}
                   </div>
+                  {order.tracking_number && (
+  <div style={{ margin: '12px 0', padding: '12px 14px', background: 'var(--surface-2)', borderRadius: 10 }}>
+    <div style={{ fontSize: 12, color: 'var(--text-3)', marginBottom: 4 }}>Numri i gjurmimit</div>
+    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+      <span style={{ fontSize: 14, fontWeight: 600, fontFamily: 'var(--font-display)' }}>{order.tracking_number}</span>
+      {order.courier_name && <span style={{ fontSize: 12, color: 'var(--text-3)' }}>via {order.courier_name}</span>}
+      <a
+        href={
+          order.courier_name === 'Albanian Courier' ? `https://al.albaniancourier.al/en/track/?code=${order.tracking_number}` :
+          order.courier_name === 'DHL' ? `https://www.dhl.com/al-en/home/tracking.html?tracking-id=${order.tracking_number}` :
+          `https://www.google.com/search?q=${order.tracking_number}+tracking`
+        }
+        target="_blank"
+        rel="noopener noreferrer"
+        style={{ marginLeft: 'auto', fontSize: 12, color: 'var(--green)', fontWeight: 500, textDecoration: 'none' }}
+      >
+        Gjurmo →
+      </a>
+    </div>
+  </div>
+)}
 
                   <div className={styles.orderFooter}>
                     <span className={styles.orderTotal}>{t('total')}: {formatPrice(order.total)}</span>
