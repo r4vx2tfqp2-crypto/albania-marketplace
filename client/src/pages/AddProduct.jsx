@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, CheckCircle } from 'lucide-react';
+import { ArrowLeft, CheckCircle, Upload, X } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import styles from './AddProduct.module.css';
 
@@ -8,56 +8,49 @@ const CATEGORIES = ['shoes', 'clothes', 'electronics', 'beauty', 'home', 'sports
 
 const CATEGORY_FIELDS = {
   shoes: [
-    { key: 'sizes', label: 'Available sizes', placeholder: '36, 37, 38, 39, 40, 41, 42, 43', type: 'text' },
-    { key: 'material', label: 'Material', placeholder: 'e.g. Leather, Mesh, Synthetic', type: 'text' },
-    { key: 'brand', label: 'Brand', placeholder: 'e.g. Nike, Adidas, Puma', type: 'text' },
-    { key: 'color', label: 'Color', placeholder: 'e.g. Black, White, Red', type: 'text' },
-    { key: 'condition', label: 'Condition', placeholder: 'New / Used', type: 'text' },
+    { key: 'sizes', label: 'Available sizes', placeholder: '36, 37, 38, 39, 40, 41, 42, 43' },
+    { key: 'material', label: 'Material', placeholder: 'e.g. Leather, Mesh' },
+    { key: 'brand', label: 'Brand', placeholder: 'e.g. Nike, Adidas' },
+    { key: 'color', label: 'Color', placeholder: 'e.g. Black, White' },
   ],
   clothes: [
-    { key: 'sizes', label: 'Available sizes', placeholder: 'XS, S, M, L, XL, XXL', type: 'text' },
-    { key: 'material', label: 'Material', placeholder: 'e.g. Cotton, Polyester, Linen', type: 'text' },
-    { key: 'brand', label: 'Brand', placeholder: 'e.g. Zara, H&M', type: 'text' },
-    { key: 'color', label: 'Color', placeholder: 'e.g. Blue, Black, White', type: 'text' },
-    { key: 'gender', label: 'Gender', placeholder: 'Men / Women / Unisex', type: 'text' },
+    { key: 'sizes', label: 'Available sizes', placeholder: 'XS, S, M, L, XL' },
+    { key: 'material', label: 'Material', placeholder: 'e.g. Cotton, Linen' },
+    { key: 'brand', label: 'Brand', placeholder: 'e.g. Zara, H&M' },
+    { key: 'color', label: 'Color', placeholder: 'e.g. Blue, Black' },
+    { key: 'gender', label: 'Gender', placeholder: 'Men / Women / Unisex' },
   ],
   electronics: [
-    { key: 'brand', label: 'Brand', placeholder: 'e.g. Apple, Samsung, Sony', type: 'text' },
-    { key: 'model', label: 'Model', placeholder: 'e.g. iPhone 15 Pro, Galaxy S24', type: 'text' },
-    { key: 'storage', label: 'Storage / Specs', placeholder: 'e.g. 256GB, 16GB RAM', type: 'text' },
-    { key: 'color', label: 'Color', placeholder: 'e.g. Space Black, Silver', type: 'text' },
-    { key: 'warranty', label: 'Warranty', placeholder: 'e.g. 1 year, 6 months', type: 'text' },
-    { key: 'condition', label: 'Condition', placeholder: 'New / Refurbished / Used', type: 'text' },
-    { key: 'weight', label: 'Weight', placeholder: 'e.g. 187g', type: 'text' },
+    { key: 'brand', label: 'Brand', placeholder: 'e.g. Apple, Samsung' },
+    { key: 'model', label: 'Model', placeholder: 'e.g. iPhone 15 Pro' },
+    { key: 'storage', label: 'Storage / Specs', placeholder: 'e.g. 256GB' },
+    { key: 'color', label: 'Color', placeholder: 'e.g. Space Black' },
+    { key: 'warranty', label: 'Warranty', placeholder: 'e.g. 1 year' },
+    { key: 'condition', label: 'Condition', placeholder: 'New / Refurbished / Used' },
   ],
   beauty: [
-    { key: 'brand', label: 'Brand', placeholder: 'e.g. Charlotte Tilbury, Dyson', type: 'text' },
-    { key: 'volume', label: 'Volume / Size', placeholder: 'e.g. 50ml, 30g', type: 'text' },
-    { key: 'skin_type', label: 'Skin type', placeholder: 'e.g. All skin types, Oily, Dry', type: 'text' },
-    { key: 'ingredients', label: 'Key ingredients', placeholder: 'e.g. Hyaluronic acid, Vitamin C', type: 'text' },
-    { key: 'color', label: 'Shade / Color', placeholder: 'e.g. Fair, Medium, Deep', type: 'text' },
+    { key: 'brand', label: 'Brand', placeholder: 'e.g. Charlotte Tilbury' },
+    { key: 'volume', label: 'Volume / Size', placeholder: 'e.g. 50ml' },
+    { key: 'skin_type', label: 'Skin type', placeholder: 'e.g. All skin types' },
+    { key: 'color', label: 'Shade / Color', placeholder: 'e.g. Fair, Medium' },
   ],
   home: [
-    { key: 'material', label: 'Material', placeholder: 'e.g. Wood, Metal, Fabric', type: 'text' },
-    { key: 'dimensions', label: 'Dimensions', placeholder: 'e.g. 120x60x75 cm', type: 'text' },
-    { key: 'color', label: 'Color', placeholder: 'e.g. White, Oak, Black', type: 'text' },
-    { key: 'weight', label: 'Weight', placeholder: 'e.g. 5kg', type: 'text' },
-    { key: 'brand', label: 'Brand', placeholder: 'e.g. IKEA, Local made', type: 'text' },
+    { key: 'material', label: 'Material', placeholder: 'e.g. Wood, Metal' },
+    { key: 'dimensions', label: 'Dimensions', placeholder: 'e.g. 120x60x75 cm' },
+    { key: 'color', label: 'Color', placeholder: 'e.g. White, Oak' },
+    { key: 'brand', label: 'Brand', placeholder: 'e.g. IKEA' },
   ],
   sports: [
-    { key: 'brand', label: 'Brand', placeholder: 'e.g. Nike, Adidas, Wilson', type: 'text' },
-    { key: 'sizes', label: 'Available sizes', placeholder: 'S, M, L or one size', type: 'text' },
-    { key: 'color', label: 'Color', placeholder: 'e.g. Blue, Red', type: 'text' },
-    { key: 'material', label: 'Material', placeholder: 'e.g. Polyester, Carbon fiber', type: 'text' },
-    { key: 'sport_type', label: 'Sport type', placeholder: 'e.g. Football, Tennis, Gym', type: 'text' },
-    { key: 'condition', label: 'Condition', placeholder: 'New / Used', type: 'text' },
+    { key: 'brand', label: 'Brand', placeholder: 'e.g. Nike, Adidas' },
+    { key: 'sizes', label: 'Available sizes', placeholder: 'S, M, L or one size' },
+    { key: 'color', label: 'Color', placeholder: 'e.g. Blue, Red' },
+    { key: 'sport_type', label: 'Sport type', placeholder: 'e.g. Football, Tennis' },
   ],
   gifts: [
-    { key: 'occasion', label: 'Occasion', placeholder: 'e.g. Birthday, Wedding, Christmas', type: 'text' },
-    { key: 'color', label: 'Color', placeholder: 'e.g. Red, Gold, Mixed', type: 'text' },
-    { key: 'material', label: 'Material', placeholder: 'e.g. Wood, Glass, Fabric', type: 'text' },
-    { key: 'dimensions', label: 'Dimensions', placeholder: 'e.g. 20x15x10 cm', type: 'text' },
-    { key: 'brand', label: 'Brand (optional)', placeholder: 'e.g. Handmade, Local', type: 'text' },
+    { key: 'occasion', label: 'Occasion', placeholder: 'e.g. Birthday, Wedding' },
+    { key: 'color', label: 'Color', placeholder: 'e.g. Red, Gold' },
+    { key: 'material', label: 'Material', placeholder: 'e.g. Wood, Glass' },
+    { key: 'dimensions', label: 'Dimensions', placeholder: 'e.g. 20x15x10 cm' },
   ],
 };
 
@@ -67,21 +60,56 @@ export default function AddProduct() {
   const [loading, setLoading] = useState(false);
   const [shops, setShops] = useState([]);
   const [error, setError] = useState('');
+  const [images, setImages] = useState([]);
+  const [imagePreviews, setImagePreviews] = useState([]);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const [form, setForm] = useState({
     name: '', price: '', category: 'shoes',
     description: '', shop_id: '', trending: false,
   });
   const [extraFields, setExtraFields] = useState({});
 
-  useEffect(() => {
-    fetchShops();
-  }, []);
+  useEffect(() => { fetchShops(); }, []);
 
   const fetchShops = async () => {
     const { data: { user } } = await supabase.auth.getUser();
     const { data } = await supabase.from('shops').select('id, name').eq('user_id', user.id);
     setShops(data || []);
     if (data && data.length > 0) setForm(f => ({ ...f, shop_id: data[0].id }));
+  };
+
+  const handleImageChange = (e) => {
+    const files = Array.from(e.target.files).slice(0, 5);
+    setImages(files);
+    const previews = files.map(f => URL.createObjectURL(f));
+    setImagePreviews(previews);
+  };
+
+  const removeImage = (index) => {
+    const newImages = images.filter((_, i) => i !== index);
+    const newPreviews = imagePreviews.filter((_, i) => i !== index);
+    setImages(newImages);
+    setImagePreviews(newPreviews);
+  };
+
+  const uploadImages = async (productId) => {
+    const urls = [];
+    for (let i = 0; i < images.length; i++) {
+      const file = images[i];
+      const ext = file.name.split('.').pop();
+      const path = `${productId}/${i}.${ext}`;
+      const { error } = await supabase.storage
+        .from('product-images')
+        .upload(path, file, { upsert: true });
+      if (!error) {
+        const { data } = supabase.storage
+          .from('product-images')
+          .getPublicUrl(path);
+        urls.push(data.publicUrl);
+      }
+      setUploadProgress(Math.round(((i + 1) / images.length) * 100));
+    }
+    return urls;
   };
 
   const handleCategoryChange = (category) => {
@@ -103,7 +131,7 @@ export default function AddProduct() {
     const details = { ...extraFields };
     delete details.sizes;
 
-    const { error } = await supabase.from('products').insert({
+    const { data: product, error: insertError } = await supabase.from('products').insert({
       name: form.name,
       price: parseFloat(form.price),
       category: form.category,
@@ -116,12 +144,18 @@ export default function AddProduct() {
       rating: 0,
       review_count: 0,
       user_id: user.id,
-    });
+    }).select().single();
 
-    if (error) {
-      setError('Something went wrong: ' + error.message);
+    if (insertError) {
+      setError('Something went wrong: ' + insertError.message);
       setLoading(false);
       return;
+    }
+
+    // Upload images if any
+    if (images.length > 0) {
+      const imageUrls = await uploadImages(product.id);
+      await supabase.from('products').update({ images: imageUrls }).eq('id', product.id);
     }
 
     setSaved(true);
@@ -156,6 +190,53 @@ export default function AddProduct() {
         <form onSubmit={handleSubmit} className={styles.form}>
           <div className={styles.formGrid}>
 
+            {/* Image upload */}
+            <div className={styles.field}>
+              <label className={styles.label}>Product photos (up to 5)</label>
+              <label style={{ cursor: 'pointer' }}>
+                <input
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  style={{ display: 'none' }}
+                  onChange={handleImageChange}
+                />
+                {imagePreviews.length === 0 ? (
+                  <div className={styles.photoUpload}>
+                    <Upload size={24} strokeWidth={1.5} style={{ color: 'var(--text-3)' }} />
+                    <div className={styles.photoText}>Click to upload photos</div>
+                    <div className={styles.photoSub}>JPG, PNG up to 5MB each</div>
+                  </div>
+                ) : (
+                  <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+                    {imagePreviews.map((src, i) => (
+                      <div key={i} style={{ position: 'relative', width: 100, height: 100 }}>
+                        <img src={src} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 10 }} alt="" />
+                        <button
+                          type="button"
+                          onClick={(e) => { e.preventDefault(); removeImage(i); }}
+                          style={{ position: 'absolute', top: -6, right: -6, width: 22, height: 22, borderRadius: '50%', background: 'var(--red)', color: '#fff', border: 'none', cursor: 'pointer', fontSize: 12, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                        >
+                          <X size={12} />
+                        </button>
+                      </div>
+                    ))}
+                    <div style={{ width: 100, height: 100, border: '2px dashed var(--border-strong)', borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-3)', fontSize: 24 }}>
+                      +
+                    </div>
+                  </div>
+                )}
+              </label>
+              {loading && uploadProgress > 0 && uploadProgress < 100 && (
+                <div style={{ marginTop: 8 }}>
+                  <div style={{ background: 'var(--border)', borderRadius: 4, height: 4 }}>
+                    <div style={{ background: 'var(--green)', height: '100%', borderRadius: 4, width: `${uploadProgress}%`, transition: 'width 0.3s' }} />
+                  </div>
+                  <div style={{ fontSize: 12, color: 'var(--text-3)', marginTop: 4 }}>Uploading {uploadProgress}%</div>
+                </div>
+              )}
+            </div>
+
             <div className={styles.field}>
               <label className={styles.label}>Shop *</label>
               <select required className={styles.select} value={form.shop_id} onChange={e => setForm({...form, shop_id: e.target.value})}>
@@ -163,7 +244,7 @@ export default function AddProduct() {
                 {shops.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
               </select>
               {shops.length === 0 && (
-                <button type="button" onClick={() => navigate('/seller/add-shop')} style={{ marginTop: 8, fontSize: 13, color: 'var(--green)', textDecoration: 'underline', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
+                <button type="button" onClick={() => navigate('/seller/add-shop')} style={{ marginTop: 8, fontSize: 13, color: 'var(--green)', background: 'none', border: 'none', cursor: 'pointer', padding: 0, fontFamily: 'var(--font-body)' }}>
                   + Create a shop first
                 </button>
               )}
@@ -189,14 +270,7 @@ export default function AddProduct() {
 
             <div className={styles.field}>
               <label className={styles.label}>Description *</label>
-              <textarea
-                required
-                className={styles.textarea}
-                placeholder="Describe your product…"
-                rows={3}
-                value={form.description}
-                onChange={e => setForm({...form, description: e.target.value})}
-              />
+              <textarea required className={styles.textarea} placeholder="Describe your product…" rows={3} value={form.description} onChange={e => setForm({...form, description: e.target.value})} />
             </div>
 
             {/* Dynamic category fields */}
@@ -219,11 +293,10 @@ export default function AddProduct() {
               </div>
             </div>
 
-            <label className={styles.checkLabel} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 14, color: 'var(--text-2)', cursor: 'pointer' }}>
+            <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 14, color: 'var(--text-2)', cursor: 'pointer' }}>
               <input type="checkbox" checked={form.trending} onChange={e => setForm({...form, trending: e.target.checked})} />
               Mark as trending
             </label>
-
           </div>
 
           <div className={styles.actions}>

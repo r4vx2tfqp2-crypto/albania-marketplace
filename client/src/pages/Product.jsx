@@ -1,3 +1,4 @@
+cat > ~/Desktop/albania-marketplace/client/src/pages/Product.jsx << 'EOF'
 import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { Heart, ShoppingCart, ArrowLeft, CheckCircle, Truck, Shield } from 'lucide-react';
@@ -20,6 +21,7 @@ export default function Product() {
   const [loading, setLoading] = useState(true);
   const [selectedSize, setSelectedSize] = useState(null);
   const [added, setAdded] = useState(false);
+  const [activeImage, setActiveImage] = useState(0);
 
   useEffect(() => { fetchProduct(); }, [id]);
 
@@ -37,6 +39,7 @@ export default function Product() {
   const saved = isSaved(product.id);
   const idx = 0;
   const formatPrice = (p) => p.toLocaleString('sq-AL') + ' L';
+  const hasImages = product.images && product.images.length > 0;
 
   const handleAddToCart = () => {
     addToCart(product, selectedSize);
@@ -57,12 +60,36 @@ export default function Product() {
         <div className={styles.layout}>
           <div className={styles.imageSection}>
             <div className={styles.imageMain} style={{ background: COLORS[idx] }}>
-              <span className={styles.imageEmoji} style={{ color: TEXT_COLORS[idx] }}>
-                {product.category === 'shoes' ? '👟' : product.category === 'clothes' ? '👕' : product.category === 'electronics' ? '📱' : product.category === 'beauty' ? '💄' : product.category === 'home' ? '🏠' : '🛍️'}
-              </span>
+              {hasImages ? (
+                <img src={product.images[activeImage]} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 'var(--radius-xl)' }} />
+              ) : (
+                <span className={styles.imageEmoji} style={{ color: TEXT_COLORS[idx] }}>
+                  {product.category === 'shoes' ? '👟' : product.category === 'clothes' ? '👕' : product.category === 'electronics' ? '📱' : product.category === 'beauty' ? '💄' : product.category === 'home' ? '🏠' : '🛍️'}
+                </span>
+              )}
               {product.trending && <span className="badge badge-deal" style={{ position:'absolute', top:16, left:16 }}>{t('trending')}</span>}
             </div>
+            {hasImages && product.images.length > 1 && (
+              <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
+                {product.images.map((img, i) => (
+                  <img
+                    key={i}
+                    src={img}
+                    alt=""
+                    onClick={() => setActiveImage(i)}
+                    style={{
+                      width: 60, height: 60, objectFit: 'cover', borderRadius: 8,
+                      cursor: 'pointer',
+                      border: activeImage === i ? '2px solid var(--text-1)' : '2px solid transparent',
+                      opacity: activeImage === i ? 1 : 0.6,
+                      transition: 'all 0.15s',
+                    }}
+                  />
+                ))}
+              </div>
+            )}
           </div>
+
           <div className={styles.infoSection}>
             <div className={styles.topMeta}>
               <span className={styles.category}>{product.category}</span>
@@ -120,6 +147,7 @@ export default function Product() {
             </div>
           </div>
         </div>
+
         {reviews.length > 0 && (
           <div className={styles.reviewsSection}>
             <h2 className={styles.reviewsTitle}>{t('reviews')}</h2>
@@ -141,3 +169,4 @@ export default function Product() {
     </div>
   );
 }
+EOF

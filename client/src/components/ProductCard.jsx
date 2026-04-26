@@ -18,13 +18,17 @@ export default function ProductCard({ product, index = 0 }) {
   return (
     <div className={styles.card}>
       <Link to={`/product/${product.id}`} className={styles.imageWrap} style={{ background: COLORS[colorIdx] }}>
-        <div className={styles.imagePlaceholder} style={{ color: TEXT_COLORS[colorIdx] }}>
-          {product.category === 'shoes' ? '👟' :
-           product.category === 'clothes' ? '👕' :
-           product.category === 'electronics' ? '📱' :
-           product.category === 'beauty' ? '💄' :
-           product.category === 'home' ? '🏠' : '🛍️'}
-        </div>
+        {product.images && product.images.length > 0 ? (
+          <img src={product.images[0]} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+        ) : (
+          <div className={styles.imagePlaceholder} style={{ color: TEXT_COLORS[colorIdx] }}>
+            {product.category === 'shoes' ? '👟' :
+             product.category === 'clothes' ? '👕' :
+             product.category === 'electronics' ? '📱' :
+             product.category === 'beauty' ? '💄' :
+             product.category === 'home' ? '🏠' : '🛍️'}
+          </div>
+        )}
         {product.trending && <span className="badge badge-deal" style={{ position:'absolute', top:10, left:10 }}>Trending</span>}
         {!(product.inStock ?? product.in_stock ?? true) && <span className="badge badge-out" style={{ position:'absolute', top:10, left:10 }}>Out of stock</span>}
         <button
