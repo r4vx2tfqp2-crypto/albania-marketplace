@@ -26,6 +26,12 @@ function ProtectedRoute({ children }) {
   if (!user) return <Navigate to="/login" replace />;
   return children;
 }
+function AdminRoute({ children }) {
+  const { user, loading } = useAuth();
+  if (loading) return <div style={{ padding: 80, textAlign: 'center', color: 'var(--text-3)' }}>Loading…</div>;
+  if (!user || user.email !== 'julsina76@gmail.com') return <Navigate to="/" replace />;
+  return children;
+}
 
 export default function App() {
   return (
@@ -63,7 +69,7 @@ function MainLayout() {
         <Route path="/seller/add-product" element={
           <ProtectedRoute><AddProduct /></ProtectedRoute>
         } />
-        <Route path="/admin/subscriptions" element={<ProtectedRoute><AdminSubscriptions /></ProtectedRoute>} />
+        <Route path="/admin/subscriptions" element={<AdminRoute><AdminSubscriptions /></AdminRoute>} />
         <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
         <Route path="/seller/add-shop" element={
           <ProtectedRoute><AddShop /></ProtectedRoute>
