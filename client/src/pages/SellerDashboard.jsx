@@ -53,8 +53,8 @@ export default function SellerDashboard() {
           </div>
           <div style={{ display: 'flex', gap: 10 }}>
           {user?.email === 'julsina76@gmail.com' && (
-            <Link to="/admin/subscriptions" className={styles.addBtn} style={{ background: 'var(--amber-light)', color: '#854F0B', border: 'none' }}>
-              💳 Subscriptions
+            <Link to="/admin" className={styles.addBtn} style={{ background: 'var(--amber-light)', color: '#854F0B', border: 'none' }}>
+              ⚙️ Admin Panel
             </Link>
           )}
             <Link to="/seller/add-shop" className={styles.addBtn} style={{ background: 'var(--surface)', color: 'var(--text-1)', border: '1px solid var(--border-strong)' }}>
