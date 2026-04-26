@@ -1,15 +1,26 @@
-import { Link } from 'react-router-dom';
-import { Package, Heart, Settings, Store, ChevronRight, User } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Package, Heart, Settings, Store, ChevronRight, User, LogOut } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { useAuth } from '../context/AuthContext';
 import styles from './Profile.module.css';
 
-const menuItems = [
-  { icon: Package, label: 'My orders', sub: 'Track and manage orders', to: '/orders' },
-  { icon: Heart, label: 'Saved items', sub: 'Your favorites', to: '/favorites' },
-  { icon: Store, label: 'Seller dashboard', sub: 'Manage your shop', to: '/seller' },
-  { icon: Settings, label: 'Settings', sub: 'Account preferences', to: '/settings' },
-];
-
 export default function Profile() {
+  const { user, signOut } = useAuth();
+  const { t } = useTranslation();
+  const navigate = useNavigate();
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate('/');
+  };
+
+  const menuItems = [
+    { icon: Package, label: t('my_orders_menu'), sub: t('my_orders_sub'), to: '/orders' },
+    { icon: Heart, label: t('saved_items'), sub: t('saved_items_sub'), to: '/favorites' },
+    { icon: Store, label: t('seller_dashboard'), sub: t('seller_dashboard_sub'), to: '/seller' },
+    { icon: Settings, label: t('settings'), sub: t('settings_sub'), to: '/settings' },
+  ];
+
   return (
     <div className={styles.page}>
       <div className="container">
@@ -18,10 +29,25 @@ export default function Profile() {
             <User size={28} strokeWidth={1.5} style={{ color: 'var(--text-3)' }} />
           </div>
           <div>
-            <div className={styles.name}>Guest User</div>
-            <div className={styles.email}>Sign in to access your account</div>
+            {user ? (
+              <>
+                <div className={styles.name}>{user.user_metadata?.name || 'Seller'}</div>
+                <div className={styles.email}>{user.email}</div>
+              </>
+            ) : (
+              <>
+                <div className={styles.name}>{t('guest_user')}</div>
+                <div className={styles.email}>{t('sign_in_prompt')}</div>
+              </>
+            )}
           </div>
-          <Link to="#" className={styles.signInBtn}>Sign in</Link>
+          {user ? (
+            <button onClick={handleSignOut} className={styles.signInBtn} style={{ background: 'var(--red-light)', color: 'var(--red)', display: 'flex', alignItems: 'center', gap: 6 }}>
+              <LogOut size={14} /> {t('sign_out')}
+            </button>
+          ) : (
+            <Link to="/login" className={styles.signInBtn}>{t('sign_in')}</Link>
+          )}
         </div>
 
         <div className={styles.menu}>

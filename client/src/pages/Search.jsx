@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { SearchIcon, SlidersHorizontal, X } from 'lucide-react';
+import { SlidersHorizontal, X } from "lucide-react";
+import { useTranslation } from 'react-i18next';
 import ProductCard from '../components/ProductCard';
 import ShopCard from '../components/ShopCard';
 import { supabase } from '../lib/supabase';
@@ -27,6 +28,7 @@ export default function Search() {
   const [products, setProducts] = useState([]);
   const [shops, setShops] = useState([]);
   const [loading, setLoading] = useState(true);
+  const { t } = useTranslation();
 
   useEffect(() => {
     fetchData();

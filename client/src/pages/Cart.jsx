@@ -2,13 +2,15 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Minus, Plus, Trash2, ArrowRight, ShoppingCart } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import styles from './Cart.module.css';
+import { useTranslation } from 'react-i18next';
 
 const COLORS = ['#E1F5EE','#E6F1FB','#FBEAF0','#FAEEDA','#EAF3DE','#EEEDFE'];
 
 export default function Cart() {
   const { cartItems, removeFromCart, updateQty, cartTotal } = useCart();
   const navigate = useNavigate();
-
+  const { t } = useTranslation();
+  
   if (cartItems.length === 0) {
     return (
       <div className={styles.empty}>
