@@ -159,6 +159,88 @@ export default function Home() {
             )}
           </>
         )}
+      {/* How it works */}
+<section className={styles.section}>
+  <div style={{ textAlign: 'center', marginBottom: 32 }}>
+    <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 28, fontWeight: 800, letterSpacing: '-0.02em', color: 'var(--text-1)', marginBottom: 8 }}>
+      Si funksionon Tregu?
+    </h2>
+    <p style={{ fontSize: 15, color: 'var(--text-3)' }}>E thjeshtë për blerësit. E thjeshtë për shitësit.</p>
+  </div>
+
+  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
+    {/* Buyers */}
+    <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-xl)', padding: 28 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 24 }}>
+        <span style={{ fontSize: 22 }}>🛍️</span>
+        <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 17, fontWeight: 700 }}>Për Blerësit</h3>
+      </div>
+      {[
+        { step: '1', icon: '🔍', title: 'Kërko', text: 'Kërko produkte nga dyqane të verifikuara në të gjithë Shqipërinë' },
+        { step: '2', icon: '🛒', title: 'Porosit', text: 'Porosit me një klik. Pagesa me dorëzim — pa kartë bankare' },
+        { step: '3', icon: '📦', title: 'Merr', text: 'Produkti dorëzohet direkt në derën tënde. Konfirmo marrjen' },
+      ].map((item, i) => (
+        <div key={i} style={{ display: 'flex', gap: 14, marginBottom: i < 2 ? 20 : 0, position: 'relative' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flexShrink: 0 }}>
+            <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'var(--text-1)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: 14, flexShrink: 0 }}>
+              {item.step}
+            </div>
+            {i < 2 && <div style={{ width: 1, flex: 1, background: 'var(--border)', margin: '4px 0' }} />}
+          </div>
+          <div style={{ paddingBottom: i < 2 ? 16 : 0 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
+              <span style={{ fontSize: 16 }}>{item.icon}</span>
+              <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--text-1)' }}>{item.title}</div>
+            </div>
+            <div style={{ fontSize: 13, color: 'var(--text-3)', lineHeight: 1.6 }}>{item.text}</div>
+          </div>
+        </div>
+      ))}
+      <button
+        onClick={() => navigate('/search')}
+        style={{ width: '100%', marginTop: 20, background: 'var(--text-1)', color: '#fff', padding: '12px', borderRadius: 'var(--radius-md)', fontSize: 14, fontWeight: 500, border: 'none', cursor: 'pointer', fontFamily: 'var(--font-body)' }}
+      >
+        Fillo të blesh →
+      </button>
+    </div>
+
+    {/* Sellers */}
+    <div style={{ background: 'var(--text-1)', border: '1px solid var(--border)', borderRadius: 'var(--radius-xl)', padding: 28 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 24 }}>
+        <span style={{ fontSize: 22 }}>🏪</span>
+        <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 17, fontWeight: 700, color: '#fff' }}>Për Shitësit</h3>
+      </div>
+      {[
+        { step: '1', icon: '📝', title: 'Regjistrohu', text: 'Krijo llogarinë dhe dyqanin tënd falas në 5 minuta' },
+        { step: '2', icon: '📸', title: 'Listo', text: 'Shto produktet me foto dhe çmim. Aq e thjeshtë sa Instagram' },
+        { step: '3', icon: '💰', title: 'Fito', text: 'Merr porosi direkt. Paguhu me dorëzim. Zgjero biznesin' },
+      ].map((item, i) => (
+        <div key={i} style={{ display: 'flex', gap: 14, marginBottom: i < 2 ? 20 : 0 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flexShrink: 0 }}>
+            <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'var(--green)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: 14, flexShrink: 0 }}>
+              {item.step}
+            </div>
+            {i < 2 && <div style={{ width: 1, flex: 1, background: 'rgba(255,255,255,0.15)', margin: '4px 0' }} />}
+          </div>
+          <div style={{ paddingBottom: i < 2 ? 16 : 0 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
+              <span style={{ fontSize: 16 }}>{item.icon}</span>
+              <div style={{ fontSize: 15, fontWeight: 600, color: '#fff' }}>{item.title}</div>
+            </div>
+            <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)', lineHeight: 1.6 }}>{item.text}</div>
+          </div>
+        </div>
+      ))}
+      <button
+        onClick={() => navigate('/seller/add-shop')}
+        style={{ width: '100%', marginTop: 20, background: 'var(--green)', color: '#fff', padding: '12px', borderRadius: 'var(--radius-md)', fontSize: 14, fontWeight: 500, border: 'none', cursor: 'pointer', fontFamily: 'var(--font-body)' }}
+      >
+        Hap dyqanin falas →
+      </button>
+    </div>
+  </div>
+</section>
+  
 {/* Guarantees section */}
 <section className={styles.section}>
   <div style={{ background: 'var(--green-light)', border: '1px solid #5DCAA5', borderRadius: 'var(--radius-xl)', padding: '32px' }}>
