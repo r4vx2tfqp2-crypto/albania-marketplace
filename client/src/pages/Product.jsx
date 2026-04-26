@@ -1,4 +1,3 @@
-cat > ~/Desktop/albania-marketplace/client/src/pages/Product.jsx << 'EOF'
 import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { Heart, ShoppingCart, ArrowLeft, CheckCircle, Truck, Shield } from 'lucide-react';
