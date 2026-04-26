@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { Package, Heart, Settings, Store, ChevronRight, User, LogOut } from 'lucide-react';
+import { Package, Heart, Settings, Store, ChevronRight, User, LogOut, Truck } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
 import styles from './Profile.module.css';
@@ -18,6 +18,7 @@ export default function Profile() {
     { icon: Package, label: t('my_orders_menu'), sub: t('my_orders_sub'), to: '/orders' },
     { icon: Heart, label: t('saved_items'), sub: t('saved_items_sub'), to: '/favorites' },
     { icon: Store, label: t('seller_dashboard'), sub: t('seller_dashboard_sub'), to: '/seller' },
+    { icon: Truck, label: 'Delivery confirmation', sub: 'For delivery drivers', to: '/delivery' },
     { icon: Settings, label: t('settings'), sub: t('settings_sub'), to: '/settings' },
   ];
 
