@@ -50,6 +50,9 @@ export default function SellerDashboard() {
             <p className={styles.sub}>Manage your shops and products</p>
           </div>
           <div style={{ display: 'flex', gap: 10 }}>
+          <Link to="/admin/subscriptions" className={styles.addBtn} style={{ background: 'var(--amber-light)', color: '#854F0B', border: 'none' }}>
+            💳 Subscriptions
+          </Link>
             <Link to="/seller/add-shop" className={styles.addBtn} style={{ background: 'var(--surface)', color: 'var(--text-1)', border: '1px solid var(--border-strong)' }}>
               + Add shop
             </Link>
