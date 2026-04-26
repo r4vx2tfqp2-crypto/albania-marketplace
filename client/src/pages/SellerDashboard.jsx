@@ -20,12 +20,19 @@ export default function SellerDashboard() {
   const fetchData = async () => {
     const [{ data: shopsData }, { data: ordersData }, { data: productsData }] = await Promise.all([
       supabase.from('shops').select('*, products(*)').eq('user_id', user.id),
-      supabase.from('orders').select('*').order('created_at', { ascending: false }).limit(5),
+      supabase.from('orders').select('*').order('created_at', { ascending: false }),
       supabase.from('products').select('*').eq('user_id', user.id).order('created_at', { ascending: false }),
     ]);
+
     setShops(shopsData || []);
     setProducts(productsData || []);
-    setOrders(ordersData || []);
+
+    // Filter orders that contain this seller's products
+    const myProductIds = (productsData || []).map(p => p.id);
+    const myOrders = (ordersData || []).filter(order =>
+      order.items?.some(item => myProductIds.includes(item.id))
+    );
+    setOrders(myOrders.slice(0, 5));
     setLoading(false);
   };
 
