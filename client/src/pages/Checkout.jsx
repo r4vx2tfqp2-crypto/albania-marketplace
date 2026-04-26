@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CheckCircle } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useCart } from '../context/CartContext';
 import { supabase } from '../lib/supabase';
 import styles from './Checkout.module.css';
@@ -10,6 +11,7 @@ const CITIES = ['Tirana', 'Durrës', 'Shkodër', 'Vlorë', 'Korçë', 'Fier', 'B
 export default function Checkout() {
   const { cartItems, cartTotal, cartCount } = useCart();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [placed, setPlaced] = useState(false);
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({ name: '', phone: '', address: '', city: 'Tirana', notes: '' });
@@ -21,9 +23,9 @@ export default function Checkout() {
 
   const validate = () => {
     const e = {};
-    if (!form.name.trim() || form.name.trim().length < 3) e.name = 'Enter your full name';
-    if (!form.phone.trim() || !/^(\+355|0)\d{8,9}$/.test(form.phone.replace(/\s/g, ''))) e.phone = 'Enter a valid number e.g. +355 69 123 4567';
-    if (!form.address.trim() || form.address.trim().length < 5) e.address = 'Enter your full address';
+    if (!form.name.trim() || form.name.trim().length < 3) e.name = t('enter_full_name');
+    if (!form.phone.trim() || !/^(\+355|0)\d{8,9}$/.test(form.phone.replace(/\s/g, ''))) e.phone = t('enter_valid_phone');
+    if (!form.address.trim() || form.address.trim().length < 5) e.address = t('enter_full_address');
     setErrors(e);
     return Object.keys(e).length === 0;
   };
@@ -32,30 +34,17 @@ export default function Checkout() {
     e.preventDefault();
     if (!validate()) return;
     setLoading(true);
-
     const { error } = await supabase.from('orders').insert({
       customer_name: form.name,
       customer_phone: form.phone,
       customer_address: form.address,
       customer_city: form.city,
       notes: form.notes,
-      total: total,
+      total,
       status: 'confirmed',
-      items: cartItems.map(i => ({
-        id: i.id,
-        name: i.name,
-        price: i.price,
-        qty: i.qty,
-        size: i.selectedSize,
-      })),
+      items: cartItems.map(i => ({ id: i.id, name: i.name, price: i.price, qty: i.qty, size: i.selectedSize })),
     });
-
-    if (error) {
-      setErrors({ submit: 'Something went wrong. Please try again.' });
-      setLoading(false);
-      return;
-    }
-
+    if (error) { setErrors({ submit: t('something_went_wrong') }); setLoading(false); return; }
     setPlaced(true);
     setTimeout(() => navigate('/orders'), 2500);
   };
@@ -64,8 +53,8 @@ export default function Checkout() {
     return (
       <div className={styles.success}>
         <div className={styles.successIcon}><CheckCircle size={64} strokeWidth={1.5} /></div>
-        <h2 className={styles.successTitle}>Order placed!</h2>
-        <p className={styles.successSub}>We'll confirm your order shortly. Redirecting to orders…</p>
+        <h2 className={styles.successTitle}>{t('order_placed')}</h2>
+        <p className={styles.successSub}>{t('order_placed_sub')}</p>
       </div>
     );
   }
@@ -73,96 +62,78 @@ export default function Checkout() {
   return (
     <div className={styles.page}>
       <div className="container">
-        <h1 className={styles.title}>Checkout</h1>
-
+        <h1 className={styles.title}>{t('checkout')}</h1>
         <div className={styles.layout}>
           <form onSubmit={handleSubmit} className={styles.form}>
             <div className={styles.formSection}>
-              <h2 className={styles.sectionTitle}>Delivery information</h2>
+              <h2 className={styles.sectionTitle}>{t('delivery_info')}</h2>
               <div className={styles.fieldRow}>
                 <div className={styles.field}>
-                  <label className={styles.label}>Full name *</label>
-                  <input
-                    className={`${styles.input} ${errors.name ? styles.inputError : ''}`}
-                    placeholder="Erion Brahimi"
-                    value={form.name}
-                    onChange={e => setForm({...form, name: e.target.value})}
-                  />
+                  <label className={styles.label}>{t('full_name')} *</label>
+                  <input className={`${styles.input} ${errors.name ? styles.inputError : ''}`} placeholder="Erion Brahimi" value={form.name} onChange={e => setForm({...form, name: e.target.value})} />
                   {errors.name && <span className={styles.errorMsg}>{errors.name}</span>}
                 </div>
                 <div className={styles.field}>
-                  <label className={styles.label}>Phone *</label>
-                  <input
-                    className={`${styles.input} ${errors.phone ? styles.inputError : ''}`}
-                    placeholder="+355 69 123 4567"
-                    value={form.phone}
-                    onChange={e => setForm({...form, phone: e.target.value})}
-                  />
+                  <label className={styles.label}>{t('phone_number')} *</label>
+                  <input className={`${styles.input} ${errors.phone ? styles.inputError : ''}`} placeholder="+355 69 123 4567" value={form.phone} onChange={e => setForm({...form, phone: e.target.value})} />
                   {errors.phone && <span className={styles.errorMsg}>{errors.phone}</span>}
                 </div>
               </div>
               <div className={styles.field}>
-                <label className={styles.label}>Address *</label>
-                <input
-                  className={`${styles.input} ${errors.address ? styles.inputError : ''}`}
-                  placeholder="Rruga Myslym Shyri, Nr. 14"
-                  value={form.address}
-                  onChange={e => setForm({...form, address: e.target.value})}
-                />
+                <label className={styles.label}>{t('address')} *</label>
+                <input className={`${styles.input} ${errors.address ? styles.inputError : ''}`} placeholder="Rruga Myslym Shyri, Nr. 14" value={form.address} onChange={e => setForm({...form, address: e.target.value})} />
                 {errors.address && <span className={styles.errorMsg}>{errors.address}</span>}
               </div>
               <div className={styles.field}>
-                <label className={styles.label}>City *</label>
+                <label className={styles.label}>{t('city')} *</label>
                 <select className={styles.select} value={form.city} onChange={e => setForm({...form, city: e.target.value})}>
                   {CITIES.map(c => <option key={c}>{c}</option>)}
                 </select>
               </div>
               <div className={styles.field}>
-                <label className={styles.label}>Notes (optional)</label>
-                <textarea className={styles.textarea} placeholder="Any special instructions…" rows={3} value={form.notes} onChange={e => setForm({...form, notes: e.target.value})} />
+                <label className={styles.label}>{t('notes')}</label>
+                <textarea className={styles.textarea} placeholder={t('notes_placeholder')} rows={3} value={form.notes} onChange={e => setForm({...form, notes: e.target.value})} />
               </div>
               {errors.submit && <div style={{ color: 'var(--red)', fontSize: 13 }}>{errors.submit}</div>}
             </div>
-
             <div className={styles.formSection}>
-              <h2 className={styles.sectionTitle}>Payment method</h2>
+              <h2 className={styles.sectionTitle}>{t('payment_method')}</h2>
               <div className={styles.paymentOption}>
                 <div className={styles.paymentIcon}>💵</div>
                 <div>
-                  <div className={styles.paymentTitle}>Cash on delivery</div>
-                  <div className={styles.paymentSub}>Pay when you receive your order</div>
+                  <div className={styles.paymentTitle}>{t('cash_delivery_title')}</div>
+                  <div className={styles.paymentSub}>{t('cash_delivery_desc')}</div>
                 </div>
                 <div className={styles.paymentCheck}>✓</div>
               </div>
               <div className={styles.paymentOptionDisabled}>
                 <div className={styles.paymentIcon}>💳</div>
                 <div>
-                  <div className={styles.paymentTitle}>Card payment</div>
-                  <div className={styles.paymentSub}>Coming soon</div>
+                  <div className={styles.paymentTitle}>{t('card_payment')}</div>
+                  <div className={styles.paymentSub}>{t('coming_soon')}</div>
                 </div>
               </div>
             </div>
-
             <button type="submit" className={styles.placeOrder} disabled={loading}>
-              {loading ? 'Placing order…' : `Place order — ${formatPrice(total)}`}
+              {loading ? '…' : `${t('place_order')} — ${formatPrice(total)}`}
             </button>
           </form>
 
           <div className={styles.orderSummary}>
-            <h2 className={styles.sectionTitle}>Order ({cartCount} items)</h2>
+            <h2 className={styles.sectionTitle}>{t('checkout')} ({cartCount} {t('items')})</h2>
             {cartItems.map(item => (
               <div key={`${item.id}-${item.selectedSize}`} className={styles.orderItem}>
                 <span className={styles.orderItemName}>{item.name}</span>
-                {item.selectedSize && <span className={styles.orderItemSize}>Size {item.selectedSize}</span>}
+                {item.selectedSize && <span className={styles.orderItemSize}>{t('size')} {item.selectedSize}</span>}
                 <span className={styles.orderItemQty}>×{item.qty}</span>
                 <span className={styles.orderItemPrice}>{formatPrice(item.price * item.qty)}</span>
               </div>
             ))}
             <div className={styles.divider} />
-            <div className={styles.totalRow}><span>Subtotal</span><span>{formatPrice(cartTotal)}</span></div>
-            <div className={styles.totalRow}><span>Delivery</span><span>{formatPrice(deliveryFee)}</span></div>
+            <div className={styles.totalRow}><span>{t('subtotal')}</span><span>{formatPrice(cartTotal)}</span></div>
+            <div className={styles.totalRow}><span>{t('delivery')}</span><span>{formatPrice(deliveryFee)}</span></div>
             <div className={styles.divider} />
-            <div className={styles.grandTotal}><span>Total</span><span>{formatPrice(total)}</span></div>
+            <div className={styles.grandTotal}><span>{t('total')}</span><span>{formatPrice(total)}</span></div>
           </div>
         </div>
       </div>
