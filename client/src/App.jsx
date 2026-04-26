@@ -13,6 +13,7 @@ import Favorites from './pages/Favorites';
 import Profile from './pages/Profile';
 import SellerDashboard from './pages/SellerDashboard';
 import AddProduct from './pages/AddProduct';
+import AddShop from './pages/AddShop';
 import Onboarding from './pages/Onboarding';
 
 export default function App() {
@@ -44,6 +45,7 @@ function MainLayout() {
         <Route path="/profile" element={<Profile />} />
         <Route path="/seller" element={<SellerDashboard />} />
         <Route path="/seller/add-product" element={<AddProduct />} />
+        <Route path="/seller/add-shop" element={<AddShop />} />
       </Routes>
       <BottomNav />
     </div>
