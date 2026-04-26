@@ -1,14 +1,17 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, ArrowRight, TrendingUp, Zap } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import ProductCard from '../components/ProductCard';
 import ShopCard from '../components/ShopCard';
 import { supabase } from '../lib/supabase';
 import { categories } from '../data/mockData';
 import styles from './Home.module.css';
+import { useTranslation } from 'react-i18next';
 
 export default function Home() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState('');
   const [visible, setVisible] = useState(false);
   const [trendingProducts, setTrendingProducts] = useState([]);
@@ -17,9 +20,9 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const t = setTimeout(() => setVisible(true), 50);
+    const timer = setTimeout(() => setVisible(true), 50);
     fetchData();
-    return () => clearTimeout(t);
+    return () => clearTimeout(timer);
   }, []);
 
   const fetchData = async () => {
@@ -40,30 +43,33 @@ export default function Home() {
     if (searchQuery.trim()) navigate(`/search?q=${encodeURIComponent(searchQuery)}`);
   };
 
+  const translatedCategories = categories.map(cat => ({
+    ...cat,
+    label: t(`cat_${cat.id}`)
+  }));
+
   return (
     <div className={`${styles.page} ${visible ? styles.visible : ''}`}>
       <div className={styles.hero}>
         <div className={styles.heroContent}>
           <div className={styles.heroTag}>
             <Zap size={12} fill="currentColor" />
-            Albania's marketplace
+            {t('hero_tag')}
           </div>
           <h1 className={styles.heroTitle}>
-            All Albanian<br />shops in one place
+            {t('hero_title').split('\n')[0]}<br />{t('hero_title').split('\n')[1]}
           </h1>
-          <p className={styles.heroSub}>
-            Discover products from verified local shops. Compare prices, read reviews, order in seconds.
-          </p>
+          <p className={styles.heroSub}>{t('hero_sub')}</p>
           <form onSubmit={handleSearch} className={styles.heroSearch}>
             <Search size={16} strokeWidth={2} className={styles.searchIcon} />
             <input
               type="text"
-              placeholder="Search products, shops…"
+              placeholder={t('search_placeholder')}
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
               className={styles.searchInput}
             />
-            <button type="submit" className={styles.searchBtn}>Search</button>
+            <button type="submit" className={styles.searchBtn}>{t('hero_search_btn')}</button>
           </form>
         </div>
       </div>
@@ -71,10 +77,10 @@ export default function Home() {
       <div className="container">
         <section className={styles.section}>
           <div className={styles.sectionHead}>
-            <h2 className={styles.sectionTitle}>Browse by category</h2>
+            <h2 className={styles.sectionTitle}>{t('browse_categories')}</h2>
           </div>
           <div className={styles.catGrid}>
-            {categories.map((cat) => (
+            {translatedCategories.map((cat) => (
               <button
                 key={cat.id}
                 className={styles.catCard}
@@ -98,16 +104,14 @@ export default function Home() {
                 <div className={styles.sectionHead}>
                   <div className={styles.sectionTitleRow}>
                     <TrendingUp size={16} strokeWidth={2} style={{ color: 'var(--amber)' }} />
-                    <h2 className={styles.sectionTitle}>Trending now</h2>
+                    <h2 className={styles.sectionTitle}>{t('trending_now')}</h2>
                   </div>
                   <button className={styles.seeAll} onClick={() => navigate('/search?sort=trending')}>
-                    See all <ArrowRight size={14} />
+                    {t('see_all')} <ArrowRight size={14} />
                   </button>
                 </div>
                 <div className={styles.productGrid}>
-                  {trendingProducts.map((p, i) => (
-                    <ProductCard key={p.id} product={p} index={i} />
-                  ))}
+                  {trendingProducts.map((p, i) => <ProductCard key={p.id} product={p} index={i} />)}
                 </div>
               </section>
             )}
@@ -115,15 +119,13 @@ export default function Home() {
             {featuredShops.length > 0 && (
               <section className={styles.section}>
                 <div className={styles.sectionHead}>
-                  <h2 className={styles.sectionTitle}>Verified shops</h2>
+                  <h2 className={styles.sectionTitle}>{t('verified_shops')}</h2>
                   <button className={styles.seeAll} onClick={() => navigate('/search?tab=shops')}>
-                    See all <ArrowRight size={14} />
+                    {t('see_all')} <ArrowRight size={14} />
                   </button>
                 </div>
                 <div className={styles.shopGrid}>
-                  {featuredShops.map(shop => (
-                    <ShopCard key={shop.id} shop={shop} />
-                  ))}
+                  {featuredShops.map(shop => <ShopCard key={shop.id} shop={shop} />)}
                 </div>
               </section>
             )}
@@ -131,15 +133,13 @@ export default function Home() {
             {allProducts.length > 0 && (
               <section className={styles.section}>
                 <div className={styles.sectionHead}>
-                  <h2 className={styles.sectionTitle}>All products</h2>
+                  <h2 className={styles.sectionTitle}>{t('all_products')}</h2>
                   <button className={styles.seeAll} onClick={() => navigate('/search')}>
-                    See all <ArrowRight size={14} />
+                    {t('see_all')} <ArrowRight size={14} />
                   </button>
                 </div>
                 <div className={styles.productGrid}>
-                  {allProducts.map((p, i) => (
-                    <ProductCard key={p.id} product={p} index={i} />
-                  ))}
+                  {allProducts.map((p, i) => <ProductCard key={p.id} product={p} index={i} />)}
                 </div>
               </section>
             )}
@@ -147,9 +147,9 @@ export default function Home() {
             {allProducts.length === 0 && trendingProducts.length === 0 && (
               <div style={{ textAlign: 'center', padding: '60px 20px' }}>
                 <div style={{ fontSize: 48, marginBottom: 16 }}>🏪</div>
-                <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 22, marginBottom: 8 }}>No products yet</h2>
-                <p style={{ color: 'var(--text-3)', marginBottom: 24 }}>Be the first to add a product!</p>
-                <button className="btn-primary" onClick={() => navigate('/seller/add-product')}>Add first product</button>
+                <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 22, marginBottom: 8 }}>{t('no_products_yet')}</h2>
+                <p style={{ color: 'var(--text-3)', marginBottom: 24 }}>{t('be_first')}</p>
+                <button className="btn-primary" onClick={() => navigate('/seller/add-product')}>{t('add_first_product')}</button>
               </div>
             )}
           </>
@@ -159,41 +159,41 @@ export default function Home() {
           <div className={styles.trustItem}>
             <span className={styles.trustIcon}>✓</span>
             <div>
-              <div className={styles.trustTitle}>Verified shops</div>
-              <div className={styles.trustSub}>Every seller is checked</div>
+              <div className={styles.trustTitle}>{t('verified_shops_title')}</div>
+              <div className={styles.trustSub}>{t('verified_shops_sub')}</div>
             </div>
           </div>
           <div className={styles.trustItem}>
             <span className={styles.trustIcon}>★</span>
             <div>
-              <div className={styles.trustTitle}>Real reviews</div>
-              <div className={styles.trustSub}>From real buyers</div>
+              <div className={styles.trustTitle}>{t('real_reviews')}</div>
+              <div className={styles.trustSub}>{t('real_reviews_sub')}</div>
             </div>
           </div>
           <div className={styles.trustItem}>
             <span className={styles.trustIcon}>💵</span>
             <div>
-              <div className={styles.trustTitle}>Cash on delivery</div>
-              <div className={styles.trustSub}>Pay when you receive</div>
+              <div className={styles.trustTitle}>{t('cash_delivery')}</div>
+              <div className={styles.trustSub}>{t('cash_delivery_sub')}</div>
             </div>
           </div>
           <div className={styles.trustItem}>
             <span className={styles.trustIcon}>🚚</span>
             <div>
-              <div className={styles.trustTitle}>Nationwide delivery</div>
-              <div className={styles.trustSub}>All cities in Albania</div>
+              <div className={styles.trustTitle}>{t('nationwide')}</div>
+              <div className={styles.trustSub}>{t('nationwide_sub')}</div>
             </div>
           </div>
         </section>
-        {/* Footer */}
+
         <div style={{ borderTop: '1px solid var(--border)', padding: '24px 0', marginTop: 20, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
           <div style={{ fontFamily: 'var(--font-display)', fontSize: 16, fontWeight: 700, color: 'var(--text-3)' }}>tregu</div>
           <div style={{ display: 'flex', gap: 20 }}>
-            <a href="/legal" style={{ fontSize: 13, color: 'var(--text-3)' }}>Terms & Conditions</a>
-            <a href="/legal" style={{ fontSize: 13, color: 'var(--text-3)' }}>Privacy Policy</a>
-            <a href="/legal" style={{ fontSize: 13, color: 'var(--text-3)' }}>Copyright</a>
-         </div>
-         <div style={{ fontSize: 12, color: 'var(--text-3)' }}>© 2026 Tregu. All rights reserved.</div>
+            <a href="/legal" style={{ fontSize: 13, color: 'var(--text-3)' }}>{t('terms')}</a>
+            <a href="/legal" style={{ fontSize: 13, color: 'var(--text-3)' }}>{t('privacy')}</a>
+            <a href="/legal" style={{ fontSize: 13, color: 'var(--text-3)' }}>{t('copyright')}</a>
+          </div>
+          <div style={{ fontSize: 12, color: 'var(--text-3)' }}>{t('footer_rights')}</div>
         </div>
       </div>
     </div>
