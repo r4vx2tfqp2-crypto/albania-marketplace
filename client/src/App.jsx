@@ -14,6 +14,7 @@ import Favorites from './pages/Favorites';
 import Profile from './pages/Profile';
 import SellerDashboard from './pages/SellerDashboard';
 import SellerOrders from './pages/SellerOrders';
+import EditProduct from './pages/EditProduct';
 import DeliveryConfirm from './pages/DeliveryConfirm';
 import ConfirmDelivery from './pages/ConfirmDelivery';
 import AddProduct from './pages/AddProduct';
@@ -80,6 +81,7 @@ function MainLayout() {
         <Route path="/admin" element={<AdminRoute><AdminPanel /></AdminRoute>} />
         <Route path="/admin/subscriptions" element={<AdminRoute><AdminSubscriptions /></AdminRoute>} />
         <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+        <Route path="/seller/edit-product/:id" element={<ProtectedRoute><EditProduct /></ProtectedRoute>} />
         <Route path="/seller/orders" element={<ProtectedRoute><SellerOrders /></ProtectedRoute>} />
         <Route path="/seller/add-shop" element={
           <ProtectedRoute><AddShop /></ProtectedRoute>
