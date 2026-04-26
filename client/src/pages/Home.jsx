@@ -8,7 +8,6 @@ import { supabase } from '../lib/supabase';
 import { categories } from '../data/mockData';
 import styles from './Home.module.css';
 import { Helmet } from 'react-helmet-async';
-const [activeTab, setActiveTab] = useState('buyer');
 
 export default function Home() {
   const navigate = useNavigate();
@@ -19,6 +18,7 @@ export default function Home() {
   const [featuredShops, setFeaturedShops] = useState([]);
   const [allProducts, setAllProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState('buyer');
 
   useEffect(() => {
     const timer = setTimeout(() => setVisible(true), 50);
@@ -160,7 +160,7 @@ export default function Home() {
             )}
           </>
         )}
-{/* How it works */}
+        {/* How it works */}
 <section className={styles.section}>
   <div style={{ textAlign: 'center', marginBottom: 32 }}>
     <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 28, fontWeight: 800, letterSpacing: '-0.02em', color: 'var(--text-1)', marginBottom: 8 }}>
