@@ -35,7 +35,7 @@ function ProtectedRoute({ children }) {
 function AdminRoute({ children }) {
   const { user, loading } = useAuth();
   if (loading) return <div style={{ padding: 80, textAlign: 'center', color: 'var(--text-3)' }}>Loading…</div>;
-  if (!user || user.email !== 'tregusupport@gmail.com') return <Navigate to="/" replace />;
+  if (!user || user.email !== 'julsina76@gmail.com') return <Navigate to="/" replace />;
   return children;
 }
 
