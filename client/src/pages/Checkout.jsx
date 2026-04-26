@@ -40,6 +40,7 @@ export default function Checkout() {
     setLoading(true);
 
     const pin = Math.floor(1000 + Math.random() * 9000).toString();
+    const { data: { user: currentUser } } = await supabase.auth.getUser();
 
     const { data: orderData, error } = await supabase.from('orders').insert({
       customer_name: form.name,
@@ -51,6 +52,7 @@ export default function Checkout() {
       total,
       status: 'confirmed',
       delivery_pin: pin,
+      buyer_id: currentUser?.id || null,
       items: cartItems.map(i => ({
         id: i.id,
         name: i.name,
@@ -102,7 +104,6 @@ export default function Checkout() {
           <form onSubmit={handleSubmit} className={styles.form}>
             <div className={styles.formSection}>
               <h2 className={styles.sectionTitle}>{t('delivery_info')}</h2>
-
               <div className={styles.fieldRow}>
                 <div className={styles.field}>
                   <label className={styles.label}>{t('full_name')} *</label>
@@ -127,7 +128,7 @@ export default function Checkout() {
               </div>
 
               <div className={styles.field}>
-                <label className={styles.label}>Email (for delivery confirmation)</label>
+                <label className={styles.label}>Email (për konfirmim porosie)</label>
                 <input
                   className={styles.input}
                   placeholder="you@example.com"
@@ -165,7 +166,6 @@ export default function Checkout() {
                   onChange={e => setForm({...form, notes: e.target.value})}
                 />
               </div>
-
               {errors.submit && <div style={{ color: 'var(--red)', fontSize: 13 }}>{errors.submit}</div>}
             </div>
 
