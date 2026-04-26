@@ -31,7 +31,7 @@ serve(async (req) => {
     if (type === 'delivery_confirmed') {
       emails.push({
         from: 'Tregu <onboarding@resend.dev>',
-        to: 'julsina76@gmail.com',
+        to: 'tregusupport@gmail.com',
         subject: `✅ Order delivered — ${order.customer_name} — #${order.id?.slice(0, 8)}`,
         html: `
           <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
@@ -98,7 +98,7 @@ serve(async (req) => {
     } else {
       emails.push({
         from: 'Tregu <onboarding@resend.dev>',
-        to: 'julsina76@gmail.com',
+        to: 'tregusupport@gmail.com',
         subject: `🛍️ New order — ${order.customer_name} — ${order.total?.toLocaleString()} L`,
         html: `
           <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">

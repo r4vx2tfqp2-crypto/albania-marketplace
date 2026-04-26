@@ -53,7 +53,7 @@ const SECTIONS = {
       },
       {
         heading: '12. Contact',
-        text: 'For questions about these terms, contact us at: julsina76@gmail.com'
+        text: 'For questions about these terms, contact us at: tregusupport@gmail.com'
       },
     ]
   },
@@ -79,7 +79,7 @@ const SECTIONS = {
       },
       {
         heading: '5. Your Rights',
-        text: 'You have the right to access your personal data, correct inaccurate data, request deletion of your data, and withdraw consent at any time. To exercise these rights, contact us at julsina76@gmail.com.'
+        text: 'You have the right to access your personal data, correct inaccurate data, request deletion of your data, and withdraw consent at any time. To exercise these rights, contact us at tregusupport@gmail.com.'
       },
       {
         heading: '6. Cookies',
@@ -95,7 +95,7 @@ const SECTIONS = {
       },
       {
         heading: '9. Contact',
-        text: 'For privacy-related questions or requests, contact us at: julsina76@gmail.com'
+        text: 'For privacy-related questions or requests, contact us at: tregusupport@gmail.com'
       },
     ]
   },
@@ -125,7 +125,7 @@ const SECTIONS = {
       },
       {
         heading: '6. DMCA / Copyright Complaints',
-        text: 'If you believe content on Tregu infringes your copyright, please contact us at julsina76@gmail.com with details of the infringement. We will investigate and take appropriate action, which may include removal of the infringing content.'
+        text: 'If you believe content on Tregu infringes your copyright, please contact us at tregusupport@gmail.com with details of the infringement. We will investigate and take appropriate action, which may include removal of the infringing content.'
       },
       {
         heading: '7. User Generated Content',
@@ -199,7 +199,7 @@ export default function Legal() {
 
         <div style={{ borderTop: '1px solid var(--border)', paddingTop: 28, marginTop: 20 }}>
           <p style={{ fontSize: 13, color: 'var(--text-3)', lineHeight: 1.7 }}>
-            These policies apply to all users of the Tregu platform. By using Tregu, you acknowledge that you have read and understood these policies. For any questions contact us at <strong>julsina76@gmail.com</strong>
+            These policies apply to all users of the Tregu platform. By using Tregu, you acknowledge that you have read and understood these policies. For any questions contact us at <strong>tregusupport@gmail.com</strong>
           </p>
         </div>
       </div>
