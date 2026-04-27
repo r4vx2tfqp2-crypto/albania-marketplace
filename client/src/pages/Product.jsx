@@ -81,15 +81,6 @@ export default function Product() {
             )}
           </div>
           
-          <Helmet>
-            <title>{product.name} — {shop?.name} | Tregu</title>
-            <meta name="description" content={`${product.name} — ${product.description?.slice(0, 150)} | Blej online në Tregu.store`} />
-            <meta property="og:title" content={`${product.name} | Tregu`} />
-            <meta property="og:description" content={product.description?.slice(0, 150)} />
-            {product.images?.[0] && <meta property="og:image" content={product.images[0]} />}
-            <meta property="og:url" content={`https://tregu.store/product/${product.id}`} />
-          </Helmet>
-          
           <div className={styles.infoSection}>
             <div className={styles.topMeta}>
               <span className={styles.category}>{product.category}</span>
