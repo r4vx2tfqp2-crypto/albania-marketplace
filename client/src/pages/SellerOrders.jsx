@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 import styles from './Orders.module.css';
+import jsPDF from 'jspdf';
 
 const ALL_STEPS = [
   { key: 'confirmed', label_key: 'order_confirmed' },
@@ -67,6 +68,137 @@ export default function SellerOrders() {
   };
 
   const formatPrice = (p) => p?.toLocaleString('sq-AL') + ' L';
+  const generateInvoice = (order) => {
+    const doc = new jsPDF();
+    
+    // Colors
+    const BLACK = [26, 25, 22];
+    const GREEN = [29, 158, 117];
+    const GRAY = [154, 152, 144];
+    const LIGHT = [247, 246, 243];
+
+    // Header background
+    doc.setFillColor(...BLACK);
+    doc.rect(0, 0, 210, 45, 'F');
+
+    // Logo T
+    doc.setFillColor(...GREEN);
+    doc.roundedRect(15, 10, 20, 20, 3, 3, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(16);
+    doc.setFont('helvetica', 'bold');
+    doc.text('T', 25, 24, { align: 'center' });
+
+    // Brand name
+    doc.setFontSize(22);
+    doc.setFont('helvetica', 'bold');
+    doc.text('tregu', 40, 24);
+
+    // Invoice title
+    doc.setFontSize(11);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(...GRAY);
+    doc.text('FATURË / INVOICE', 40, 33);
+
+    // Invoice number and date - right side
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(10);
+    doc.text(`#${order.id.slice(0, 8).toUpperCase()}`, 195, 18, { align: 'right' });
+    doc.setTextColor(...GRAY);
+    doc.text(new Date(order.created_at).toLocaleDateString('sq-AL'), 195, 28, { align: 'right' });
+
+    // Customer section
+    doc.setFillColor(...LIGHT);
+    doc.rect(0, 45, 210, 35, 'F');
+    
+    doc.setTextColor(...GRAY);
+    doc.setFontSize(8);
+    doc.setFont('helvetica', 'bold');
+    doc.text('BLERËSI / CUSTOMER', 15, 57);
+    
+    doc.setTextColor(...BLACK);
+    doc.setFontSize(11);
+    doc.setFont('helvetica', 'bold');
+    doc.text(order.customer_name, 15, 66);
+    
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9);
+    doc.setTextColor(...GRAY);
+    doc.text(`${order.customer_address}, ${order.customer_city}`, 15, 73);
+    doc.text(order.customer_phone, 15, 79);
+
+    // Order details header
+    doc.setFillColor(...BLACK);
+    doc.rect(0, 85, 210, 10, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(8);
+    doc.setFont('helvetica', 'bold');
+    doc.text('PRODUKTI', 15, 92);
+    doc.text('SASIA', 120, 92);
+    doc.text('ÇMIMI', 150, 92);
+    doc.text('TOTALI', 185, 92, { align: 'right' });
+
+    // Items
+    let y = 105;
+    order.items?.forEach((item, i) => {
+      if (i % 2 === 0) {
+        doc.setFillColor(250, 250, 248);
+        doc.rect(0, y - 6, 210, 12, 'F');
+      }
+      doc.setTextColor(...BLACK);
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`${item.name}${item.size ? ` (${item.size})` : ''}`, 15, y);
+      doc.text(`x${item.qty}`, 120, y);
+      doc.text(`${item.price?.toLocaleString()} L`, 150, y);
+      doc.text(`${(item.price * item.qty).toLocaleString()} L`, 185, y, { align: 'right' });
+      y += 14;
+    });
+
+    // Delivery fee
+    doc.setDrawColor(...LIGHT);
+    doc.line(15, y, 195, y);
+    y += 10;
+    doc.setTextColor(...GRAY);
+    doc.setFontSize(10);
+    doc.text('Tarifa e dorëzimit', 15, y);
+    doc.text('300 L', 185, y, { align: 'right' });
+
+    // Total
+    y += 10;
+    doc.setFillColor(...GREEN);
+    doc.rect(0, y - 5, 210, 16, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(13);
+    doc.setFont('helvetica', 'bold');
+    doc.text('TOTALI', 15, y + 6);
+    doc.text(`${order.total?.toLocaleString()} L`, 185, y + 6, { align: 'right' });
+
+    // Payment method
+    y += 25;
+    doc.setTextColor(...GRAY);
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'normal');
+    doc.text('Mënyra e pagesës: Pagesa me dorëzim (Cash on delivery)', 15, y);
+
+    // Notes
+    if (order.notes) {
+      y += 10;
+      doc.text(`Shënime: ${order.notes}`, 15, y);
+    }
+
+    // Footer
+    doc.setFillColor(...BLACK);
+    doc.rect(0, 270, 210, 27, 'F');
+    doc.setTextColor(...GRAY);
+    doc.setFontSize(8);
+    doc.text('tregu.store', 105, 280, { align: 'center' });
+    doc.text('tregusupport@gmail.com', 105, 287, { align: 'center' });
+    doc.setTextColor(...GREEN);
+    doc.text('Faleminderit për blerjen tuaj!', 105, 294, { align: 'center' });
+
+    doc.save(`fature-tregu-${order.id.slice(0, 8)}.pdf`);
+  };
 
   if (loading) return <div style={{ padding: 80, textAlign: 'center', color: 'var(--text-3)' }}>Loading…</div>;
 
@@ -238,6 +370,20 @@ export default function SellerOrders() {
     </div>
   )}
 </div>
+           {/* Invoice button */}
+          <button
+  onClick={() => generateInvoice(order)}
+  style={{
+    width: '100%', marginTop: 10, padding: '10px 14px',
+    background: 'var(--surface)', border: '1px solid var(--border-strong)',
+    borderRadius: 10, fontSize: 13, fontWeight: 500, cursor: 'pointer',
+    fontFamily: 'var(--font-body)', color: 'var(--text-1)',
+    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+  }}
+>
+  📄 Gjenero Faturë PDF
+</button>
+
                   {/* PIN for driver */}
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', background: 'var(--amber-light)', borderRadius: 10, marginTop: 10 }}>
                     <span style={{ fontSize: 13, color: '#854F0B' }}>🔑 Driver PIN:</span>
