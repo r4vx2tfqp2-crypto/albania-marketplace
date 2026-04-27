@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 import { jsPDF } from 'jspdf';
+import QRCode from 'qrcode';
 import styles from './Orders.module.css';
 
 const ALL_STEPS = [
@@ -35,8 +36,7 @@ export default function SellerOrders() {
   useEffect(() => { fetchOrders(); }, []);
 
   const fetchOrders = async () => {
-    const { data: productsData } = await supabase
-      .from("products").select("id").eq("user_id", user.id);
+    const { data: productsData } = await supabase.from("products").select("id").eq("user_id", user.id);
     const myProductIds = (productsData || []).map(p => p.id);
     if (myProductIds.length === 0) { setOrders([]); setLoading(false); return; }
     const { data } = await supabase.from("orders").select("*").order("created_at", { ascending: false });
@@ -56,159 +56,287 @@ export default function SellerOrders() {
 
   const formatPrice = (p) => p?.toLocaleString("sq-AL") + " L";
 
-  const generateInvoice = (order) => {
-    const doc = new jsPDF();
-    const BLACK = [26, 25, 22];
-    const GREEN = [29, 158, 117];
-    const GRAY = [154, 152, 144];
-    const LIGHT = [247, 246, 243];
-    const WHITE = [255, 255, 255];
+  const generateInvoice = async (order) => {
+    const doc = new jsPDF({ format: 'a4' });
     const pageW = 210;
+    const pageH = 297;
+    const margin = 20;
 
-    doc.setFillColor(...BLACK);
-    doc.rect(0, 0, pageW, 50, "F");
+    const BLACK = [15, 15, 15];
+    const GREEN = [29, 158, 117];
+    const GRAY = [120, 120, 120];
+    const LIGHTGRAY = [240, 240, 240];
+    const WHITE = [255, 255, 255];
+    const DARKGRAY = [60, 60, 60];
+
+    // Generate QR code for the order
+    const qrCanvas = document.createElement("canvas");
+    await QRCode.toCanvas(qrCanvas, "https://tregu.store/shop/" + (shop?.id || ""), {
+      width: 80, margin: 1, color: { dark: "#0F0F0F", light: "#FFFFFF" }
+    });
+    const qrDataUrl = qrCanvas.toDataURL();
+
+    // ── LEFT SIDEBAR ──
+    doc.setFillColor(15, 15, 15);
+    doc.rect(0, 0, 58, pageH, "F");
+
+    // Sidebar - Shop initials circle
     doc.setFillColor(...GREEN);
-    doc.circle(25, 22, 12, "F");
+    doc.circle(29, 30, 16, "F");
     doc.setTextColor(...WHITE);
-    doc.setFontSize(14);
+    doc.setFontSize(18);
     doc.setFont("helvetica", "bold");
-    doc.text(shop?.initials || "T", 25, 27, { align: "center" });
-    doc.setFontSize(16);
-    doc.setFont("helvetica", "bold");
-    doc.setTextColor(...WHITE);
-    doc.text(shop?.name || "Dyqani", 42, 20);
+    doc.text(shop?.initials || "T", 29, 36, { align: "center" });
+
+    // Sidebar - Shop name
     doc.setFontSize(9);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(...WHITE);
+    const shopName = shop?.name || "Dyqani";
+    doc.text(shopName, 29, 56, { align: "center", maxWidth: 48 });
+
+    // Sidebar - powered by
+    doc.setFontSize(7);
     doc.setFont("helvetica", "normal");
-    doc.setTextColor(...GRAY);
-    doc.text("powered by tregu.store", 42, 28);
-    if (shop?.location) doc.text(shop.location, 42, 35);
-    if (shop?.phone) doc.text(shop.phone, 42, 41);
+    doc.setTextColor(100, 100, 100);
+    doc.text("powered by", 29, 68, { align: "center" });
     doc.setTextColor(...GREEN);
-    doc.setFontSize(20);
-    doc.setFont("helvetica", "bold");
-    doc.text("FATURE", pageW - 15, 20, { align: "right" });
-    doc.setTextColor(...GRAY);
-    doc.setFontSize(9);
-    doc.setFont("helvetica", "normal");
-    doc.text("Nr: #" + order.id.slice(0, 8).toUpperCase(), pageW - 15, 30, { align: "right" });
-    doc.text("Date: " + new Date(order.created_at).toLocaleDateString("sq-AL"), pageW - 15, 38, { align: "right" });
+    doc.setFontSize(8);
+    doc.text("tregu.store", 29, 74, { align: "center" });
 
-    doc.setFillColor(...LIGHT);
-    doc.rect(0, 50, pageW, 42, "F");
-    doc.setTextColor(...GRAY);
+    // Sidebar divider
+    doc.setDrawColor(40, 40, 40);
+    doc.setLineWidth(0.3);
+    doc.line(10, 82, 48, 82);
+
+    // Sidebar - Shop details
+    doc.setTextColor(160, 160, 160);
     doc.setFontSize(7);
     doc.setFont("helvetica", "bold");
-    doc.text("SHITESI", 15, 62);
+    doc.text("SHITESI", 10, 92);
     doc.setFont("helvetica", "normal");
-    doc.setFontSize(9);
-    doc.setTextColor(...BLACK);
-    doc.text(shop?.name || "Dyqani", 15, 70);
-    doc.setTextColor(...GRAY);
-    doc.setFontSize(8);
-    if (shop?.location) doc.text(shop.location, 15, 77);
-    if (shop?.phone) doc.text(shop.phone, 15, 84);
-    doc.text("NIPT: ______________", 15, 91);
-    doc.setTextColor(...GRAY);
+    doc.setTextColor(200, 200, 200);
+    doc.setFontSize(7.5);
+    let sideY = 100;
+    if (shop?.location) { doc.text(shop.location, 10, sideY, { maxWidth: 38 }); sideY += 12; }
+    if (shop?.phone) { doc.text(shop.phone, 10, sideY); sideY += 8; }
+    doc.text("tregusupport@gmail.com", 10, sideY, { maxWidth: 38 }); sideY += 16;
+
+    doc.setDrawColor(40, 40, 40);
+    doc.line(10, sideY, 48, sideY); sideY += 10;
+
+    doc.setTextColor(160, 160, 160);
     doc.setFontSize(7);
     doc.setFont("helvetica", "bold");
-    doc.text("BLERESI", 110, 62);
+    doc.text("NIPT", 10, sideY); sideY += 8;
     doc.setFont("helvetica", "normal");
-    doc.setFontSize(9);
-    doc.setTextColor(...BLACK);
-    doc.text(order.customer_name, 110, 70);
-    doc.setTextColor(...GRAY);
-    doc.setFontSize(8);
-    doc.text(order.customer_address + ", " + order.customer_city, 110, 77);
-    doc.text(order.customer_phone, 110, 84);
-    if (order.customer_email) doc.text(order.customer_email, 110, 91);
+    doc.setTextColor(200, 200, 200);
+    doc.text("_______________", 10, sideY); sideY += 16;
 
-    let y = 100;
-    doc.setFillColor(...BLACK);
-    doc.rect(0, y, pageW, 10, "F");
+    doc.setDrawColor(40, 40, 40);
+    doc.line(10, sideY, 48, sideY); sideY += 10;
+
+    doc.setTextColor(160, 160, 160);
+    doc.setFontSize(7);
+    doc.setFont("helvetica", "bold");
+    doc.text("PAGESA", 10, sideY); sideY += 8;
+    doc.setFillColor(...GREEN);
+    doc.roundedRect(10, sideY, 38, 10, 2, 2, "F");
     doc.setTextColor(...WHITE);
-    doc.setFontSize(8);
+    doc.setFontSize(7);
     doc.setFont("helvetica", "bold");
-    doc.text("NR", 15, y + 7);
-    doc.text("PRODUKTI", 25, y + 7);
-    doc.text("MADHESIA", 110, y + 7);
-    doc.text("SASIA", 135, y + 7);
-    doc.text("CMIMI UNIT.", 150, y + 7);
-    doc.text("TOTALI", pageW - 15, y + 7, { align: "right" });
+    doc.text("ME DOREZIM", 29, sideY + 6.5, { align: "center" }); sideY += 18;
 
+    // QR Code on sidebar
+    doc.addImage(qrDataUrl, "PNG", 9, sideY, 40, 40);
+    sideY += 42;
+    doc.setTextColor(80, 80, 80);
+    doc.setFontSize(6);
+    doc.setFont("helvetica", "normal");
+    doc.text("Skanoni per dyqanin", 29, sideY, { align: "center" });
+
+    // ── MAIN CONTENT ──
+    const contentX = 68;
+    const contentW = pageW - contentX - margin;
+
+    // Invoice title
+    doc.setTextColor(...BLACK);
+    doc.setFontSize(32);
+    doc.setFont("helvetica", "bold");
+    doc.text("FATURE", contentX, 28);
+
+    // Green underline
+    doc.setFillColor(...GREEN);
+    doc.rect(contentX, 31, 42, 1.5, "F");
+
+    // Invoice meta - right aligned
+    doc.setFontSize(8);
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(...GRAY);
+    doc.text("Nr. Fatures:", pageW - margin - 40, 20);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(...BLACK);
+    doc.text("#" + order.id.slice(0, 8).toUpperCase(), pageW - margin, 20, { align: "right" });
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(...GRAY);
+    doc.text("Data:", pageW - margin - 40, 27);
+    doc.setTextColor(...BLACK);
+    doc.text(new Date(order.created_at).toLocaleDateString("sq-AL"), pageW - margin, 27, { align: "right" });
+    doc.text("Statusi:", pageW - margin - 40, 34);
+    doc.setFillColor(...GREEN);
+    doc.roundedRect(pageW - margin - 22, 29, 22, 8, 2, 2, "F");
+    doc.setTextColor(...WHITE);
+    doc.setFontSize(7);
+    doc.text("KONFIRMUAR", pageW - margin - 11, 34.5, { align: "center" });
+
+    // ── CUSTOMER SECTION ──
+    let y = 45;
+    doc.setFillColor(...LIGHTGRAY);
+    doc.roundedRect(contentX, y, contentW, 36, 3, 3, "F");
+
+    doc.setTextColor(...GRAY);
+    doc.setFontSize(7);
+    doc.setFont("helvetica", "bold");
+    doc.text("BLERESI / DESTINATARI", contentX + 6, y + 8);
+
+    doc.setTextColor(...BLACK);
+    doc.setFontSize(11);
+    doc.setFont("helvetica", "bold");
+    doc.text(order.customer_name, contentX + 6, y + 17);
+
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8);
+    doc.setTextColor(...DARKGRAY);
+    doc.text(order.customer_address + ", " + order.customer_city, contentX + 6, y + 24);
+    doc.text(order.customer_phone + (order.customer_email ? "  |  " + order.customer_email : ""), contentX + 6, y + 30);
+
+    // ── ITEMS TABLE ──
+    y += 44;
+
+    // Table header
+    doc.setFillColor(...BLACK);
+    doc.roundedRect(contentX, y, contentW, 10, 2, 2, "F");
+    doc.setTextColor(...WHITE);
+    doc.setFontSize(7.5);
+    doc.setFont("helvetica", "bold");
+    doc.text("NR", contentX + 4, y + 6.5);
+    doc.text("PERSHKRIMI", contentX + 14, y + 6.5);
+    doc.text("SASIA", contentX + contentW - 62, y + 6.5);
+    doc.text("CMIMI UNIT.", contentX + contentW - 44, y + 6.5);
+    doc.text("TOTALI", contentX + contentW - 2, y + 6.5, { align: "right" });
+
+    // Table rows
     y += 14;
     let subtotal = 0;
     order.items?.forEach((item, i) => {
-      if (i % 2 === 0) { doc.setFillColor(250, 249, 247); doc.rect(0, y - 6, pageW, 12, "F"); }
+      if (i % 2 === 0) {
+        doc.setFillColor(248, 248, 248);
+        doc.rect(contentX, y - 5, contentW, 12, "F");
+      }
       const lineTotal = item.price * item.qty;
       subtotal += lineTotal;
-      doc.setTextColor(...BLACK);
-      doc.setFontSize(9);
+      doc.setTextColor(...DARKGRAY);
+      doc.setFontSize(8);
       doc.setFont("helvetica", "normal");
-      doc.text((i + 1) + ".", 15, y);
-      doc.text(item.name.length > 35 ? item.name.slice(0, 35) + "..." : item.name, 25, y);
-      doc.text(item.size || "-", 110, y);
-      doc.text("" + item.qty, 140, y);
-      doc.text(item.price?.toLocaleString() + " L", 150, y);
-      doc.text(lineTotal.toLocaleString() + " L", pageW - 15, y, { align: "right" });
-      y += 13;
+      doc.text((i + 1) + ".", contentX + 4, y + 2);
+      const itemName = item.name + (item.size ? " (" + item.size + ")" : "");
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(...BLACK);
+      doc.text(itemName.length > 38 ? itemName.slice(0, 38) + "..." : itemName, contentX + 14, y + 2);
+      doc.setFont("helvetica", "normal");
+      doc.setTextColor(...DARKGRAY);
+      doc.text("" + item.qty, contentX + contentW - 58, y + 2);
+      doc.text(item.price?.toLocaleString() + " L", contentX + contentW - 42, y + 2);
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(...BLACK);
+      doc.text(lineTotal.toLocaleString() + " L", contentX + contentW - 2, y + 2, { align: "right" });
+      y += 12;
     });
 
-    y += 5;
-    doc.setDrawColor(...LIGHT);
+    // ── TOTALS BOX ──
+    y += 6;
+    doc.setDrawColor(...LIGHTGRAY);
     doc.setLineWidth(0.5);
-    doc.line(110, y, pageW - 15, y);
+    doc.line(contentX, y, contentX + contentW, y);
     y += 8;
+
+    const totalsX = contentX + contentW - 70;
+
+    // Subtotal row
     doc.setTextColor(...GRAY);
-    doc.setFontSize(9);
-    doc.text("Nentotali:", 130, y);
-    doc.setTextColor(...BLACK);
-    doc.text(subtotal.toLocaleString() + " L", pageW - 15, y, { align: "right" });
-    y += 8;
-    doc.setTextColor(...GRAY);
-    doc.text("Tarifa e dorezimit:", 130, y);
-    doc.setTextColor(...BLACK);
-    doc.text("300 L", pageW - 15, y, { align: "right" });
-    y += 8;
-    const tvsh = Math.round(subtotal * 0.20);
-    doc.setTextColor(...GRAY);
-    doc.text("TVSH (20%):", 130, y);
-    doc.setTextColor(...BLACK);
-    doc.text(tvsh.toLocaleString() + " L", pageW - 15, y, { align: "right" });
-    y += 5;
-    doc.setFillColor(...GREEN);
-    doc.rect(110, y, pageW - 110, 14, "F");
-    doc.setTextColor(...WHITE);
-    doc.setFontSize(11);
-    doc.setFont("helvetica", "bold");
-    doc.text("TOTALI:", 115, y + 9);
-    doc.text(order.total?.toLocaleString() + " L", pageW - 15, y + 9, { align: "right" });
-    y += 22;
-    doc.setFillColor(225, 245, 238);
-    doc.rect(15, y, 80, 12, "F");
-    doc.setTextColor(15, 110, 86);
     doc.setFontSize(8);
+    doc.setFont("helvetica", "normal");
+    doc.text("Nentotali:", totalsX, y);
+    doc.setTextColor(...BLACK);
+    doc.text(subtotal.toLocaleString() + " L", contentX + contentW - 2, y, { align: "right" });
+    y += 8;
+
+    // Delivery
+    doc.setTextColor(...GRAY);
+    doc.text("Tarifa e dorezimit:", totalsX, y);
+    doc.setTextColor(...BLACK);
+    doc.text("300 L", contentX + contentW - 2, y, { align: "right" });
+    y += 8;
+
+    // TVSH
+    const tvshBase = subtotal;
+    const tvsh = Math.round(tvshBase * 0.20);
+    doc.setTextColor(...GRAY);
+    doc.text("TVSH 20% (e perfshire):", totalsX, y);
+    doc.setTextColor(...BLACK);
+    doc.text(tvsh.toLocaleString() + " L", contentX + contentW - 2, y, { align: "right" });
+    y += 10;
+
+    // Total box
+    doc.setFillColor(...BLACK);
+    doc.roundedRect(totalsX - 4, y, contentW - (totalsX - contentX) + 4, 14, 2, 2, "F");
+    doc.setTextColor(...WHITE);
+    doc.setFontSize(9);
     doc.setFont("helvetica", "bold");
-    doc.text("PAGESA ME DOREZIM", 55, y + 8, { align: "center" });
-    if (order.notes) { y += 20; doc.setTextColor(...GRAY); doc.setFontSize(8); doc.setFont("helvetica", "normal"); doc.text("Shenime: " + order.notes, 15, y); }
-    doc.setDrawColor(...GRAY);
-    doc.line(15, 255, 80, 255);
+    doc.text("TOTALI PERFUNDIMTAR:", totalsX + 2, y + 9);
+    doc.setFillColor(...GREEN);
+    doc.roundedRect(contentX + contentW - 38, y + 1, 36, 12, 2, 2, "F");
+    doc.setTextColor(...WHITE);
+    doc.setFontSize(9);
+    doc.text(order.total?.toLocaleString() + " L", contentX + contentW - 20, y + 8.5, { align: "center" });
+
+    // Notes
+    if (order.notes) {
+      y += 22;
+      doc.setFillColor(255, 251, 235);
+      doc.roundedRect(contentX, y, contentW, 14, 2, 2, "F");
+      doc.setTextColor(133, 79, 11);
+      doc.setFontSize(7);
+      doc.setFont("helvetica", "bold");
+      doc.text("SHENIME:", contentX + 4, y + 6);
+      doc.setFont("helvetica", "normal");
+      doc.text(order.notes, contentX + 22, y + 6);
+    }
+
+    // ── FOOTER ──
+    y = pageH - 28;
+    doc.setDrawColor(...LIGHTGRAY);
+    doc.setLineWidth(0.3);
+    doc.line(contentX, y, pageW - margin, y);
+    y += 6;
+
     doc.setTextColor(...GRAY);
     doc.setFontSize(7);
     doc.setFont("helvetica", "normal");
-    doc.text("Nenshkrimi i shitesit", 47, 261, { align: "center" });
-    doc.line(130, 255, pageW - 15, 255);
-    doc.text("Nenshkrimi i bleresit", 162, 261, { align: "center" });
-    doc.setFillColor(...BLACK);
-    doc.rect(0, 272, pageW, 25, "F");
+    doc.text("Kjo fature eshte gjeneruar automatikisht nga platforma Tregu.store", contentX, y);
+    y += 5;
+    doc.text("Per cdo pyetje: tregusupport@gmail.com  |  tregu.store", contentX, y);
+
+    // Signature lines
+    doc.setDrawColor(...LIGHTGRAY);
+    doc.line(contentX, pageH - 10, contentX + 40, pageH - 10);
     doc.setTextColor(...GRAY);
-    doc.setFontSize(8);
-    doc.setFont("helvetica", "normal");
-    doc.text("tregu.store  |  tregusupport@gmail.com", pageW / 2, 281, { align: "center" });
-    doc.setTextColor(...GREEN);
-    doc.setFontSize(9);
-    doc.setFont("helvetica", "bold");
-    doc.text("Faleminderit per blerjen tuaj!", pageW / 2, 290, { align: "center" });
-    doc.save("fature-" + (shop?.name || "tregu") + "-" + order.id.slice(0, 8) + ".pdf");
+    doc.setFontSize(6.5);
+    doc.text("Nenshkrimi i Shitesit", contentX + 20, pageH - 6, { align: "center" });
+    doc.line(pageW - margin - 40, pageH - 10, pageW - margin, pageH - 10);
+    doc.text("Nenshkrimi i Bleresit", pageW - margin - 20, pageH - 6, { align: "center" });
+
+    doc.save("fature-" + (shop?.name || "tregu").replace(/\s/g, "-") + "-" + order.id.slice(0, 8) + ".pdf");
   };
 
   if (loading) return <div style={{ padding: 80, textAlign: "center", color: "var(--text-3)" }}>Loading...</div>;
@@ -313,7 +441,7 @@ export default function SellerOrders() {
                             "https://www.google.com/search?q=" + order.tracking_number + "+tracking"}
                           target="_blank" rel="noopener noreferrer"
                           style={{ padding: "8px 12px", borderRadius: 8, background: "var(--green)", color: "#fff", fontSize: 12, fontWeight: 500, textDecoration: "none", whiteSpace: "nowrap" }}>
-                          Gjurmo →
+                          Gjurmo
                         </a>
                       )}
                     </div>
@@ -321,19 +449,19 @@ export default function SellerOrders() {
                       <div style={{ marginTop: 10, padding: "10px 12px", background: "var(--blue-light)", borderRadius: 8 }}>
                         <div style={{ fontSize: 12, fontWeight: 500, color: "var(--blue)", marginBottom: 6 }}>Nuk ke korrier?</div>
                         <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                          <a href="https://al.albaniancourier.al" target="_blank" rel="noopener noreferrer" style={{ fontSize: 12, color: "var(--blue)", textDecoration: "none", padding: "4px 10px", border: "1px solid var(--blue)", borderRadius: 20 }}>Albanian Courier →</a>
-                          <a href="https://www.dhl.com/al-en" target="_blank" rel="noopener noreferrer" style={{ fontSize: 12, color: "var(--blue)", textDecoration: "none", padding: "4px 10px", border: "1px solid var(--blue)", borderRadius: 20 }}>DHL Albania →</a>
-                          <a href="tel:+35542259777" style={{ fontSize: 12, color: "var(--blue)", textDecoration: "none", padding: "4px 10px", border: "1px solid var(--blue)", borderRadius: 20 }}>Posta Shqiptare →</a>
+                          <a href="https://al.albaniancourier.al" target="_blank" rel="noopener noreferrer" style={{ fontSize: 12, color: "var(--blue)", textDecoration: "none", padding: "4px 10px", border: "1px solid var(--blue)", borderRadius: 20 }}>Albanian Courier</a>
+                          <a href="https://www.dhl.com/al-en" target="_blank" rel="noopener noreferrer" style={{ fontSize: 12, color: "var(--blue)", textDecoration: "none", padding: "4px 10px", border: "1px solid var(--blue)", borderRadius: 20 }}>DHL Albania</a>
+                          <a href="tel:+35542259777" style={{ fontSize: 12, color: "var(--blue)", textDecoration: "none", padding: "4px 10px", border: "1px solid var(--blue)", borderRadius: 20 }}>Posta Shqiptare</a>
                         </div>
                       </div>
                     )}
                   </div>
 
                   <button onClick={() => generateInvoice(order)}
-                    style={{ width: "100%", marginTop: 10, padding: "10px 14px", background: "var(--surface)", border: "1px solid var(--border-strong)",
-                      borderRadius: 10, fontSize: 13, fontWeight: 500, cursor: "pointer", fontFamily: "var(--font-body)", color: "var(--text-1)",
+                    style={{ width: "100%", marginTop: 10, padding: "10px 14px", background: "var(--text-1)", border: "none",
+                      borderRadius: 10, fontSize: 13, fontWeight: 500, cursor: "pointer", fontFamily: "var(--font-body)", color: "#fff",
                       display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
-                    Gjenero Fature PDF
+                    Gjenero Fature Profesionale PDF
                   </button>
 
                   <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 14px", background: "var(--amber-light)", borderRadius: 10, marginTop: 10 }}>
