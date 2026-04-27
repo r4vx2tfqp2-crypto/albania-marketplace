@@ -105,7 +105,8 @@ export default function AddProduct() {
         const { data } = supabase.storage
           .from('product-images')
           .getPublicUrl(path);
-        urls.push(data.publicUrl);
+        if (data?.publicUrl) urls.push(data.publicUrl);
+        console.log('Image URL:', data?.publicUrl);
       }
       setUploadProgress(Math.round(((i + 1) / images.length) * 100));
     }

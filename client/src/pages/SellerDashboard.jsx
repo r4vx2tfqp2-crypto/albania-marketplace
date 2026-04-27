@@ -181,10 +181,12 @@ export default function SellerDashboard() {
                           style={{ padding: "5px 10px", borderRadius: 8, border: "1px solid var(--border-strong)", fontSize: 12, cursor: "pointer", background: "var(--surface)", fontFamily: "var(--font-body)", color: "var(--text-2)" }}>
                           Edit
                         </button>
-                        <button onClick={() => handleDeleteProduct(p.id)}
-                          style={{ padding: "5px 10px", borderRadius: 8, border: "none", fontSize: 12, cursor: "pointer", background: "var(--red-light)", fontFamily: "var(--font-body)", color: "var(--red)" }}>
-                          Delete
-                        </button>
+                        <button
+  onClick={() => handleDeleteProduct(p.id)}
+  style={{ padding: '10px 14px', borderRadius: 8, border: 'none', fontSize: 13, cursor: 'pointer', background: 'var(--red-light)', fontFamily: 'var(--font-body)', color: 'var(--red)', minWidth: 44, minHeight: 44 }}
+>
+  🗑️
+</button>
                       </div>
                     </div>
                   );
