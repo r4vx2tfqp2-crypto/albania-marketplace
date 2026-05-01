@@ -262,18 +262,6 @@ export default function AddProduct() {
                 </button>
               )}
 
-              {/* AI Generate button */}
-              {imagePreviews.length > 0 && (
-                <button type="button" onClick={generateWithAI} disabled={aiLoading}
-                  style={{ marginTop: 12, width: "100%", padding: "12px 16px", borderRadius: "var(--radius-md)",
-                    background: aiLoading ? "var(--border)" : "linear-gradient(135deg, #1D9E75, #185FA5)",
-                    color: "#fff", border: "none", cursor: aiLoading ? "not-allowed" : "pointer",
-                    fontSize: 14, fontWeight: 500, fontFamily: "var(--font-body)",
-                    display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
-                  ✨ {aiLoading ? "AI po gjeneron..." : "Gjenero me AI automatikisht"}
-                </button>
-              )}
-
               {loading && uploadProgress > 0 && uploadProgress < 100 && (
                 <div style={{ marginTop: 8 }}>
                   <div style={{ background: "var(--border)", borderRadius: 4, height: 4 }}>
