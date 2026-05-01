@@ -41,12 +41,26 @@ export default function DeliveryConfirm() {
   };
 
   const openRoute = () => {
-    if (order?.latitude && order?.longitude) {
-      const url = `https://www.google.com/maps/dir/?api=1&destination=${order.latitude},${order.longitude}&travelmode=driving`;
-      window.open(url, '_blank');
+    const destination = order?.latitude && order?.longitude
+      ? order.latitude + "," + order.longitude
+      : encodeURIComponent(order.customer_address + ", " + order.customer_city + ", Albania");
+
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          const origin = pos.coords.latitude + "," + pos.coords.longitude;
+          const url = "https://www.google.com/maps/dir/?api=1&origin=" + origin + "&destination=" + destination + "&travelmode=driving";
+          window.open(url, "_blank");
+        },
+        () => {
+          // If geolocation fails, open without origin
+          const url = "https://www.google.com/maps/dir/?api=1&destination=" + destination + "&travelmode=driving";
+          window.open(url, "_blank");
+        }
+      );
     } else {
-      const url = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(order.customer_address + ', ' + order.customer_city + ', Albania')}&travelmode=driving`;
-      window.open(url, '_blank');
+      const url = "https://www.google.com/maps/dir/?api=1&destination=" + destination + "&travelmode=driving";
+      window.open(url, "_blank");
     }
   };
 
