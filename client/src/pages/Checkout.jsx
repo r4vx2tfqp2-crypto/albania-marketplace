@@ -173,14 +173,20 @@ export default function Checkout() {
               </div>
 
               {showMap && (
-                <div style={{ marginBottom: 16 }}>
-                  <p style={{ fontSize: 13, color: "var(--text-3)", marginBottom: 8 }}>
-                    Klikoni ne harte per te vendosur vendndodhjen e dorezimit
-                  </p>
-                  <div ref={mapRef} style={{ width: "100%", height: 300, borderRadius: "var(--radius-lg)", border: "1px solid var(--border)" }} />
+                <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, zIndex: 1000, background: "rgba(0,0,0,0.8)", display: "flex", flexDirection: "column" }}>
+                  <div style={{ background: "var(--surface)", padding: "12px 16px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                    <p style={{ fontSize: 14, color: "var(--text-1)", margin: 0, fontWeight: 500 }}>
+                      📍 Klikoni ne harte per te vendosur vendndodhjen
+                    </p>
+                    <button onClick={() => setShowMap(false)}
+                      style={{ background: pinLocation ? "var(--green)" : "var(--text-1)", color: "#fff", border: "none", borderRadius: 8, padding: "8px 16px", fontSize: 13, fontWeight: 500, cursor: "pointer", fontFamily: "var(--font-body)" }}>
+                      {pinLocation ? "✓ Konfirmo" : "Mbyll"}
+                    </button>
+                  </div>
+                  <div ref={mapRef} style={{ flex: 1, width: "100%" }} />
                   {pinLocation && (
-                    <div style={{ marginTop: 8, fontSize: 13, color: "var(--green-dark)", background: "var(--green-light)", padding: "8px 12px", borderRadius: 8 }}>
-                      Vendndodhja u vendos me sukses!
+                    <div style={{ background: "var(--green)", padding: "12px 16px", textAlign: "center" }}>
+                      <p style={{ margin: 0, color: "#fff", fontSize: 13, fontWeight: 500 }}>✓ Vendndodhja u vendos! Klikoni Konfirmo per te vazhduar.</p>
                     </div>
                   )}
                 </div>
