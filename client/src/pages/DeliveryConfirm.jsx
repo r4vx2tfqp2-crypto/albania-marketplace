@@ -45,10 +45,16 @@ export default function DeliveryConfirm() {
     const lng = parseFloat(order?.longitude);
     let url;
     if (!isNaN(lat) && !isNaN(lng)) {
-      // Use coordinates directly - works on both mobile and desktop
-      url = "https://www.google.com/maps/dir//" + lat + "," + lng;
+      // Try Google Maps app first on mobile, fallback to web
+      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+      if (isMobile) {
+        url = "https://maps.google.com/?daddr=" + lat + "," + lng + "&directionsmode=driving";
+      } else {
+        url = "https://www.google.com/maps/dir/?api=1&destination=" + lat + "%2C" + lng + "&travelmode=driving";
+      }
     } else {
-      url = "https://www.google.com/maps/dir//" + encodeURIComponent(order.customer_address + ", " + order.customer_city + ", Albania");
+      const addr = encodeURIComponent(order.customer_address + ", " + order.customer_city + ", Albania");
+      url = "https://www.google.com/maps/dir/?api=1&destination=" + addr + "&travelmode=driving";
     }
     window.open(url, "_blank");
   };
