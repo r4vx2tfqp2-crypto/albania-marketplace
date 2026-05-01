@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { Heart, ShoppingCart, Share2, Store, ChevronUp, ChevronDown } from "lucide-react";
+import { Heart, ShoppingCart, Share2, Store } from "lucide-react";
 import { useCart } from "../context/CartContext";
 import { supabase } from "../lib/supabase";
 
@@ -11,6 +11,8 @@ export default function Feed() {
   const [current, setCurrent] = useState(0);
   const [loading, setLoading] = useState(true);
   const [added, setAdded] = useState(false);
+  const [animating, setAnimating] = useState(false);
+  const [direction, setDirection] = useState("up");
   const touchStartY = useRef(null);
   const containerRef = useRef(null);
 
@@ -27,8 +29,20 @@ export default function Feed() {
     setLoading(false);
   };
 
-  const next = () => { if (current < products.length - 1) setCurrent(c => c + 1); };
-  const prev = () => { if (current > 0) setCurrent(c => c - 1); };
+  const next = () => {
+    if (current < products.length - 1 && !animating) {
+      setDirection("up");
+      setAnimating(true);
+      setTimeout(() => { setCurrent(c => c + 1); setAnimating(false); }, 300);
+    }
+  };
+  const prev = () => {
+    if (current > 0 && !animating) {
+      setDirection("down");
+      setAnimating(true);
+      setTimeout(() => { setCurrent(c => c - 1); setAnimating(false); }, 300);
+    }
+  };
 
   const handleTouchStart = (e) => { touchStartY.current = e.touches[0].clientY; };
   const handleTouchEnd = (e) => {
@@ -84,7 +98,7 @@ export default function Feed() {
       style={{ height: "100vh", width: "100%", background: "#000", position: "relative", overflow: "hidden", userSelect: "none" }}>
 
       {/* PRODUCT IMAGE */}
-      <div style={{ position: "absolute", inset: 0 }}>
+      <div style={{ position: "absolute", inset: 0, transition: "opacity 0.3s ease", opacity: animating ? 0 : 1 }}>
         {hasImage ? (
           <img src={product.images[0]} alt={product.name}
             style={{ width: "100%", height: "100%", objectFit: "cover", opacity: 0.85 }} />
@@ -112,7 +126,7 @@ export default function Feed() {
       </div>
 
       {/* RIGHT SIDE ACTIONS */}
-      <div style={{ position: "absolute", right: 16, bottom: 160, display: "flex", flexDirection: "column", gap: 20, zIndex: 10, alignItems: "center" }}>
+      <div style={{ position: "absolute", right: 16, bottom: 180, display: "flex", flexDirection: "column", gap: 20, zIndex: 10, alignItems: "center" }}>
         <button onClick={() => toggleSaved(product)}
           style={{ background: "rgba(255,255,255,0.15)", border: "none", borderRadius: "50%", width: 52, height: 52, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", backdropFilter: "blur(8px)", flexDirection: "column", gap: 2 }}>
           <Heart size={22} fill={saved ? "#E24B4A" : "none"} color={saved ? "#E24B4A" : "#fff"} strokeWidth={2} />
@@ -138,17 +152,7 @@ export default function Feed() {
         </button>
       </div>
 
-      {/* NAVIGATION ARROWS */}
-      <div style={{ position: "absolute", right: 16, top: "50%", transform: "translateY(-50%)", display: "flex", flexDirection: "column", gap: 8, zIndex: 10 }}>
-        <button onClick={prev} disabled={current === 0}
-          style={{ background: current === 0 ? "rgba(255,255,255,0.05)" : "rgba(255,255,255,0.15)", border: "none", borderRadius: "50%", width: 36, height: 36, display: "flex", alignItems: "center", justifyContent: "center", cursor: current === 0 ? "not-allowed" : "pointer", backdropFilter: "blur(8px)" }}>
-          <ChevronUp size={18} color={current === 0 ? "rgba(255,255,255,0.3)" : "#fff"} />
-        </button>
-        <button onClick={next} disabled={current === products.length - 1}
-          style={{ background: current === products.length - 1 ? "rgba(255,255,255,0.05)" : "rgba(255,255,255,0.15)", border: "none", borderRadius: "50%", width: 36, height: 36, display: "flex", alignItems: "center", justifyContent: "center", cursor: current === products.length - 1 ? "not-allowed" : "pointer", backdropFilter: "blur(8px)" }}>
-          <ChevronDown size={18} color={current === products.length - 1 ? "rgba(255,255,255,0.3)" : "#fff"} />
-        </button>
-      </div>
+
 
       {/* BOTTOM INFO */}
       <div style={{ position: "absolute", bottom: 0, left: 0, right: 80, padding: "24px 20px 32px", zIndex: 10 }}>
