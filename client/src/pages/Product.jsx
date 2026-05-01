@@ -108,9 +108,11 @@ export default function Product() {
               <span className={styles.ratingVal}>{product.rating || 0}</span>
               <span className={styles.reviewCount}>({product.review_count || 0} {t("reviews")})</span>
             </div>
+
+            {/* 1. PRICE */}
             <div className={styles.price}>{formatPrice(product.price)}</div>
 
-            {/* Size picker */}
+            {/* 2. SIZE PICKER */}
             {product.sizes?.length > 0 && (
               <div className={styles.sizeSection}>
                 <div className={styles.sizeLabel}>{t("size")}</div>
@@ -126,7 +128,7 @@ export default function Product() {
               </div>
             )}
 
-            {/* Color picker */}
+            {/* 3. COLOR PICKER */}
             {colors.length > 0 && (
               <div className={styles.sizeSection}>
                 <div className={styles.sizeLabel}>Ngjyra</div>
@@ -142,6 +144,30 @@ export default function Product() {
               </div>
             )}
 
+            {/* 4. SPECS */}
+            {specs.length > 0 && (
+              <div style={{ margin: "16px 0", padding: 16, background: "var(--surface-2)", borderRadius: "var(--radius-lg)" }}>
+                <div style={{ fontSize: 12, fontWeight: 600, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 12 }}>
+                  Detajet e produktit
+                </div>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+                  {specs.map(([key, value]) => (
+                    <div key={key} style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                      <span style={{ fontSize: 11, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.05em" }}>{key}</span>
+                      <span style={{ fontSize: 14, fontWeight: 500, color: "var(--text-1)" }}>{value}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* 5. DESCRIPTION */}
+            <div className={styles.description}>
+              <div className={styles.descTitle}>{t("about_product")}</div>
+              <p className={styles.descText}>{product.description}</p>
+            </div>
+
+            {/* 6. ADD TO CART */}
             <div className={styles.actions}>
               <button className={styles.addToCart + (added ? " " + styles.addedSuccess : "")} onClick={handleAddToCart} disabled={!product.in_stock}>
                 <ShoppingCart size={16} />
@@ -151,16 +177,23 @@ export default function Product() {
                 <Heart size={18} fill={saved ? "currentColor" : "none"} strokeWidth={2} />
               </button>
             </div>
+
+            {/* 7. BUY NOW */}
             <button className={styles.buyNow} onClick={() => { addToCart(product, selectedSize, selectedColor); navigate("/checkout"); }}>
               {t("buy_now")}
             </button>
+
+            {/* 8. WHATSAPP */}
             <button className={styles.whatsappBtn} onClick={() => window.open(whatsappUrl, "_blank")}>
               <span>💬</span> {t("contact_whatsapp")}
             </button>
+
             <div className={styles.deliveryInfo}>
               <div className={styles.deliveryItem}><Truck size={14} strokeWidth={2} /><span>{t("cash_on_delivery")}</span></div>
               <div className={styles.deliveryItem}><Shield size={14} strokeWidth={2} /><span>{t("verified_seller")}</span></div>
             </div>
+
+            {/* 9. SHOP CARD */}
             {shop && (
               <Link to={"/shop/" + shop.id} className={styles.shopCard}>
                 <div className={styles.shopAvatar} style={{ background: shop.color + "22", color: shop.color }}>
@@ -174,29 +207,6 @@ export default function Product() {
                 </div>
                 <span className={styles.visitShop}>{t("visit_shop")}</span>
               </Link>
-            )}
-
-            {/* Description */}
-            <div className={styles.description}>
-              <div className={styles.descTitle}>{t("about_product")}</div>
-              <p className={styles.descText}>{product.description}</p>
-            </div>
-
-            {/* Specs */}
-            {specs.length > 0 && (
-              <div style={{ marginTop: 16, padding: 16, background: "var(--surface-2)", borderRadius: "var(--radius-lg)" }}>
-                <div style={{ fontSize: 12, fontWeight: 600, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 12 }}>
-                  Detajet e produktit
-                </div>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-                  {specs.map(([key, value]) => (
-                    <div key={key} style={{ display: "flex", flexDirection: "column", gap: 2 }}>
-                      <span style={{ fontSize: 11, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.05em" }}>{key}</span>
-                      <span style={{ fontSize: 14, fontWeight: 500, color: "var(--text-1)" }}>{value}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
             )}
           </div>
         </div>
