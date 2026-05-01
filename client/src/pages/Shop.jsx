@@ -91,14 +91,7 @@ export default function Shop() {
           ) : <div className={styles.empty}>{t('no_products_shop')}</div>
         )}
 
-        {tab === 'reviews' && <Reviews shopId={id} type="shop" />}</div></div>
-                  <div className={styles.reviewDate}>{new Date(r.created_at).toLocaleDateString()}</div>
-                </div>
-                <p className={styles.reviewText}>{r.text}</p>
-              </div>
-            )) : <div className={styles.empty}>{t('no_reviews')}</div>}
-          </div>
-        )}
+        {tab === 'reviews' && <Reviews shopId={id} type="shop" />}
 
         {tab === 'info' && (
           <div className={styles.infoGrid}>
