@@ -114,7 +114,6 @@ export default function AddProduct() {
     setError("");
 
     try {
-      // Convert image to base64
       const file = images[0];
       const base64 = await new Promise((res, rej) => {
         const reader = new FileReader();
@@ -123,32 +122,32 @@ export default function AddProduct() {
         reader.readAsDataURL(file);
       });
 
-      const mediaType = file.type || "image/jpeg";
+      const mimeType = file.type || "image/jpeg";
+      const GEMINI_KEY = "AIzaSyAeAZ-IgdpUZSoDquHrWxcRoAKVBSVqDVo";
 
-      const response = await fetch("https://api.anthropic.com/v1/messages", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          model: "claude-sonnet-4-20250514",
-          max_tokens: 1000,
-          messages: [{
-            role: "user",
-            content: [
-              {
-                type: "image",
-                source: { type: "base64", media_type: mediaType, data: base64 }
-              },
-              {
-                type: "text",
-                text: "You are helping an Albanian seller list a product on Tregu.store marketplace. Analyze this product image and respond ONLY with a JSON object (no markdown, no extra text) with these fields: {name: string (product name in Albanian, max 60 chars), description: string (product description in Albanian, 2-3 sentences, highlight key features), category: string (one of: shoes, clothes, electronics, beauty, home, sports, gifts), price: number (suggested price in Albanian Lek ALL, realistic market price), brand: string (brand if visible, else empty string), color: string (main color in Albanian)}. Be concise and accurate."
-              }
-            ]
-          }]
-        })
-      });
+      const response = await fetch(
+        "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + GEMINI_KEY,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            contents: [{
+              parts: [
+                {
+                  inline_data: { mime_type: mimeType, data: base64 }
+                },
+                {
+                  text: "You are helping an Albanian seller list a product on Tregu.store marketplace. Analyze this product image and respond ONLY with a JSON object (no markdown, no extra text) with these exact fields: {name: string (product name in Albanian max 60 chars), description: string (product description in Albanian 2-3 sentences), category: string (one of: shoes clothes electronics beauty home sports gifts), price: number (suggested price in Albanian Lek ALL realistic), brand: string (brand if visible else empty string), color: string (main color in Albanian)}. Be accurate."
+                }
+              ]
+            }],
+            generationConfig: { temperature: 0.3, maxOutputTokens: 500 }
+          })
+        }
+      );
 
       const data = await response.json();
-      const text = data.content?.[0]?.text || "";
+      const text = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
       const clean = text.replace(/```json|```/g, "").trim();
       const parsed = JSON.parse(clean);
 
@@ -156,7 +155,7 @@ export default function AddProduct() {
         ...f,
         name: parsed.name || f.name,
         description: parsed.description || f.description,
-        category: parsed.category || f.category,
+        category: CATEGORIES.includes(parsed.category) ? parsed.category : f.category,
         price: parsed.price ? String(parsed.price) : f.price,
       }));
 
@@ -260,6 +259,18 @@ export default function AddProduct() {
                     display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
                   <Sparkles size={16} />
                   {aiLoading ? "AI po gjeneron..." : "Gjenero me AI automatikisht"}
+                </button>
+              )}
+
+              {/* AI Generate button */}
+              {imagePreviews.length > 0 && (
+                <button type="button" onClick={generateWithAI} disabled={aiLoading}
+                  style={{ marginTop: 12, width: "100%", padding: "12px 16px", borderRadius: "var(--radius-md)",
+                    background: aiLoading ? "var(--border)" : "linear-gradient(135deg, #1D9E75, #185FA5)",
+                    color: "#fff", border: "none", cursor: aiLoading ? "not-allowed" : "pointer",
+                    fontSize: 14, fontWeight: 500, fontFamily: "var(--font-body)",
+                    display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
+                  ✨ {aiLoading ? "AI po gjeneron..." : "Gjenero me AI automatikisht"}
                 </button>
               )}
 
