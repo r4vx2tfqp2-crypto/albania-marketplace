@@ -72,14 +72,6 @@ export default function Home() {
             />
             <button type="submit" className={styles.searchBtn}>{t('hero_search_btn')}</button>
           </form>
-          <button onClick={() => navigate('/feed')}
-            style={{ marginTop: 14, display: 'inline-flex', alignItems: 'center', gap: 8,
-              background: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.25)',
-              borderRadius: 24, padding: '9px 20px', color: '#fff', fontSize: 13,
-              cursor: 'pointer', fontFamily: 'var(--font-body)', fontWeight: 500,
-              backdropFilter: 'blur(8px)' }}>
-            ▶ Shfleto si TikTok
-          </button>
         </div>
       </div>
       
