@@ -144,20 +144,31 @@ export default function Product() {
               </div>
             )}
 
-            {/* 4. SPECS */}
+            {/* 4. SPECS - interactive if multiple options */}
             {specs.length > 0 && (
-              <div style={{ margin: "16px 0", padding: 16, background: "var(--surface-2)", borderRadius: "var(--radius-lg)" }}>
-                <div style={{ fontSize: 12, fontWeight: 600, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 12 }}>
-                  Detajet e produktit
-                </div>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-                  {specs.map(([key, value]) => (
-                    <div key={key} style={{ display: "flex", flexDirection: "column", gap: 2 }}>
-                      <span style={{ fontSize: 11, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.05em" }}>{key}</span>
-                      <span style={{ fontSize: 14, fontWeight: 500, color: "var(--text-1)" }}>{value}</span>
+              <div style={{ margin: "16px 0" }}>
+                {specs.map(([key, value]) => {
+                  const options = value.includes(",") ? value.split(",").map(v => v.trim()).filter(Boolean) : null;
+                  return (
+                    <div key={key} style={{ marginBottom: 12 }}>
+                      <div style={{ fontSize: 12, fontWeight: 600, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 6 }}>
+                        {key}
+                      </div>
+                      {options ? (
+                        <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                          {options.map(opt => (
+                            <button key={opt} className={styles.sizeBtn}
+                              style={{ fontSize: 13 }}>
+                              {opt}
+                            </button>
+                          ))}
+                        </div>
+                      ) : (
+                        <span style={{ fontSize: 14, fontWeight: 500, color: "var(--text-1)" }}>{value}</span>
+                      )}
                     </div>
-                  ))}
-                </div>
+                  );
+                })}
               </div>
             )}
 
