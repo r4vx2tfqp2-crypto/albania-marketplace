@@ -46,24 +46,49 @@ export default function Checkout() {
     if (showMap) setTimeout(initMap, 200);
   }, [showMap]);
 
+  const searchBoxRef = useRef(null);
+
   const initMap = () => {
     if (!window.google || !mapRef.current || mapInstanceRef.current) return;
     const map = new window.google.maps.Map(mapRef.current, {
       center: { lat: 41.3275, lng: 19.8187 },
-      zoom: 13,
+      zoom: 15,
       mapTypeControl: false,
       streetViewControl: false,
       fullscreenControl: false,
+      mapTypeId: "roadmap",
+      styles: [
+        { featureType: "poi", elementType: "labels", stylers: [{ visibility: "on" }] },
+        { featureType: "building", elementType: "labels", stylers: [{ visibility: "on" }] },
+      ],
     });
     mapInstanceRef.current = map;
+
+    // Add search box
+    if (searchBoxRef.current) {
+      const searchBox = new window.google.maps.places.SearchBox(searchBoxRef.current);
+      map.addListener("bounds_changed", () => searchBox.setBounds(map.getBounds()));
+      searchBox.addListener("places_changed", () => {
+        const places = searchBox.getPlaces();
+        if (!places || places.length === 0) return;
+        const place = places[0];
+        if (!place.geometry) return;
+        map.setCenter(place.geometry.location);
+        map.setZoom(18);
+        placeMarker({ lat: place.geometry.location.lat(), lng: place.geometry.location.lng() }, map);
+        if (place.formatted_address) setForm(f => ({ ...f, address: place.formatted_address }));
+      });
+    }
+
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(pos => {
         const loc = { lat: pos.coords.latitude, lng: pos.coords.longitude };
         map.setCenter(loc);
-        map.setZoom(16);
+        map.setZoom(18);
         placeMarker(loc, map);
       });
     }
+
     map.addListener("click", (e) => {
       placeMarker({ lat: e.latLng.lat(), lng: e.latLng.lng() }, map);
     });
@@ -181,14 +206,18 @@ export default function Checkout() {
 
               {showMap && (
                 <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, zIndex: 1000, background: "rgba(0,0,0,0.8)", display: "flex", flexDirection: "column" }}>
-                  <div style={{ background: "var(--surface)", padding: "12px 16px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                    <p style={{ fontSize: 14, color: "var(--text-1)", margin: 0, fontWeight: 500 }}>
-                      📍 Klikoni ne harte per te vendosur vendndodhjen
-                    </p>
-                    <button onClick={() => setShowMap(false)}
-                      style={{ background: pinLocation ? "var(--green)" : "var(--text-1)", color: "#fff", border: "none", borderRadius: 8, padding: "8px 16px", fontSize: 13, fontWeight: 500, cursor: "pointer", fontFamily: "var(--font-body)" }}>
-                      {pinLocation ? "✓ Konfirmo" : "Mbyll"}
-                    </button>
+                  <div style={{ background: "var(--surface)", padding: "12px 16px" }}>
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
+                      <p style={{ fontSize: 14, color: "var(--text-1)", margin: 0, fontWeight: 500 }}>
+                        📍 Vendosni vendndodhjen tuaj
+                      </p>
+                      <button onClick={() => setShowMap(false)}
+                        style={{ background: pinLocation ? "var(--green)" : "var(--text-1)", color: "#fff", border: "none", borderRadius: 8, padding: "8px 16px", fontSize: 13, fontWeight: 500, cursor: "pointer", fontFamily: "var(--font-body)" }}>
+                        {pinLocation ? "✓ Konfirmo" : "Mbyll"}
+                      </button>
+                    </div>
+                    <input ref={searchBoxRef} type="text" placeholder="🔍 Kërko adresën tuaj..."
+                      style={{ width: "100%", padding: "10px 14px", borderRadius: "var(--radius-md)", border: "1px solid var(--border-strong)", fontSize: 14, fontFamily: "var(--font-body)", outline: "none", boxSizing: "border-box" }} />
                   </div>
                   <div ref={mapRef} style={{ flex: 1, width: "100%" }} />
                   {pinLocation && (
