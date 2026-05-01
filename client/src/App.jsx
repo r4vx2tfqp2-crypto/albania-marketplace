@@ -22,6 +22,8 @@ import AddShop from './pages/AddShop';
 import AdminSubscriptions from './pages/AdminSubscriptions';
 import AdminPanel from './pages/AdminPanel';
 import Legal from './pages/Legal';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
 import Settings from './pages/Settings';
 import Onboarding from './pages/Onboarding';
 import Login from './pages/Login';
@@ -48,7 +50,9 @@ export default function App() {
             <Route path="/onboarding" element={<Onboarding />} />
             <Route path="/confirm-delivery" element={<ConfirmDelivery />} />
             <Route path="/delivery" element={<DeliveryConfirm />} />
-            <Route path="/login" element={<Login />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/login" element={<Login />} />
             <Route path="/*" element={<MainLayout />} />
           </Routes>
         </BrowserRouter>
