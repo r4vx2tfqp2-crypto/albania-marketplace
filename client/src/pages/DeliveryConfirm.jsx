@@ -43,13 +43,13 @@ export default function DeliveryConfirm() {
   const openRoute = () => {
     const lat = parseFloat(order?.latitude);
     const lng = parseFloat(order?.longitude);
-    let destination;
+    let url;
     if (!isNaN(lat) && !isNaN(lng)) {
-      destination = lat + "," + lng;
+      // Use coordinates directly - works on both mobile and desktop
+      url = "https://www.google.com/maps/dir//" + lat + "," + lng;
     } else {
-      destination = encodeURIComponent(order.customer_address + ", " + order.customer_city + ", Albania");
+      url = "https://www.google.com/maps/dir//" + encodeURIComponent(order.customer_address + ", " + order.customer_city + ", Albania");
     }
-    const url = "https://www.google.com/maps/dir/?api=1&destination=" + destination + "&travelmode=driving";
     window.open(url, "_blank");
   };
 
