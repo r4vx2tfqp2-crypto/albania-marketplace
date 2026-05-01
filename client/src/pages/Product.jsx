@@ -4,6 +4,7 @@ import { Heart, ShoppingCart, ArrowLeft, CheckCircle, Truck, Shield } from "luci
 import { useTranslation } from "react-i18next";
 import { useCart } from "../context/CartContext";
 import { supabase } from "../lib/supabase";
+import Reviews from "../components/Reviews";
 import styles from "./Product.module.css";
 
 const BG_COLORS = ["#E1F5EE","#E6F1FB","#FBEAF0","#FAEEDA","#EAF3DE","#EEEDFE"];
@@ -222,23 +223,7 @@ export default function Product() {
           </div>
         </div>
 
-        {reviews.length > 0 && (
-          <div className={styles.reviewsSection}>
-            <h2 className={styles.reviewsTitle}>{t("reviews")}</h2>
-            <div className={styles.reviewsList}>
-              {reviews.map(r => (
-                <div key={r.id} className={styles.review}>
-                  <div className={styles.reviewHeader}>
-                    <div className={styles.reviewAvatar}>{r.author[0]}</div>
-                    <div><div className={styles.reviewAuthor}>{r.author}</div><div className="stars">{"★".repeat(r.rating)}</div></div>
-                    <div className={styles.reviewDate}>{new Date(r.created_at).toLocaleDateString()}</div>
-                  </div>
-                  <p className={styles.reviewText}>{r.text}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
+        <div style={{ padding: "0 0 40px" }}><Reviews productId={id} type="product" /></div>
       </div>
     </div>
   );

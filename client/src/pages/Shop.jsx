@@ -4,6 +4,7 @@ import { ArrowLeft, MapPin, CheckCircle, Truck } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import ProductCard from '../components/ProductCard';
 import { supabase } from '../lib/supabase';
+import Reviews from '../components/Reviews';
 import styles from './Shop.module.css';
 
 export default function Shop() {
@@ -90,13 +91,7 @@ export default function Shop() {
           ) : <div className={styles.empty}>{t('no_products_shop')}</div>
         )}
 
-        {tab === 'reviews' && (
-          <div className={styles.reviewsList}>
-            {reviews.length > 0 ? reviews.map(r => (
-              <div key={r.id} className={styles.review}>
-                <div className={styles.reviewHeader}>
-                  <div className={styles.reviewAvatar}>{r.author[0]}</div>
-                  <div><div className={styles.reviewAuthor}>{r.author}</div><div className="stars">{'★'.repeat(r.rating)}</div></div>
+        {tab === 'reviews' && <Reviews shopId={id} type="shop" />}</div></div>
                   <div className={styles.reviewDate}>{new Date(r.created_at).toLocaleDateString()}</div>
                 </div>
                 <p className={styles.reviewText}>{r.text}</p>
