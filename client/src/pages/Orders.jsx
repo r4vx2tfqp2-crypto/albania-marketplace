@@ -20,6 +20,13 @@ const STATUS_COLORS = {
   delivered: { color: "var(--green)", bg: "var(--green-light)" },
 };
 
+const STATUS_LABELS = {
+  packed: "Porosia juaj u paketua!",
+  on_the_way: "Porosia juaj eshte ne rruge!",
+  delivered: "Porosia juaj u dorezua!",
+  picked_up: "Porosia juaj u mor nga kurieri!",
+};
+
 export default function Orders() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -29,13 +36,45 @@ export default function Orders() {
 
   useEffect(() => { fetchOrders(); }, []);
 
+  // Auto refresh + push notifications
+  useEffect(() => {
+    if (isGuest) return;
+
+    // Request notification permission
+    if ("Notification" in window && Notification.permission === "default") {
+      Notification.requestPermission();
+    }
+
+    const interval = setInterval(async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      const { data } = await supabase
+        .from("orders").select("*").eq("buyer_id", user.id)
+        .order("created_at", { ascending: false });
+      if (data) {
+        setOrders(prev => {
+          data.forEach(newOrder => {
+            const oldOrder = prev.find(o => o.id === newOrder.id);
+            if (oldOrder && oldOrder.status !== newOrder.status) {
+              if ("Notification" in window && Notification.permission === "granted") {
+                const msg = STATUS_LABELS[newOrder.status];
+                if (msg) new Notification("Tregu - Perditesim Porosie", { body: msg, icon: "/favicon.svg" });
+              }
+            }
+          });
+          return data;
+        });
+      }
+    }, 30000);
+
+    return () => clearInterval(interval);
+  }, [isGuest]);
+
   const fetchOrders = async () => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { setIsGuest(true); setLoading(false); return; }
     const { data } = await supabase
-      .from("orders")
-      .select("*")
-      .eq("buyer_id", user.id)
+      .from("orders").select("*").eq("buyer_id", user.id)
       .order("created_at", { ascending: false });
     setOrders(data || []);
     setLoading(false);
@@ -93,8 +132,7 @@ export default function Orders() {
                   {order.items && (
                     <div className={styles.orderItems}>
                       {order.items.map((item, i) => (
-                        <div key={i} className={styles.orderItem}
-                          style={{ cursor: "pointer" }}
+                        <div key={i} className={styles.orderItem} style={{ cursor: "pointer" }}
                           onClick={() => navigate("/product/" + item.id)}>
                           {item.name} {item.size ? "(" + item.size + ")" : ""} x{item.qty}
                           <span style={{ fontSize: 11, color: "var(--text-3)", marginLeft: 6 }}>→</span>
