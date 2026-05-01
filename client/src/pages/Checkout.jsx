@@ -28,6 +28,13 @@ export default function Checkout() {
   const total = cartTotal + deliveryFee;
   const formatPrice = (p) => p.toLocaleString("sq-AL") + " L";
 
+  // Redirect to login if not logged in
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (!user) navigate("/login");
+    });
+  }, []);
+
   useEffect(() => {
     if (showMap) setTimeout(initMap, 200);
   }, [showMap]);
@@ -84,10 +91,11 @@ export default function Checkout() {
     setLoading(true);
     const pin = Math.floor(1000 + Math.random() * 9000).toString();
     const { data: { user: currentUser } } = await supabase.auth.getUser();
+    if (!currentUser) { navigate("/login"); return; }
     const { data: orderData, error } = await supabase.from("orders").insert({
       customer_name: form.name, customer_email: form.email, customer_phone: form.phone,
       customer_address: form.address, customer_city: form.city, notes: form.notes,
-      total, status: "confirmed", delivery_pin: pin, buyer_id: currentUser?.id || null,
+      total, status: "confirmed", delivery_pin: pin, buyer_id: currentUser.id,
       latitude: pinLocation?.lat || null, longitude: pinLocation?.lng || null,
       items: cartItems.map(i => ({ id: i.id, name: i.name, price: i.price, qty: i.qty, size: i.selectedSize })),
     }).select().single();
