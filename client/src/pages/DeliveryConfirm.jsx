@@ -41,9 +41,14 @@ export default function DeliveryConfirm() {
   };
 
   const openRoute = () => {
-    const destination = order?.latitude && order?.longitude
-      ? order.latitude + "," + order.longitude
-      : encodeURIComponent(order.customer_address + ", " + order.customer_city + ", Albania");
+    const lat = parseFloat(order?.latitude);
+    const lng = parseFloat(order?.longitude);
+    let destination;
+    if (!isNaN(lat) && !isNaN(lng)) {
+      destination = lat + "," + lng;
+    } else {
+      destination = encodeURIComponent(order.customer_address + ", " + order.customer_city + ", Albania");
+    }
     const url = "https://www.google.com/maps/dir/?api=1&destination=" + destination + "&travelmode=driving";
     window.open(url, "_blank");
   };
