@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { CheckCircle, MapPin } from "lucide-react";
 import { useTranslation } from "react-i18next";
@@ -24,8 +24,15 @@ export default function Checkout() {
   const mapInstanceRef = useRef(null);
   const markerRef = useRef(null);
 
-  const deliveryFee = 300;
+  const [deliveryFee, setDeliveryFee] = useState(300);
   const total = cartTotal + deliveryFee;
+
+  useEffect(() => {
+    if (cartItems.length > 0 && cartItems[0].shop_id) {
+      supabase.from("shops").select("delivery_fee").eq("id", cartItems[0].shop_id).single()
+        .then(({ data }) => { if (data?.delivery_fee) setDeliveryFee(data.delivery_fee); });
+    }
+  }, [cartItems]);
   const formatPrice = (p) => p.toLocaleString("sq-AL") + " L";
 
   // Redirect to login if not logged in

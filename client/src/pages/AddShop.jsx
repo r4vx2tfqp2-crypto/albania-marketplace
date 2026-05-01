@@ -17,7 +17,7 @@ export default function AddShop() {
   const [logoPreview, setLogoPreview] = useState(null);
   const [form, setForm] = useState({
     name: "", description: "", category: "Clothes & Fashion",
-    location: "Tirana", phone: "", email: "", color: "#1D9E75",
+    location: "Tirana", phone: "", email: "", color: "#1D9E75", delivery_fee: 300,
   });
 
   const getInitials = (name) => name.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2);
@@ -53,6 +53,7 @@ export default function AddShop() {
       phone: form.phone,
       email: form.email,
       color: form.color,
+      delivery_fee: parseInt(form.delivery_fee) || 300,
       initials: getInitials(form.name),
       verified: false,
       rating: 0,
@@ -160,6 +161,16 @@ export default function AddShop() {
                 <input required type="email" className={styles.input} placeholder="dyqani@example.com"
                   value={form.email} onChange={e => setForm({...form, email: e.target.value})} />
               </div>
+            </div>
+
+            <div className={styles.field}>
+              <label className={styles.label}>Tarifa e dorezimit (ALL)</label>
+              <input type="number" className={styles.input} placeholder="300"
+                value={form.delivery_fee}
+                onChange={e => setForm({...form, delivery_fee: e.target.value})} />
+              <span style={{ fontSize: 12, color: "var(--text-3)", marginTop: 4, display: "block" }}>
+                Cmimi qe klienti paguan per dorezim. Default: 300 L
+              </span>
             </div>
 
             <div className={styles.field}>
