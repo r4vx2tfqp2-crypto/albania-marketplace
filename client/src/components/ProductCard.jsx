@@ -52,8 +52,10 @@ export default function ProductCard({ product, index = 0 }) {
           <div>
             <div className={styles.price}>{formatPrice(product.price)}</div>
             <div className={styles.rating}>
-              <span className="stars">{"★".repeat(Math.round(product.rating || 0))}</span>
-              <span className={styles.ratingCount}>({product.review_count || 0})</span>
+              <span className="stars" style={{ color: product.rating ? "#F59E0B" : "var(--border-strong)" }}>
+                {"★".repeat(Math.round(product.rating || 0))}{"☆".repeat(5 - Math.round(product.rating || 0))}
+              </span>
+              {product.review_count > 0 && <span className={styles.ratingCount}>({product.review_count})</span>}
             </div>
           </div>
           <button
