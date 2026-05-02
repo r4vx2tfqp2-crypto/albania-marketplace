@@ -36,7 +36,8 @@ export default function Shop() {
   if (!shop) return <div style={{ padding: 80, textAlign: 'center', color: 'var(--text-3)' }}>Shop not found</div>;
 
   const whatsappMessage = `Hi! I found your shop "${shop.name}" on Tregu and I'd like to know more.`;
-  const whatsappPhone = shop?.phone?.replace(/\s+/g, '').replace('+', '');
+  const rawPhone = shop?.phone?.replace(/\s+/g, '') || '';
+  const whatsappPhone = rawPhone.startsWith('+355') ? rawPhone.replace('+', '') : rawPhone.startsWith('0') ? '355' + rawPhone.slice(1) : '355' + rawPhone;
   const whatsappUrl = `https://wa.me/${whatsappPhone}?text=${encodeURIComponent(whatsappMessage)}`;
 
   const TABS = [
