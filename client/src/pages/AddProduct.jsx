@@ -260,7 +260,7 @@ export default function AddProduct() {
                 value={form.name} onChange={e => setForm({...form, name: e.target.value})} />
             </div>
 
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 14 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(140px, 1fr))", gap: 12, marginBottom: 14 }}>
               <div className={styles.field}>
                 <label className={styles.label}>Çmimi (ALL) *</label>
                 <input required type="number" className={styles.input} placeholder="3200"
@@ -376,7 +376,7 @@ export default function AddProduct() {
                 </div>
                 <h2 style={{ fontSize: 16, fontWeight: 600, margin: 0 }}>Detajet e produktit</h2>
               </div>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: 12 }}>
                 {categoryDetails.map(field => (
                   <div key={field.key} className={styles.field}>
                     <label className={styles.label}>{field.label}</label>
