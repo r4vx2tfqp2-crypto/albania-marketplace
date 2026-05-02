@@ -12,6 +12,7 @@ const CATEGORIES = [
   { key: "home", label: "Shtepi & Jetese", icon: "🏠" },
   { key: "sports", label: "Sporte & Fitness", icon: "⚽" },
   { key: "gifts", label: "Dhurata", icon: "🎁" },
+  { key: "construction", label: "Vegla & Ndertim", icon: "🔨" },
 ];
 
 const PRESET_SIZES = {
@@ -91,6 +92,16 @@ const CATEGORY_DETAILS = {
     { key: "gender", label: "Gjinia", type: "select", options: ["Burra", "Gra", "Femije", "Unisex"] },
     { key: "condition", label: "Gjendja", type: "select", options: ["I ri me etikete", "I ri pa etikete", "Si i ri", "I perdorur mire"] },
     { key: "level", label: "Niveli", type: "select", options: ["Fillestar", "Mesem", "Profesionist"] },
+  ],
+  construction: [
+    { key: "brand", label: "Marka", placeholder: "Bosch, Makita, DeWalt, Stanley..." },
+    { key: "product_type", label: "Lloji i produktit", type: "select", options: ["Vegla elektrike", "Vegla dore", "Materiale ndertimi", "Pajisje hidraulike", "Pajisje elektrike", "Bojera & Llac", "Dyer & Dritare", "Pllaka & Mozaik", "Pompa & Tubacione", "Skela & Mbajtese", "Pajisje korriku", "Tjeter"] },
+    { key: "power", label: "Fuqia", placeholder: "500W, 1200W, 18V..." },
+    { key: "condition", label: "Gjendja", type: "select", options: ["I ri ne kuti", "I ri pa kuti", "Si i ri", "I perdorur mire", "I perdorur"] },
+    { key: "material", label: "Materiali", placeholder: "Celik, Alumin, Plastike..." },
+    { key: "dimensions", label: "Permasat/Kapaciteti", placeholder: "20cm, 5L, 2m..." },
+    { key: "warranty", label: "Garancia", placeholder: "1 vit, 2 vjet, Pa garanci..." },
+    { key: "accessories", label: "Aksesore te perfshire", placeholder: "Karikues, Valixhe, Bit set..." },
   ],
   gifts: [
     { key: "occasion", label: "Rasti", type: "select", options: ["Ditelindja", "Dasma", "Vjetori", "Dita e Nenes", "Dita e Babait", "Krishtlindja", "Viti i Ri", "Dita e Shën Valentinit", "Diplomim", "Lindja e femijës", "Tjeter"] },

@@ -6,7 +6,7 @@ import styles from "./AddProduct.module.css";
 
 const CITIES = ["Tirana", "Durres", "Shkoder", "Vlore", "Korce", "Fier", "Berat", "Lushnje"];
 const COLORS = ["#1D9E75","#D4537E","#378ADD","#993556","#BA7517","#534AB7"];
-const CATEGORIES = ["Kepuce & Sporte","Rroba & Mode","Elektronike","Bukuri & Kozmetike","Shtepi & Jetese","Kepuce","Dhurata"];
+const CATEGORIES = ["Kepuce & Sporte","Rroba & Mode","Elektronike","Bukuri & Kozmetike","Shtepi & Jetese","Kepuce","Dhurata","Vegla & Ndertim"];
 
 export default function AddShop() {
   const navigate = useNavigate();
