@@ -2,7 +2,7 @@ import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 
 const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')
 const SITE_URL = 'https://tregu.store'
-const ADMIN_EMAIL = 'tregusupport@gmail.com'
+const ADMIN_EMAIL = 'info@tregu.store'
 const FROM = 'Tregu <noreply@tregu.store>'
 
 const corsHeaders = {
@@ -180,7 +180,7 @@ serve(async (req) => {
 
         ${order.notes ? `<p style="font-size:13px;color:#5C5A55;background:#FEF9EE;padding:12px;border-radius:8px;margin-bottom:16px;">📝 <strong>Shenime:</strong> ${order.notes}</p>` : ''}
 
-        <p style="font-size:12px;color:#9A9890;margin-top:16px;line-height:1.6;">Per cdo pyetje kontaktoni: <a href="mailto:tregusupport@gmail.com" style="color:#1D9E75;">tregusupport@gmail.com</a></p>
+        <p style="font-size:12px;color:#9A9890;margin-top:16px;line-height:1.6;">Per cdo pyetje kontaktoni: <a href="mailto:info@tregu.store" style="color:#1D9E75;">info@tregu.store</a></p>
 
       </td></tr>
 

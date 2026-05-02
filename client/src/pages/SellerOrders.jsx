@@ -100,7 +100,7 @@ export default function SellerOrders() {
     doc.setFontSize(7);
     doc.setFont("helvetica", "normal");
     doc.setTextColor(180, 180, 180);
-    doc.text("tregu.store  |  tregusupport@gmail.com", pageW - mr, 11, { align: "right" });
+    doc.text("tregu.store  |  info@tregu.store", pageW - mr, 11, { align: "right" });
 
     // ── INVOICE TITLE + META ──
     let y = 30;

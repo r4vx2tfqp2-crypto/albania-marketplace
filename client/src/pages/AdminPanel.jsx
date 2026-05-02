@@ -88,7 +88,7 @@ export default function AdminPanel() {
           <div style={{ width: 32, height: 32, background: 'var(--green)', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: 18, color: '#fff' }}>T</div>
           <div>
             <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 16, color: '#fff' }}>Tregu Admin</div>
-            <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)' }}>tregusupport@gmail.com</div>
+            <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)' }}>info@tregu.store</div>
           </div>
         </div>
         <button onClick={() => navigate('/')} style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>

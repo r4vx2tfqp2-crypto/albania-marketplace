@@ -53,7 +53,7 @@ const SECTIONS = {
       },
       {
         heading: '12. Kontakti',
-        text: 'Për pyetje rreth këtyre kushteve, na kontaktoni: tregusupport@gmail.com'
+        text: 'Për pyetje rreth këtyre kushteve, na kontaktoni: info@tregu.store'
       },
     ]
   },
@@ -79,7 +79,7 @@ const SECTIONS = {
       },
       {
         heading: '5. Të Drejtat Tuaja',
-        text: 'Keni të drejtë të aksesoni të dhënat tuaja personale, të korrigjoni të dhënat e pasakta, të kërkoni fshirjen e të dhënave tuaja dhe të tërhiqni pëlqimin në çdo kohë. Për të ushtruar këto të drejta, na kontaktoni: tregusupport@gmail.com'
+        text: 'Keni të drejtë të aksesoni të dhënat tuaja personale, të korrigjoni të dhënat e pasakta, të kërkoni fshirjen e të dhënave tuaja dhe të tërhiqni pëlqimin në çdo kohë. Për të ushtruar këto të drejta, na kontaktoni: info@tregu.store'
       },
       {
         heading: '6. Cookies',
@@ -95,7 +95,7 @@ const SECTIONS = {
       },
       {
         heading: '9. Kontakti',
-        text: 'Për pyetje rreth privatësisë, na kontaktoni: tregusupport@gmail.com'
+        text: 'Për pyetje rreth privatësisë, na kontaktoni: info@tregu.store'
       },
     ]
   },
@@ -125,7 +125,7 @@ const SECTIONS = {
       },
       {
         heading: '6. Ankesat e së Drejtës së Autorit',
-        text: 'Nëse besoni se përmbajtja në Tregu shkel të drejtën tuaj të autorit, ju lutemi na kontaktoni: tregusupport@gmail.com me detajet e shkeljes. Do të hetojmë dhe do të marrim veprimet e duhura.'
+        text: 'Nëse besoni se përmbajtja në Tregu shkel të drejtën tuaj të autorit, ju lutemi na kontaktoni: info@tregu.store me detajet e shkeljes. Do të hetojmë dhe do të marrim veprimet e duhura.'
       },
       {
         heading: '7. Përmbajtja e Gjeneruar nga Përdoruesit',
@@ -191,7 +191,7 @@ export default function Legal() {
 
         <div style={{ borderTop: '1px solid var(--border)', paddingTop: 28, marginTop: 20 }}>
           <p style={{ fontSize: 13, color: 'var(--text-3)', lineHeight: 1.7 }}>
-            Këto politika zbatohen për të gjithë përdoruesit e platformës Tregu. Duke përdorur Tregu, ju pranoni se keni lexuar dhe kuptuar këto politika. Për çdo pyetje na kontaktoni: <strong>tregusupport@gmail.com</strong>
+            Këto politika zbatohen për të gjithë përdoruesit e platformës Tregu. Duke përdorur Tregu, ju pranoni se keni lexuar dhe kuptuar këto politika. Për çdo pyetje na kontaktoni: <strong>info@tregu.store</strong>
           </p>
         </div>
       </div>
