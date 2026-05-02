@@ -91,7 +91,7 @@ input, select, textarea { font-family: var(--font-body); }
   font-size: 11px; font-weight: 500; padding: 3px 8px;
   border-radius: 20px; white-space: nowrap;
 }
-.badge-verified { background: var(--green-light); color: var(--green-dark); }
+.badge-verified { background: #1877F2; color: #fff; border-radius: 20px; padding: 3px 10px; font-size: 11px; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; }
 .badge-new { background: var(--blue-light); color: var(--blue); }
 .badge-out { background: var(--red-light); color: var(--red); }
 .badge-deal { background: var(--amber-light); color: #854F0B; }
