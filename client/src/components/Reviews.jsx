@@ -6,10 +6,14 @@ export default function Reviews({ productId, shopId, type = "product", onReviewA
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
   const [form, setForm] = useState({ rating: 5, text: "", author: "" });
   const [success, setSuccess] = useState(false);
 
-  useEffect(() => { fetchReviews(); }, [productId, shopId]);
+  useEffect(() => {
+    fetchReviews();
+    supabase.auth.getUser().then(({ data: { user } }) => setCurrentUser(user));
+  }, [productId, shopId]);
 
   const fetchReviews = async () => {
     let query = supabase.from("reviews").select("*").order("created_at", { ascending: false });
@@ -49,6 +53,13 @@ export default function Reviews({ productId, shopId, type = "product", onReviewA
     if (onReviewAdded) onReviewAdded();
     setSubmitting(false);
     setTimeout(() => setSuccess(false), 3000);
+  };
+
+  const handleDelete = async (reviewId) => {
+    if (!window.confirm("Fshi kete vleresim?")) return;
+    await supabase.from("reviews").delete().eq("id", reviewId);
+    await fetchReviews();
+    if (onReviewAdded) onReviewAdded();
   };
 
   const avgRating = reviews.length > 0
@@ -138,7 +149,15 @@ export default function Reviews({ productId, shopId, type = "product", onReviewA
                     <div style={{ fontSize: 12, color: "var(--text-3)" }}>{new Date(r.created_at).toLocaleDateString("sq-AL")}</div>
                   </div>
                 </div>
-                <div style={{ color: "#F59E0B", fontSize: 14 }}>{"★".repeat(r.rating)}{"☆".repeat(5 - r.rating)}</div>
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <div style={{ color: "#F59E0B", fontSize: 14 }}>{"★".repeat(r.rating)}{"☆".repeat(5 - r.rating)}</div>
+                  {currentUser && currentUser.id === r.buyer_id && (
+                    <button onClick={() => handleDelete(r.id)}
+                      style={{ background: "var(--red-light)", color: "var(--red)", border: "none", borderRadius: 6, padding: "4px 8px", fontSize: 11, cursor: "pointer", fontFamily: "var(--font-body)" }}>
+                      Fshi
+                    </button>
+                  )}
+                </div>
               </div>
               {r.text && <p style={{ fontSize: 14, color: "var(--text-2)", margin: 0, lineHeight: 1.6 }}>{r.text}</p>}
             </div>

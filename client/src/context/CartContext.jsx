@@ -4,7 +4,9 @@ const CartContext = createContext();
 
 export function CartProvider({ children }) {
   const [cartItems, setCartItems] = useState([]);
-  const [savedItems, setSavedItems] = useState([]);
+  const [savedItems, setSavedItems] = useState(() => {
+    try { return JSON.parse(localStorage.getItem("tregu_saved") || "[]"); } catch { return []; }
+  });
 
   const addToCart = (product, selectedSize = null) => {
     setCartItems(prev => {
@@ -27,6 +29,10 @@ export function CartProvider({ children }) {
       i.id === productId && i.selectedSize === selectedSize ? { ...i, qty } : i
     ));
   };
+
+  useEffect(() => {
+    localStorage.setItem("tregu_saved", JSON.stringify(savedItems));
+  }, [savedItems]);
 
   const toggleSaved = (product) => {
     setSavedItems(prev =>

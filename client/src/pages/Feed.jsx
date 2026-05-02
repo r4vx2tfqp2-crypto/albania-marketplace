@@ -27,13 +27,19 @@ export default function Feed() {
     setLoading(false);
   };
 
+  const [slideDir, setSlideDir] = useState("up");
+  const [sliding, setSliding] = useState(false);
+
   const goTo = (index) => {
-    if (index < 0 || index >= products.length) return;
+    if (index < 0 || index >= products.length || sliding) return;
+    setSlideDir(index > current ? "up" : "down");
+    setSliding(true);
     setOpacity(0);
     setTimeout(() => {
       setCurrent(index);
       setOpacity(1);
-    }, 200);
+      setSliding(false);
+    }, 250);
   };
 
   const handleTouchStart = (e) => { touchStartY.current = e.touches[0].clientY; };
@@ -90,7 +96,8 @@ export default function Feed() {
       style={{ height: "100vh", width: "100%", background: "#000", position: "relative", overflow: "hidden" }}>
 
       {/* BACKGROUND IMAGE */}
-      <div style={{ position: "absolute", inset: 0, transition: "opacity 0.2s ease", opacity }}>
+      <div style={{ position: "absolute", inset: 0, transition: "opacity 0.25s ease, transform 0.25s ease",
+        opacity, transform: sliding ? (slideDir === "up" ? "translateY(30px)" : "translateY(-30px)") : "translateY(0)" }}>
         {hasImage ? (
           <img src={product.images[0]} alt={product.name}
             style={{ width: "100%", height: "100%", objectFit: "cover" }} />

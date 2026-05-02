@@ -18,7 +18,6 @@ export default function Product() {
   const { addToCart, toggleSaved, isSaved } = useCart();
   const [product, setProduct] = useState(null);
   const [shop, setShop] = useState(null);
-  const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedSize, setSelectedSize] = useState(null);
   const [selectedColor, setSelectedColor] = useState(null);
@@ -38,8 +37,6 @@ export default function Product() {
         setSelectedColor(colors[0] || null);
       }
     }
-    const { data: reviewsData } = await supabase.from("reviews").select("*").eq("product_id", id);
-    setReviews(reviewsData || []);
     setLoading(false);
   };
 
