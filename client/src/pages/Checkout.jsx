@@ -113,6 +113,7 @@ export default function Checkout() {
     if (!form.name.trim() || form.name.trim().length < 3) e.name = t("enter_full_name");
     if (!form.phone.trim() || !/^(\+355|0)\d{8,9}$/.test(form.phone.replace(/\s/g, ""))) e.phone = t("enter_valid_phone");
     if (!form.address.trim() || form.address.trim().length < 5) e.address = t("enter_full_address");
+    if (!form.email.trim() || !form.email.includes("@")) e.email = "Shkruani nje email te vlefshme";
     setErrors(e);
     return Object.keys(e).length === 0;
   };
@@ -179,9 +180,10 @@ export default function Checkout() {
               </div>
 
               <div className={styles.field}>
-                <label className={styles.label}>Email (per konfirmim porosie)</label>
-                <input className={styles.input} placeholder="you@example.com" type="email"
+                <label className={styles.label}>Email (per konfirmim porosie) *</label>
+                <input required className={styles.input + (errors.email ? " " + styles.inputError : "")} placeholder="you@example.com" type="email"
                   value={form.email} onChange={e => setForm({...form, email: e.target.value})} />
+                {errors.email && <span className={styles.errorMsg}>{errors.email}</span>}
               </div>
 
               <div className={styles.field}>
