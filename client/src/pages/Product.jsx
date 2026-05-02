@@ -5,7 +5,6 @@ import { useTranslation } from "react-i18next";
 import { useCart } from "../context/CartContext";
 import { supabase } from "../lib/supabase";
 import { Helmet } from "react-helmet-async";
-import { Helmet } from "react-helmet-async";
 import Reviews from "../components/Reviews";
 import styles from "./Product.module.css";
 
@@ -67,9 +66,6 @@ export default function Product() {
     : [];
 
   const whatsappMessage = "Pershendetje! Jam i interesuar per: " + product.name + " nga dyqani juaj ne Tregu.";
-  const seoTitle = product.name + " — " + (shop?.name || "Tregu") + " | Tregu.store";
-  const seoDesc = (product.description || "").slice(0, 155) + " | Bli online ne Tregu.store me pagese me dorezim.";
-  const seoImage = product.images?.[0] || "https://tregu.store/og-image.png";
   const seoTitle = product.name + " — " + (shop?.name || "Tregu") + " | Tregu.store";
   const seoDesc = (product.description || "").slice(0, 155) + " | Bli online ne Tregu.store me pagese me dorezim.";
   const seoImage = product.images?.[0] || "https://tregu.store/og-image.png";
