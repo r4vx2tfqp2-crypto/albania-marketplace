@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "../lib/supabase";
 
-export default function Reviews({ productId, shopId, type = "product" }) {
+export default function Reviews({ productId, shopId, type = "product", onReviewAdded }) {
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -46,6 +46,7 @@ export default function Reviews({ productId, shopId, type = "product" }) {
     setShowForm(false);
     setForm({ rating: 5, text: "", author: "" });
     await fetchReviews();
+    if (onReviewAdded) onReviewAdded();
     setSubmitting(false);
     setTimeout(() => setSuccess(false), 3000);
   };

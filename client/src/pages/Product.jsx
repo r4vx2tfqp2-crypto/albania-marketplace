@@ -223,7 +223,7 @@ export default function Product() {
           </div>
         </div>
 
-        <div style={{ padding: "0 0 40px" }}><Reviews productId={id} type="product" /></div>
+        <div style={{ padding: "0 0 40px" }}><Reviews productId={id} type="product" onReviewAdded={fetchProduct} /></div>
       </div>
     </div>
   );
