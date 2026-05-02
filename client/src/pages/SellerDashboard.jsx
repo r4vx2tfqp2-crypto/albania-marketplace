@@ -222,6 +222,17 @@ export default function SellerDashboard() {
             </div>
           </div>
         )}
+      {/* SUPPORT BUTTON */}
+      <div style={{ margin: "20px 0 40px", padding: "20px 24px", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--radius-lg)", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12 }}>
+        <div>
+          <div style={{ fontSize: 15, fontWeight: 600, marginBottom: 4 }}>Keni pyetje ose problem?</div>
+          <div style={{ fontSize: 13, color: "var(--text-3)" }}>Ekipi yne është këtu për t'ju ndihmuar 7 ditë në javë.</div>
+        </div>
+        <a href={"mailto:info@tregu.store?subject=Kerk%C3%ABs%C3%AB%20ndihm%C3%ABs%20-%20" + encodeURIComponent(user?.email || "")}
+          style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "var(--text-1)", color: "#fff", padding: "10px 20px", borderRadius: "var(--radius-md)", fontSize: 14, fontWeight: 500, textDecoration: "none", whiteSpace: "nowrap" }}>
+          💬 Kontakto Suportin
+        </a>
+      </div>
       </div>
     </div>
   );
