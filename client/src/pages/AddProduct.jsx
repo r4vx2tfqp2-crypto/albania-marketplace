@@ -94,7 +94,7 @@ export default function AddProduct() {
 
   const handleImageChange = (e) => {
     const newFiles = Array.from(e.target.files);
-    const combined = [...images, ...newFiles].slice(0, 5);
+    const combined = [...images, ...newFiles].slice(0, 10);
     setImages(combined);
     setImagePreviews(combined.map(f => URL.createObjectURL(f)));
   };
@@ -198,7 +198,7 @@ export default function AddProduct() {
             <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
               <div style={{ width: 28, height: 28, borderRadius: "50%", background: "var(--text-1)", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, fontWeight: 700, flexShrink: 0 }}>1</div>
               <h2 style={{ fontSize: 16, fontWeight: 600, margin: 0 }}>Foto produktit</h2>
-              <span style={{ fontSize: 12, color: "var(--text-3)" }}>Deri ne 5 foto</span>
+              <span style={{ fontSize: 12, color: "var(--text-3)" }}>Deri ne 10 foto</span>
             </div>
             <label style={{ cursor: "pointer", display: "block" }}>
               <input type="file" accept="image/*" multiple style={{ display: "none" }} onChange={handleImageChange} />
@@ -206,7 +206,7 @@ export default function AddProduct() {
                 <div style={{ border: "2px dashed var(--border-strong)", borderRadius: 12, padding: 32, textAlign: "center" }}>
                   <Upload size={28} strokeWidth={1.5} style={{ color: "var(--text-3)", marginBottom: 8 }} />
                   <div style={{ fontSize: 14, fontWeight: 500, marginBottom: 4 }}>Kliko per te ngarkuar foto</div>
-                  <div style={{ fontSize: 12, color: "var(--text-3)" }}>JPG, PNG — Max 5MB secila</div>
+                  <div style={{ fontSize: 12, color: "var(--text-3)" }}>JPG, PNG — Max 5MB secila — Deri ne 10 foto</div>
                 </div>
               ) : (
                 <div style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" }}>
@@ -220,7 +220,7 @@ export default function AddProduct() {
                       </button>
                     </div>
                   ))}
-                  {imagePreviews.length < 5 && (
+                  {imagePreviews.length < 10 && (
                     <div style={{ width: 90, height: 90, border: "2px dashed var(--border-strong)", borderRadius: 10, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", color: "var(--text-3)", fontSize: 11, gap: 4 }}>
                       <Plus size={20} />
                       Shto foto
