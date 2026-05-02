@@ -73,7 +73,12 @@ export default function Product() {
   const seoTitle = product.name + " — " + (shop?.name || "Tregu") + " | Tregu.store";
   const seoDesc = (product.description || "").slice(0, 155) + " | Bli online ne Tregu.store me pagese me dorezim.";
   const seoImage = product.images?.[0] || "https://tregu.store/og-image.png";
-  const whatsappPhone = shop?.phone?.replace(/\s+/g, "").replace("+", "");
+  const rawPhone = shop?.phone?.replace(/\s+/g, "") || "";
+  const whatsappPhone = rawPhone.startsWith("+355") 
+    ? rawPhone.replace("+", "")
+    : rawPhone.startsWith("0") 
+    ? "355" + rawPhone.slice(1)
+    : "355" + rawPhone;
   const whatsappUrl = "https://wa.me/" + whatsappPhone + "?text=" + encodeURIComponent(whatsappMessage);
 
   return (
