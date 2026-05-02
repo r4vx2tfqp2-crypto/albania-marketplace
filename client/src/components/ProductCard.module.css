@@ -1,13 +1,15 @@
 .card {
   background: var(--surface);
-  border-radius: var(--radius-lg);
+  border-radius: 12px;
   border: 1px solid var(--border);
   overflow: hidden;
   transition: transform 0.2s, box-shadow 0.2s;
+  position: relative;
 }
 .card:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.10);
+  border-color: var(--border-strong);
 }
 
 .imageWrap {
@@ -15,6 +17,14 @@
   position: relative;
   aspect-ratio: 1;
   overflow: hidden;
+  background: var(--surface-2);
+}
+
+.imageWrap img {
+  transition: transform 0.4s ease;
+}
+.card:hover .imageWrap img {
+  transform: scale(1.04);
 }
 
 .imagePlaceholder {
@@ -23,81 +33,108 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 48px;
+  font-size: 52px;
+}
+
+.badges {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .saveBtn {
   position: absolute;
   top: 10px;
   right: 10px;
-  width: 30px;
-  height: 30px;
+  width: 34px;
+  height: 34px;
   background: white;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   color: var(--text-3);
-  box-shadow: var(--shadow-sm);
-  transition: color 0.15s, transform 0.15s;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+  transition: color 0.15s, transform 0.15s, box-shadow 0.15s;
 }
-.saveBtn:hover { color: var(--pink); transform: scale(1.1); }
+.saveBtn:hover { color: var(--pink); transform: scale(1.1); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
 .saveBtn.saved { color: var(--pink); }
 
 .body {
-  padding: 12px;
+  padding: 12px 14px 14px;
 }
 
 .name {
   display: block;
-  font-size: 14px;
+  font-size: 13.5px;
   font-weight: 500;
   color: var(--text-1);
-  line-height: 1.3;
-  margin-bottom: 3px;
-  white-space: nowrap;
+  line-height: 1.4;
+  margin-bottom: 4px;
   overflow: hidden;
-  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  text-decoration: none;
+  min-height: 38px;
 }
 .name:hover { color: var(--green-dark); }
 
 .shop {
   display: flex;
   align-items: center;
-  gap: 4px;
-  font-size: 12px;
+  gap: 5px;
+  font-size: 11.5px;
   color: var(--text-3);
   margin-bottom: 10px;
+  text-decoration: none;
 }
 .shop:hover { color: var(--text-2); }
 
 .verifiedDot {
   width: 6px;
   height: 6px;
-  background: var(--green);
+  background: #1877F2;
   border-radius: 50%;
   flex-shrink: 0;
 }
 
 .footer {
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   justify-content: space-between;
+  margin-top: 8px;
+  gap: 8px;
+}
+
+.priceWrap {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
 .price {
-  font-size: 15px;
-  font-weight: 600;
+  font-size: 17px;
+  font-weight: 700;
   font-family: var(--font-display);
   color: var(--text-1);
-  line-height: 1.2;
+  line-height: 1.1;
+}
+
+.delivery {
+  font-size: 11px;
+  color: var(--green-dark);
+  font-weight: 500;
 }
 
 .rating {
   display: flex;
   align-items: center;
   gap: 3px;
-  margin-top: 2px;
+  margin-top: 3px;
 }
 
 .ratingCount {
@@ -106,12 +143,12 @@
 }
 
 .addBtn {
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   background: var(--text-1);
   color: #fff;
-  border-radius: var(--radius-sm);
-  font-size: 20px;
+  border-radius: 10px;
+  font-size: 22px;
   line-height: 1;
   display: flex;
   align-items: center;
@@ -121,3 +158,27 @@
 }
 .addBtn:hover { background: var(--green); transform: scale(1.05); }
 .addBtn:disabled { background: var(--border-strong); cursor: not-allowed; }
+
+.sizesRow {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.sizeTag {
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: var(--surface-2);
+  color: var(--text-3);
+  border: 1px solid var(--border);
+  font-weight: 500;
+}
+
+.colorDots {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 8px;
+  align-items: center;
+}
