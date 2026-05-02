@@ -29,9 +29,9 @@ export default function Home() {
   const fetchData = async () => {
     setLoading(true);
     const [{ data: trending }, { data: shops }, { data: products }] = await Promise.all([
-      supabase.from('products').select('*, shops(*)').eq('trending', true).limit(4),
+      supabase.from('products').select('*, shops(*)').eq('trending', true).order('created_at', { ascending: false }).limit(4),
       supabase.from('shops').select('*').eq('verified', true).limit(4),
-      supabase.from('products').select('*, shops(*)').limit(8),
+      supabase.from('products').select('*, shops(*)').order('created_at', { ascending: false }).limit(8),
     ]);
     setTrendingProducts(trending || []);
     setFeaturedShops(shops || []);

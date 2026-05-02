@@ -34,6 +34,10 @@ export function CartProvider({ children }) {
     localStorage.setItem("tregu_saved", JSON.stringify(savedItems));
   }, [savedItems]);
 
+  useEffect(() => {
+    localStorage.setItem("tregu_saved", JSON.stringify(savedItems));
+  }, [savedItems]);
+
   const toggleSaved = (product) => {
     setSavedItems(prev =>
       prev.find(i => i.id === product.id)
