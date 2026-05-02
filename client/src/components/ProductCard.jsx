@@ -40,7 +40,10 @@ export default function ProductCard({ product, index = 0 }) {
       <div className={styles.body}>
         <Link to={"/product/" + product.id} className={styles.name}>{product.name}</Link>
         {shop && (
-          <Link to={"/shop/" + shop.id} className={styles.shop}>
+          <Link to={"/shop/" + shop.id} className={styles.shop} style={{ display: "flex", alignItems: "center", gap: 5 }}>
+            <div style={{ width: 18, height: 18, borderRadius: "50%", background: shop.color + "22", color: shop.color, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 9, fontWeight: 700, flexShrink: 0, overflow: "hidden" }}>
+              {shop.logo_url ? <img src={shop.logo_url} alt={shop.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : shop.initials}
+            </div>
             {shop.name}
             {shop.verified && <span className={styles.verifiedDot} title="Verified shop" />}
           </Link>
