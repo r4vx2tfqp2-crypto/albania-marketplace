@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import { useCart } from "../context/CartContext";
 import { supabase } from "../lib/supabase";
 import { Helmet } from "react-helmet-async";
+import { Helmet } from "react-helmet-async";
 import Reviews from "../components/Reviews";
 import styles from "./Product.module.css";
 
@@ -69,12 +70,25 @@ export default function Product() {
   const seoTitle = product.name + " — " + (shop?.name || "Tregu") + " | Tregu.store";
   const seoDesc = (product.description || "").slice(0, 155) + " | Bli online ne Tregu.store me pagese me dorezim.";
   const seoImage = product.images?.[0] || "https://tregu.store/og-image.png";
+  const seoTitle = product.name + " — " + (shop?.name || "Tregu") + " | Tregu.store";
+  const seoDesc = (product.description || "").slice(0, 155) + " | Bli online ne Tregu.store me pagese me dorezim.";
+  const seoImage = product.images?.[0] || "https://tregu.store/og-image.png";
   const whatsappPhone = shop?.phone?.replace(/\s+/g, "").replace("+", "");
   const whatsappUrl = "https://wa.me/" + whatsappPhone + "?text=" + encodeURIComponent(whatsappMessage);
 
   return (
     <div className={styles.page}>
       <div className="container">
+        <Helmet>
+          <title>{seoTitle}</title>
+          <meta name="description" content={seoDesc} />
+          <meta property="og:title" content={seoTitle} />
+          <meta property="og:description" content={seoDesc} />
+          <meta property="og:image" content={seoImage} />
+          <meta property="og:url" content={"https://tregu.store/product/" + product.id} />
+          <meta property="og:type" content="product" />
+          <meta name="twitter:card" content="summary_large_image" />
+        </Helmet>
         <Helmet>
           <title>{seoTitle}</title>
           <meta name="description" content={seoDesc} />
