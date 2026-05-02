@@ -77,9 +77,10 @@ export default function AddProduct() {
   };
 
   const handleImageChange = (e) => {
-    const files = Array.from(e.target.files).slice(0, 5);
-    setImages(files);
-    setImagePreviews(files.map(f => URL.createObjectURL(f)));
+    const newFiles = Array.from(e.target.files);
+    const combined = [...images, ...newFiles].slice(0, 5);
+    setImages(combined);
+    setImagePreviews(combined.map(f => URL.createObjectURL(f)));
   };
 
   const removeImage = (index) => {
