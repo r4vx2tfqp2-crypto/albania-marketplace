@@ -76,8 +76,15 @@ export default function Home() {
       </div>
       
       <Helmet>
-       <title>Tregu — Të gjitha dyqanet shqiptare në një vend</title>
-       <meta name="description" content="Zbulo produkte nga dyqane lokale të verifikuara në Shqipëri. Krahaso çmimet, porosit online, pagesa me dorëzim." />
+        <title>Tregu.store — Platforma e Pare Shqiptare e Tregtise Elektronike</title>
+        <meta name="description" content="Zbulo produkte nga dyqane lokale te verifikuara ne Shqiperi. Porosit online, pagesa me dorezim. Kenge, rroba, elektronike dhe shume me teper." />
+        <meta property="og:title" content="Tregu.store — Dyqanet Shqiptare Online" />
+        <meta property="og:description" content="Platforma e pare shqiptare e tregtise elektronike. Bli dhe shit online me pagese me dorezim." />
+        <meta property="og:image" content="https://tregu.store/og-image.png" />
+        <meta property="og:url" content="https://tregu.store" />
+        <meta property="og:type" content="website" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <link rel="canonical" href="https://tregu.store" />
       </Helmet>
 
       <div className="container">

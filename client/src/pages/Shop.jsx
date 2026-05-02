@@ -4,6 +4,7 @@ import { ArrowLeft, MapPin, CheckCircle, Truck } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import ProductCard from '../components/ProductCard';
 import { supabase } from '../lib/supabase';
+import { Helmet } from 'react-helmet-async';
 import Reviews from '../components/Reviews';
 import styles from './Shop.module.css';
 
@@ -48,7 +49,15 @@ export default function Shop() {
     <div className={styles.page}>
       <div className={styles.header}>
         <div className="container">
-          <button className={styles.back} onClick={() => navigate(-1)}>
+          <Helmet>
+          <title>{shop.name} — Dyqan Online | Tregu.store</title>
+          <meta name="description" content={shop.description?.slice(0, 155) + " | Bli online ne Tregu.store."} />
+          <meta property="og:title" content={shop.name + " | Tregu.store"} />
+          <meta property="og:description" content={shop.description?.slice(0, 155)} />
+          {shop.logo_url && <meta property="og:image" content={shop.logo_url} />}
+          <meta property="og:url" content={"https://tregu.store/shop/" + shop.id} />
+        </Helmet>
+        <button className={styles.back} onClick={() => navigate(-1)}>
             <ArrowLeft size={16} /> {t('back')}
           </button>
           <div className={styles.shopHero}>
