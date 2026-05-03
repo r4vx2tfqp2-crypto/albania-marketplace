@@ -60,7 +60,8 @@ export default function DeliveryConfirm() {
   const stopDraw = () => {
     isDrawing.current = false;
     if (canvasRef.current) {
-      setSignature(canvasRef.current.toDataURL());
+      // Compress signature to small jpeg
+      setSignature(canvasRef.current.toDataURL('image/jpeg', 0.3));
     }
   };
 
@@ -85,7 +86,7 @@ export default function DeliveryConfirm() {
       await fetch(FUNCTION_URL, {
         method: 'POST',
         headers: { 'Authorization': 'Bearer ' + ANON_KEY, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ order: { ...order, ...(updatedOrder || {}), status: newStatus, delivery_preference: deliveryOption, neighbour_name: neighbourName || '', signature: signature || null }, type: 'delivery_confirmed' }),
+        body: JSON.stringify({ order: { id: order.id, customer_name: order.customer_name, customer_email: order.customer_email, customer_phone: order.customer_phone, customer_address: order.customer_address, customer_city: order.customer_city, total: order.total, items: order.items, notes: deliveryNote, delivery_preference: deliveryOption, neighbour_name: neighbourName || '', signature: signature || null, status: newStatus }, type: 'delivery_confirmed' }),
       });
     } catch (err) { console.log('Email error:', err); }
     setStep('success');
