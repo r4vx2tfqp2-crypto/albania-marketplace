@@ -36,11 +36,21 @@ export default function SellerOrders() {
   useEffect(() => { fetchOrders(); }, []);
 
   const fetchOrders = async () => {
+    const { data: shopsData } = await supabase.from("shops").select("id").eq("user_id", user.id);
+    const myShopIds = (shopsData || []).map(s => s.id);
+    if (myShopIds.length === 0) { setOrders([]); setLoading(false); return; }
+    const { data: shopOrders } = await supabase.from("orders").select("*").in("shop_id", myShopIds).order("created_at", { ascending: false });
+    // Also get orders by product IDs for backward compatibility
     const { data: productsData } = await supabase.from("products").select("id").eq("user_id", user.id);
     const myProductIds = (productsData || []).map(p => p.id);
-    if (myProductIds.length === 0) { setOrders([]); setLoading(false); return; }
-    const { data } = await supabase.from("orders").select("*").order("created_at", { ascending: false });
-    const myOrders = (data || []).filter(order => order.items?.some(item => myProductIds.includes(item.id)));
+    const { data: allOrders } = await supabase.from("orders").select("*").order("created_at", { ascending: false });
+    const productOrders = (allOrders || []).filter(order => order.items?.some(item => myProductIds.includes(item.id)));
+    // Merge both, removing duplicates
+    const merged = [...(shopOrders || [])];
+    for (const o of productOrders) {
+      if (!merged.find(m => m.id === o.id)) merged.push(o);
+    }
+    const myOrders = merged.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
     const { data: shopData } = await supabase.from("shops").select("*").eq("user_id", user.id).single();
     setShop(shopData || null);
     setOrders(myOrders);

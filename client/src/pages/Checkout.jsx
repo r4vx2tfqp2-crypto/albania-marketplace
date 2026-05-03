@@ -130,6 +130,7 @@ export default function Checkout() {
       customer_address: form.address, customer_city: form.city, notes: form.notes,
       total, status: "confirmed", delivery_pin: pin, buyer_id: currentUser.id,
       latitude: pinLocation?.lat || null, longitude: pinLocation?.lng || null,
+      shop_id: cartItems[0]?.shop_id || null,
       items: cartItems.map(i => ({ id: i.id, name: i.name, price: i.price, qty: i.qty, size: i.selectedSize })),
     }).select().single();
     if (error) { setErrors({ submit: t("something_went_wrong") }); setLoading(false); return; }
