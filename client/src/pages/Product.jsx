@@ -29,6 +29,7 @@ export default function Product() {
   const fetchProduct = async () => {
     const { data } = await supabase.from("products").select("*, shops(*)").eq("id", id).single();
     if (data) {
+      console.log('Product data:', JSON.stringify({ id: data.id, shop_id: data.shop_id, shops: data.shops?.id }));
       setProduct(data);
       setShop(data.shops);
       setSelectedSize(data.sizes?.[0] || null);
