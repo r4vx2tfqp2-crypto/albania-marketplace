@@ -8,7 +8,7 @@ export function CartProvider({ children }) {
     try { return JSON.parse(localStorage.getItem("tregu_saved") || "[]"); } catch { return []; }
   });
 
-  const addToCart = (product, selectedSize = null) => {
+  const addToCart = (product, selectedSize = null, selectedColor = null) => {
     setCartItems(prev => {
       const existing = prev.find(i => i.id === product.id && i.selectedSize === selectedSize);
       if (existing) {
