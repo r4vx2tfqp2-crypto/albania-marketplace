@@ -58,7 +58,7 @@ serve(async (req) => {
         failed: { icon: '❌', title: 'Nuk u dorezua', color: '#E24B4A' },
       }
       const pref = prefDetails[deliveryPref] || prefDetails.delivered
-      const neighbourInfo = order.notes?.includes('fqinji:') ? order.notes.split('fqinji:')[1]?.split('|')[0]?.trim() : null
+      const neighbourInfo = order.neighbour_name || (order.notes?.includes('fqinji:') ? order.notes.split('fqinji:')[1]?.split('|')[0]?.trim() : null)
 
       results.push(await sendEmail(
         ADMIN_EMAIL,
@@ -111,6 +111,7 @@ serve(async (req) => {
                   <div style="background:#E6F1FB;border-radius:10px;padding:16px;margin-bottom:20px;">
                     <p style="margin:0 0 8px;font-size:14px;color:#185FA5;font-weight:bold;">🏠 Porosia u la tek fqinji juaj</p>
                     ${neighbourInfo ? `<p style="margin:0;font-size:14px;color:#185FA5;">Emri i fqinjit: <strong>${neighbourInfo}</strong></p>` : ''}
+                    ${order.signature ? `<p style="margin:8px 0 0;font-size:13px;color:#185FA5;">Firma:</p><img src="${order.signature}" style="max-width:200px;border:1px solid #ddd;border-radius:8px;margin-top:4px;" />` : ''}
                     <p style="margin:8px 0 0;font-size:13px;color:#185FA5;">Ju lutem terhiqni porosine sa me shpejt.</p>
                   </div>` : ''}
 

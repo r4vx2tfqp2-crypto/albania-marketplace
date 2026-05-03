@@ -76,12 +76,16 @@ export default function DeliveryConfirm() {
     const newStatus = deliveryOption === 'failed' ? 'confirmed' : 'delivered';
     const deliveryNote = deliveryOption === 'neighbour' ? 'U la tek fqinji: ' + neighbourName : deliveryOption === 'door' ? 'U la para deres' : deliveryOption === 'failed' ? 'Nuk u dorezua' : 'U dorezua';
     const { data: updatedOrder } = await supabase
-      .from('orders').update({ status: newStatus, notes: (order.notes ? order.notes + ' | ' : '') + deliveryNote }).eq('id', order.id).select().single();
+      .from('orders').update({
+        status: newStatus,
+        delivery_preference: deliveryOption,
+        notes: (order.notes ? order.notes + ' | ' : '') + deliveryNote
+      }).eq('id', order.id).select().single();
     try {
       await fetch(FUNCTION_URL, {
         method: 'POST',
         headers: { 'Authorization': 'Bearer ' + ANON_KEY, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ order: updatedOrder || { ...order, status: 'delivered' }, type: 'delivery_confirmed' }),
+        body: JSON.stringify({ order: { ...(updatedOrder || { ...order, status: 'delivered' }), delivery_preference: deliveryOption, neighbour_name: neighbourName, signature: signature }, type: 'delivery_confirmed' }),
       });
     } catch (err) { console.log('Email error:', err); }
     setStep('success');
