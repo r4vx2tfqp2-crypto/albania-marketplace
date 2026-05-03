@@ -8,6 +8,11 @@ const FUNCTION_URL = 'https://onngupovxaequeqplikx.supabase.co/functions/v1/orde
 export default function DeliveryConfirm() {
   const [step, setStep] = useState('form');
   const [deliveryOption, setDeliveryOption] = useState('delivered');
+  const [neighbourName, setNeighbourName] = useState('');
+  const [signature, setSignature] = useState(null);
+  const [isSigning, setIsSigning] = useState(false);
+  const canvasRef = React.useRef(null);
+  const isDrawing = React.useRef(false);
   const [loading, setLoading] = useState(false);
   const [pin, setPin] = useState('');
   const [order, setOrder] = useState(null);
@@ -26,10 +31,50 @@ export default function DeliveryConfirm() {
     setLoading(false);
   };
 
+  const startDraw = (e) => {
+    isDrawing.current = true;
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext('2d');
+    const rect = canvas.getBoundingClientRect();
+    const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+    const y = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+  };
+
+  const draw = (e) => {
+    if (!isDrawing.current) return;
+    e.preventDefault();
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext('2d');
+    const rect = canvas.getBoundingClientRect();
+    const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+    const y = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
+    ctx.lineTo(x, y);
+    ctx.strokeStyle = '#1A1916';
+    ctx.lineWidth = 2;
+    ctx.lineCap = 'round';
+    ctx.stroke();
+  };
+
+  const stopDraw = () => {
+    isDrawing.current = false;
+    if (canvasRef.current) {
+      setSignature(canvasRef.current.toDataURL());
+    }
+  };
+
+  const clearSignature = () => {
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    setSignature(null);
+  };
+
   const handleConfirm = async () => {
     setLoading(true);
     const newStatus = deliveryOption === 'failed' ? 'confirmed' : 'delivered';
-    const deliveryNote = deliveryOption === 'neighbour' ? 'U la tek fqinji' : deliveryOption === 'door' ? 'U la para deres' : deliveryOption === 'failed' ? 'Nuk u dorezua' : 'U dorezua';
+    const deliveryNote = deliveryOption === 'neighbour' ? 'U la tek fqinji: ' + neighbourName : deliveryOption === 'door' ? 'U la para deres' : deliveryOption === 'failed' ? 'Nuk u dorezua' : 'U dorezua';
     const { data: updatedOrder } = await supabase
       .from('orders').update({ status: newStatus, notes: (order.notes ? order.notes + ' | ' : '') + deliveryNote }).eq('id', order.id).select().single();
     try {
@@ -164,7 +209,30 @@ export default function DeliveryConfirm() {
                 </button>
               ))}
             </div>
-            <button onClick={handleConfirm} disabled={loading} style={deliveryOption === "failed" ? { ...s.btnGreen, background: "var(--red)" } : s.btnGreen}>
+            {deliveryOption === "neighbour" && (
+              <div style={{ marginBottom: 16 }}>
+                <div style={{ fontSize: 13, fontWeight: 600, color: "var(--text-2)", marginBottom: 8 }}>Emri i fqinjit *</div>
+                <input value={neighbourName} onChange={e => setNeighbourName(e.target.value)}
+                  placeholder="p.sh. Arben Hoxha, Kati 2..."
+                  style={{ width: "100%", padding: "10px 14px", borderRadius: 10, border: "1px solid var(--border-strong)", fontSize: 14, fontFamily: "var(--font-body)", background: "var(--bg)", color: "var(--text-1)", boxSizing: "border-box", marginBottom: 12, outline: "none" }} />
+                <div style={{ fontSize: 13, fontWeight: 600, color: "var(--text-2)", marginBottom: 8 }}>Firma e fqinjit</div>
+                <div style={{ border: "1px solid var(--border-strong)", borderRadius: 10, overflow: "hidden", background: "#fff", marginBottom: 8, position: "relative" }}>
+                  <canvas ref={canvasRef} width={320} height={120}
+                    style={{ display: "block", width: "100%", height: 120, touchAction: "none", cursor: "crosshair" }}
+                    onMouseDown={startDraw} onMouseMove={draw} onMouseUp={stopDraw} onMouseLeave={stopDraw}
+                    onTouchStart={startDraw} onTouchMove={draw} onTouchEnd={stopDraw} />
+                  {!signature && <div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%,-50%)", color: "var(--text-3)", fontSize: 13, pointerEvents: "none" }}>Vizatoni firmen ketu...</div>}
+                </div>
+                {signature && (
+                  <button type="button" onClick={clearSignature}
+                    style={{ fontSize: 12, color: "var(--red)", background: "none", border: "none", cursor: "pointer", fontFamily: "var(--font-body)" }}>
+                    Fshi firmen
+                  </button>
+                )}
+              </div>
+            )}
+
+            <button onClick={handleConfirm} disabled={loading || (deliveryOption === "neighbour" && !neighbourName.trim())} style={deliveryOption === "failed" ? { ...s.btnGreen, background: "var(--red)" } : s.btnGreen}>
               {loading ? "Duke konfirmuar..." : deliveryOption === "failed" ? "Sheno si i padorezuar" : "Konfirmo Dorezimin"}
             </button>
             <button onClick={reset} style={s.btnGhost}>← Kthehu</button>
