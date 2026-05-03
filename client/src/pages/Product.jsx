@@ -29,7 +29,6 @@ export default function Product() {
   const fetchProduct = async () => {
     const { data } = await supabase.from("products").select("*, shops(*)").eq("id", id).single();
     if (data) {
-      console.log('Product data:', JSON.stringify({ id: data.id, shop_id: data.shop_id, shops: data.shops?.id }));
       setProduct(data);
       setShop(data.shops);
       setSelectedSize(data.sizes?.[0] || null);
@@ -50,7 +49,7 @@ export default function Product() {
   const hasImages = product.images && product.images.length > 0;
 
   const handleAddToCart = () => {
-    addToCart(product, selectedSize, selectedColor);
+    addToCart({...product, shop_id: product.shop_id || product.shops?.id}, selectedSize, selectedColor);
     setAdded(true);
     setTimeout(() => setAdded(false), 1500);
   };
@@ -218,7 +217,7 @@ export default function Product() {
             </div>
 
             {/* 7. BUY NOW */}
-            <button className={styles.buyNow} onClick={() => { addToCart(product, selectedSize, selectedColor); navigate("/checkout"); }}>
+            <button className={styles.buyNow} onClick={() => { addToCart({...product, shop_id: product.shop_id || product.shops?.id}, selectedSize, selectedColor); navigate("/checkout"); }}>
               {t("buy_now")}
             </button>
 
