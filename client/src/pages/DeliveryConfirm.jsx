@@ -7,6 +7,7 @@ const FUNCTION_URL = 'https://onngupovxaequeqplikx.supabase.co/functions/v1/orde
 
 export default function DeliveryConfirm() {
   const [step, setStep] = useState('form');
+  const [deliveryOption, setDeliveryOption] = useState('delivered');
   const [loading, setLoading] = useState(false);
   const [pin, setPin] = useState('');
   const [order, setOrder] = useState(null);
@@ -27,8 +28,10 @@ export default function DeliveryConfirm() {
 
   const handleConfirm = async () => {
     setLoading(true);
+    const newStatus = deliveryOption === 'failed' ? 'confirmed' : 'delivered';
+    const deliveryNote = deliveryOption === 'neighbour' ? 'U la tek fqinji' : deliveryOption === 'door' ? 'U la para deres' : deliveryOption === 'failed' ? 'Nuk u dorezua' : 'U dorezua';
     const { data: updatedOrder } = await supabase
-      .from('orders').update({ status: 'delivered' }).eq('id', order.id).select().single();
+      .from('orders').update({ status: newStatus, notes: (order.notes ? order.notes + ' | ' : '') + deliveryNote }).eq('id', order.id).select().single();
     try {
       await fetch(FUNCTION_URL, {
         method: 'POST',
@@ -139,8 +142,30 @@ export default function DeliveryConfirm() {
               {order.latitude ? 'Hap Rrugën në Hartë' : 'Navigo tek Klienti'}
             </button>
 
-            <button onClick={handleConfirm} disabled={loading} style={s.btnGreen}>
-              {loading ? 'Duke konfirmuar...' : 'Konfirmo Dorezimin'}
+            <div style={{ marginBottom: 16 }}>
+              <div style={{ fontSize: 13, fontWeight: 600, color: "var(--text-2)", marginBottom: 10 }}>Zgjidhni opsionin e dorezimit:</div>
+              {[
+                { key: "delivered", label: "U dorezua personalisht", icon: "✅", desc: "Klienti mori porosine" },
+                { key: "neighbour", label: "U la tek fqinji", icon: "🏠", desc: "Me leje te klientit" },
+                { key: "door", label: "U la para derës", icon: "📦", desc: "Me leje te klientit" },
+                { key: "failed", label: "Nuk u dorezua", icon: "❌", desc: "Klienti nuk ishte prezent" },
+              ].map(opt => (
+                <button key={opt.key} type="button"
+                  onClick={() => setDeliveryOption(opt.key)}
+                  style={{ width: "100%", marginBottom: 8, padding: "12px 14px", borderRadius: 10, border: "2px solid",
+                    borderColor: deliveryOption === opt.key ? "var(--text-1)" : "var(--border)",
+                    background: deliveryOption === opt.key ? "var(--surface-2)" : "transparent",
+                    cursor: "pointer", fontFamily: "var(--font-body)", display: "flex", alignItems: "center", gap: 10, textAlign: "left" }}>
+                  <span style={{ fontSize: 20 }}>{opt.icon}</span>
+                  <div>
+                    <div style={{ fontSize: 14, fontWeight: 600, color: "var(--text-1)" }}>{opt.label}</div>
+                    <div style={{ fontSize: 12, color: "var(--text-3)" }}>{opt.desc}</div>
+                  </div>
+                </button>
+              ))}
+            </div>
+            <button onClick={handleConfirm} disabled={loading} style={deliveryOption === "failed" ? { ...s.btnGreen, background: "var(--red)" } : s.btnGreen}>
+              {loading ? "Duke konfirmuar..." : deliveryOption === "failed" ? "Sheno si i padorezuar" : "Konfirmo Dorezimin"}
             </button>
             <button onClick={reset} style={s.btnGhost}>← Kthehu</button>
           </>
