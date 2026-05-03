@@ -61,7 +61,7 @@ export default function DeliveryConfirm() {
     isDrawing.current = false;
     if (canvasRef.current) {
       // Compress signature to small jpeg
-      setSignature(canvasRef.current.toDataURL('image/jpeg', 0.3));
+      setSignature(canvasRef.current.toDataURL('image/jpeg', 0.2));
     }
   };
 
@@ -222,7 +222,7 @@ export default function DeliveryConfirm() {
                   style={{ width: "100%", padding: "10px 14px", borderRadius: 10, border: "1px solid var(--border-strong)", fontSize: 14, fontFamily: "var(--font-body)", background: "var(--bg)", color: "var(--text-1)", boxSizing: "border-box", marginBottom: 12, outline: "none" }} />
                 <div style={{ fontSize: 13, fontWeight: 600, color: "var(--text-2)", marginBottom: 8 }}>Firma e fqinjit</div>
                 <div style={{ border: "1px solid var(--border-strong)", borderRadius: 10, overflow: "hidden", background: "#fff", marginBottom: 8, position: "relative" }}>
-                  <canvas ref={canvasRef} width={320} height={120}
+                  <canvas ref={canvasRef} width={280} height={100}
                     style={{ display: "block", width: "100%", height: 120, touchAction: "none", cursor: "crosshair" }}
                     onMouseDown={startDraw} onMouseMove={draw} onMouseUp={stopDraw} onMouseLeave={stopDraw}
                     onTouchStart={startDraw} onTouchMove={draw} onTouchEnd={stopDraw} />
