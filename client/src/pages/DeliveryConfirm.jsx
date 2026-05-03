@@ -85,7 +85,7 @@ export default function DeliveryConfirm() {
       await fetch(FUNCTION_URL, {
         method: 'POST',
         headers: { 'Authorization': 'Bearer ' + ANON_KEY, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ order: { ...(updatedOrder || { ...order, status: 'delivered' }), delivery_preference: deliveryOption, neighbour_name: neighbourName, signature: signature }, type: 'delivery_confirmed' }),
+        body: JSON.stringify({ order: { ...order, ...(updatedOrder || {}), status: newStatus, delivery_preference: deliveryOption, neighbour_name: neighbourName || '', signature: signature || null }, type: 'delivery_confirmed' }),
       });
     } catch (err) { console.log('Email error:', err); }
     setStep('success');
