@@ -50,17 +50,29 @@ serve(async (req) => {
     const results = []
 
     if (type === 'delivery_confirmed') {
+      const deliveryPref = order.delivery_preference || 'delivered'
+      const prefDetails: Record<string, {icon: string, title: string, color: string}> = {
+        delivered: { icon: '✅', title: 'U dorezua personalisht', color: '#1D9E75' },
+        neighbour: { icon: '🏠', title: 'U la tek fqinji', color: '#378ADD' },
+        door: { icon: '📦', title: 'U la para deres', color: '#854F0B' },
+        failed: { icon: '❌', title: 'Nuk u dorezua', color: '#E24B4A' },
+      }
+      const pref = prefDetails[deliveryPref] || prefDetails.delivered
+      const neighbourInfo = order.notes?.includes('fqinji:') ? order.notes.split('fqinji:')[1]?.split('|')[0]?.trim() : null
+
       results.push(await sendEmail(
         ADMIN_EMAIL,
         `✅ Porosia u dorezua — ${order.customer_name} #${order.id?.slice(0, 8)}`,
         `<div style="font-family:sans-serif;max-width:600px;margin:0 auto;">
-          <div style="background:#1D9E75;padding:24px;border-radius:12px 12px 0 0;">
-            <h1 style="color:#fff;margin:0;font-size:22px;">Porosia u dorezua!</h1>
+          <div style="background:${pref.color};padding:24px;border-radius:12px 12px 0 0;">
+            <h1 style="color:#fff;margin:0;font-size:22px;">${pref.icon} ${pref.title}</h1>
           </div>
           <div style="background:#F7F6F3;padding:24px;border-radius:0 0 12px 12px;">
-            <p style="font-size:15px;color:#1A1916;">Porosia <strong>#${order.id?.slice(0, 8)}</strong> u dorezua tek <strong>${order.customer_name}</strong></p>
-            <p style="font-size:14px;color:#5C5A55;">Opsioni: ${order.delivery_preference || 'U dorezua'}</p>
-            <div style="background:#1D9E75;padding:14px;border-radius:8px;text-align:center;margin-top:16px;">
+            <p style="font-size:15px;color:#1A1916;">Porosia <strong>#${order.id?.slice(0, 8)}</strong></p>
+            <p style="font-size:14px;color:#5C5A55;">Klient: ${order.customer_name} — ${order.customer_phone}</p>
+            <p style="font-size:14px;color:#5C5A55;">Adresa: ${order.customer_address}, ${order.customer_city}</p>
+            ${neighbourInfo ? `<p style="font-size:14px;color:#5C5A55;">Fqinji: <strong>${neighbourInfo}</strong></p>` : ''}
+            <div style="background:${pref.color};padding:14px;border-radius:8px;text-align:center;margin-top:16px;">
               <p style="margin:0;color:#fff;font-size:18px;font-weight:bold;">Totali: ${order.total?.toLocaleString()} L</p>
             </div>
           </div>
@@ -68,9 +80,10 @@ serve(async (req) => {
       ))
 
       if (order.customer_email) {
+        const isDelivered = deliveryPref !== 'failed'
         results.push(await sendEmail(
           order.customer_email,
-          `📦 Porosia juaj ka arritur! — Tregu #${order.id?.slice(0, 8)}`,
+          isDelivered ? `${pref.icon} Porosia juaj — ${pref.title} — Tregu #${order.id?.slice(0, 8)}` : `❌ Porosia juaj nuk u dorezua — Tregu #${order.id?.slice(0, 8)}`,
           `<!DOCTYPE html><html><body style="margin:0;padding:0;background:#F0EFEC;font-family:Arial,sans-serif;">
           <table width="100%" cellpadding="0" cellspacing="0" style="padding:20px 0;">
             <tr><td align="center">
@@ -83,22 +96,56 @@ serve(async (req) => {
                     </tr></table></td>
                   </tr></table>
                 </td></tr>
-                <tr><td style="background:#1D9E75;padding:16px 28px;text-align:center;">
-                  <p style="margin:0;color:#fff;font-size:16px;font-weight:bold;">📦 Porosia juaj ka arritur!</p>
+                <tr><td style="background:${pref.color};padding:16px 28px;text-align:center;">
+                  <p style="margin:0;color:#fff;font-size:18px;font-weight:bold;">${pref.icon} ${pref.title}</p>
                 </td></tr>
                 <tr><td style="background:#fff;padding:28px;">
-                  <p style="font-size:15px;color:#1A1916;">Pershendetje <strong>${order.customer_name}</strong>,</p>
-                  <p style="font-size:14px;color:#5C5A55;">Porosia juaj eshte shënuar si e dorezuar. A e morrët?</p>
-                  <table width="100%" style="margin:20px 0;"><tr>
-                    <td align="center" style="padding-bottom:12px;">
-                      <a href="${SITE_URL}/confirm-delivery?order=${order.id}&confirm=yes" style="background:#1D9E75;color:#fff;padding:14px 40px;border-radius:10px;text-decoration:none;font-size:15px;font-weight:bold;display:inline-block;">✓ Po, e mora!</a>
-                    </td>
-                  </tr><tr>
-                    <td align="center">
-                      <a href="${SITE_URL}/confirm-delivery?order=${order.id}&confirm=no" style="color:#E24B4A;font-size:14px;text-decoration:none;">Jo, kam nje problem</a>
-                    </td>
-                  </tr></table>
-                  <p style="font-size:12px;color:#9A9890;text-align:center;">Faleminderit qe blini ne tregu.store</p>
+                  <p style="font-size:15px;color:#1A1916;margin-bottom:16px;">Pershendetje <strong>${order.customer_name}</strong>,</p>
+
+                  ${deliveryPref === 'delivered' ? `
+                  <div style="background:#E1F5EE;border-radius:10px;padding:16px;margin-bottom:20px;">
+                    <p style="margin:0;font-size:14px;color:#0F6E56;">✅ Porosia juaj u dorezua personalisht. Shpresojme ta gezoni!</p>
+                  </div>` : ''}
+
+                  ${deliveryPref === 'neighbour' ? `
+                  <div style="background:#E6F1FB;border-radius:10px;padding:16px;margin-bottom:20px;">
+                    <p style="margin:0 0 8px;font-size:14px;color:#185FA5;font-weight:bold;">🏠 Porosia u la tek fqinji juaj</p>
+                    ${neighbourInfo ? `<p style="margin:0;font-size:14px;color:#185FA5;">Emri i fqinjit: <strong>${neighbourInfo}</strong></p>` : ''}
+                    <p style="margin:8px 0 0;font-size:13px;color:#185FA5;">Ju lutem terhiqni porosine sa me shpejt.</p>
+                  </div>` : ''}
+
+                  ${deliveryPref === 'door' ? `
+                  <div style="background:#FAEEDA;border-radius:10px;padding:16px;margin-bottom:20px;">
+                    <p style="margin:0;font-size:14px;color:#854F0B;">📦 Porosia juaj u la para deres suaj. Ju lutem terhiqni sa me shpejt.</p>
+                  </div>` : ''}
+
+                  ${deliveryPref === 'failed' ? `
+                  <div style="background:#FBEAF0;border-radius:10px;padding:16px;margin-bottom:20px;">
+                    <p style="margin:0 0 8px;font-size:14px;color:#99355A;font-weight:bold;">❌ Porosia nuk u dorezua</p>
+                    <p style="margin:0;font-size:13px;color:#99355A;">Shoferi nuk mundi te gjeje adresen ose nuk kishte kend ne shtepi. Do te tentojme perseri.</p>
+                  </div>
+                  <div style="text-align:center;margin-bottom:20px;">
+                    <a href="mailto:info@tregu.store" style="background:#1D9E75;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-size:14px;font-weight:600;display:inline-block;">Kontaktoni Suportin</a>
+                  </div>` : ''}
+
+                  <div style="background:#F7F6F3;border-radius:10px;padding:14px;margin-bottom:20px;">
+                    <p style="margin:0 0 6px;font-size:12px;color:#9A9890;text-transform:uppercase;font-weight:bold;">Detajet e Porosise</p>
+                    <p style="margin:0;font-size:13px;color:#1A1916;">Nr: <strong>#${order.id?.slice(0, 8).toUpperCase()}</strong></p>
+                    <p style="margin:3px 0 0;font-size:13px;color:#5C5A55;">Totali: <strong>${order.total?.toLocaleString()} L</strong></p>
+                  </div>
+
+                  ${isDelivered ? `
+                  <p style="font-size:14px;color:#5C5A55;margin-bottom:16px;">A e keni marre porosine?</p>
+                  <table width="100%" style="margin-bottom:16px;">
+                    <tr><td align="center" style="padding-bottom:10px;">
+                      <a href="${SITE_URL}/confirm-delivery?order=${order.id}&confirm=yes" style="background:#1D9E75;color:#fff;padding:12px 32px;border-radius:10px;text-decoration:none;font-size:14px;font-weight:bold;display:inline-block;">✓ Po, e kam!</a>
+                    </td></tr>
+                    <tr><td align="center">
+                      <a href="${SITE_URL}/confirm-delivery?order=${order.id}&confirm=no" style="color:#E24B4A;font-size:13px;text-decoration:none;">Jo, kam nje problem</a>
+                    </td></tr>
+                  </table>` : ''}
+
+                  <p style="font-size:12px;color:#9A9890;text-align:center;">Per cdo pyetje: <a href="mailto:info@tregu.store" style="color:#1D9E75;">info@tregu.store</a></p>
                 </td></tr>
                 <tr><td style="background:#1A1916;border-radius:0 0 12px 12px;padding:16px 28px;text-align:center;">
                   <p style="margin:0;color:rgba(255,255,255,0.4);font-size:11px;">© 2026 Tregu.store</p>
