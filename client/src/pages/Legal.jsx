@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 
 const SECTIONS = {
@@ -137,7 +137,9 @@ const SECTIONS = {
 
 export default function Legal() {
   const navigate = useNavigate();
-  const [activePage, setActivePage] = useState('terms');
+  const [searchParams] = useSearchParams();
+  const initialTab = searchParams.get('tab');
+  const [activePage, setActivePage] = useState(SECTIONS[initialTab] ? initialTab : 'terms');
   const page = SECTIONS[activePage];
 
   return (

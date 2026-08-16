@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, Link } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 import styles from "./Login.module.css";
 
@@ -10,10 +10,25 @@ export default function ResetPassword() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [done, setDone] = useState(false);
+  const [ready, setReady] = useState(false);
+  const [invalidLink, setInvalidLink] = useState(false);
+
+  // Clicking the emailed reset link should leave the visitor with an active
+  // recovery session by the time this page mounts (supabase-js exchanges
+  // the code/token in the URL automatically). If it's missing -- expired
+  // link, link already used, or the link was blocked before reaching this
+  // page -- fail with a clear message instead of a confusing error only
+  // after the user fills in the form and submits.
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!session) setInvalidLink(true);
+      setReady(true);
+    }).catch(() => { setInvalidLink(true); setReady(true); });
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (password !== confirm) { setError("Fjalekalimetнë nuk perputhен!"); return; }
+    if (password !== confirm) { setError("Fjalëkalimet nuk përputhen!"); return; }
     if (password.length < 6) { setError("Fjalëkalimi duhet te kete te pakten 6 karaktere!"); return; }
     setLoading(true);
     setError("");
@@ -35,6 +50,17 @@ export default function ResetPassword() {
             <div style={{ fontSize: 48, marginBottom: 16 }}>✅</div>
             <h2 style={{ fontFamily: "var(--font-display)", fontSize: 22, fontWeight: 700, marginBottom: 8 }}>Fjalëkalimi u ndryshua!</h2>
             <p style={{ fontSize: 14, color: "var(--text-3)" }}>Duke u ridrejtuar...</p>
+          </div>
+        ) : !ready ? (
+          <p style={{ fontSize: 14, color: "var(--text-3)", textAlign: "center" }}>Duke u ngarkuar...</p>
+        ) : invalidLink ? (
+          <div style={{ textAlign: "center" }}>
+            <div style={{ fontSize: 48, marginBottom: 16 }}>⚠️</div>
+            <h2 style={{ fontFamily: "var(--font-display)", fontSize: 22, fontWeight: 700, marginBottom: 8 }}>Linku ka skaduar</h2>
+            <p style={{ fontSize: 14, color: "var(--text-3)", marginBottom: 24, lineHeight: 1.6 }}>
+              Ky link per rivendosjen e fjalekalimit eshte i pavlefshem ose ka skaduar. Kerkoni nje link te ri.
+            </p>
+            <Link to="/forgot-password" style={{ color: "var(--green)", fontSize: 14, textDecoration: "none" }}>Kerko link te ri</Link>
           </div>
         ) : (
           <>

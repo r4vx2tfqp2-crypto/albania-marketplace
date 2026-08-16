@@ -9,6 +9,7 @@ export default function Reviews({ productId, shopId, type = "product", onReviewA
   const [currentUser, setCurrentUser] = useState(null);
   const [form, setForm] = useState({ rating: 5, text: "", author: "" });
   const [success, setSuccess] = useState(false);
+  const [submitError, setSubmitError] = useState("");
 
   useEffect(() => {
     fetchReviews();
@@ -26,26 +27,38 @@ export default function Reviews({ productId, shopId, type = "product", onReviewA
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setSubmitting(true);
+    setSubmitError("");
     const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      // reviews.buyer_id is required by RLS to match auth.uid() -- an
+      // anonymous submission (buyer_id: null) is rejected outright, so
+      // don't let a logged-out visitor submit a review that will silently
+      // fail.
+      setSubmitError("Duhet te kyçeni per te lene nje vleresim.");
+      return;
+    }
+    setSubmitting(true);
     const insert = {
       rating: form.rating,
       text: form.text,
-      author: form.author || (user?.email?.split("@")[0] || "Anonim"),
-      buyer_id: user?.id || null,
+      author: form.author || (user.email?.split("@")[0] || "Anonim"),
+      buyer_id: user.id,
       type,
     };
     if (type === "product") insert.product_id = productId;
     if (type === "shop") insert.shop_id = shopId;
-    await supabase.from("reviews").insert(insert);
-    const newReviews = [...reviews, { ...insert, id: Date.now(), created_at: new Date().toISOString() }];
-    const avg = newReviews.reduce((s, r) => s + r.rating, 0) / newReviews.length;
-    if (type === "product" && productId) {
-      await supabase.from("products").update({ rating: Math.round(avg * 10) / 10, review_count: newReviews.length }).eq("id", productId);
+    const { error } = await supabase.from("reviews").insert(insert);
+    if (error) {
+      setSubmitError("Dicka shkoi keq. Provoni perseri.");
+      setSubmitting(false);
+      return;
     }
-    if (type === "shop" && shopId) {
-      await supabase.from("shops").update({ rating: Math.round(avg * 10) / 10, review_count: newReviews.length }).eq("id", shopId);
-    }
+    // The product/shop rating + review_count aggregate is now recomputed
+    // server-side (a DB trigger recomputes it directly from the reviews
+    // table on every insert/delete) instead of being written here as the
+    // reviewing user -- that write was silently failing for anyone who
+    // wasn't the product/shop owner, since it's correctly RLS-restricted to
+    // auth.uid() = user_id.
     setSuccess(true);
     setShowForm(false);
     setForm({ rating: 5, text: "", author: "" });
@@ -57,7 +70,8 @@ export default function Reviews({ productId, shopId, type = "product", onReviewA
 
   const handleDelete = async (reviewId) => {
     if (!window.confirm("Fshi kete vleresim?")) return;
-    await supabase.from("reviews").delete().eq("id", reviewId);
+    const { error } = await supabase.from("reviews").delete().eq("id", reviewId);
+    if (error) { window.alert("Fshirja deshtoi. Provoni perseri."); return; }
     await fetchReviews();
     if (onReviewAdded) onReviewAdded();
   };
@@ -93,6 +107,11 @@ export default function Reviews({ productId, shopId, type = "product", onReviewA
 
       {showForm && (
         <form onSubmit={handleSubmit} style={{ background: "var(--surface-2)", padding: 16, borderRadius: 12, marginBottom: 20 }}>
+          {submitError && (
+            <div style={{ background: "var(--red-light)", color: "var(--red)", padding: "10px 14px", borderRadius: 8, marginBottom: 12, fontSize: 13 }}>
+              {submitError}
+            </div>
+          )}
           <div style={{ marginBottom: 12 }}>
             <label style={{ fontSize: 13, fontWeight: 500, color: "var(--text-2)", display: "block", marginBottom: 6 }}>Emri juaj</label>
             <input style={{ width: "100%", padding: "8px 12px", borderRadius: 8, border: "1px solid var(--border-strong)", fontSize: 14, fontFamily: "var(--font-body)", background: "var(--surface)", color: "var(--text-1)", outline: "none", boxSizing: "border-box" }}

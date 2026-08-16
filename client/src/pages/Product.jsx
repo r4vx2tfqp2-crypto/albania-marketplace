@@ -80,20 +80,11 @@ export default function Product() {
         <Helmet>
           <title>{seoTitle}</title>
           <meta name="description" content={seoDesc} />
+          <link rel="canonical" href={"https://www.tregu.store/product/" + product.id} />
           <meta property="og:title" content={seoTitle} />
           <meta property="og:description" content={seoDesc} />
           <meta property="og:image" content={seoImage} />
-          <meta property="og:url" content={"https://tregu.store/product/" + product.id} />
-          <meta property="og:type" content="product" />
-          <meta name="twitter:card" content="summary_large_image" />
-        </Helmet>
-        <Helmet>
-          <title>{seoTitle}</title>
-          <meta name="description" content={seoDesc} />
-          <meta property="og:title" content={seoTitle} />
-          <meta property="og:description" content={seoDesc} />
-          <meta property="og:image" content={seoImage} />
-          <meta property="og:url" content={"https://tregu.store/product/" + product.id} />
+          <meta property="og:url" content={"https://www.tregu.store/product/" + product.id} />
           <meta property="og:type" content="product" />
           <meta name="twitter:card" content="summary_large_image" />
         </Helmet>

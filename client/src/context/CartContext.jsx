@@ -8,7 +8,24 @@ export function CartProvider({ children }) {
     try { return JSON.parse(localStorage.getItem("tregu_saved") || "[]"); } catch { return []; }
   });
 
+  // Checkout only ever records a single shop_id per order (cartItems[0]'s
+  // shop), so a cart silently mixing products from two shops meant the
+  // second shop never saw the order in its dashboard at all -- not an RLS
+  // issue, just data that was never attributable to more than one seller.
+  // Keep the cart single-shop: adding a product from a different shop than
+  // what's already in the cart asks to clear it first, same pattern most
+  // single-vendor-cart marketplaces use.
   const addToCart = (product, selectedSize = null, selectedColor = null) => {
+    const conflictsWithOtherShop = cartItems.length > 0 && product.shop_id &&
+      cartItems.some(i => i.shop_id && i.shop_id !== product.shop_id);
+    if (conflictsWithOtherShop) {
+      const confirmed = window.confirm(
+        "Shporta juaj ka produkte nga nje dyqan tjeter. Ta zbrazim shporten dhe te shtojme kete produkt?"
+      );
+      if (!confirmed) return false;
+      setCartItems([{ ...product, qty: 1, selectedSize }]);
+      return true;
+    }
     setCartItems(prev => {
       const existing = prev.find(i => i.id === product.id && i.selectedSize === selectedSize);
       if (existing) {
@@ -17,6 +34,7 @@ export function CartProvider({ children }) {
       }
       return [...prev, { ...product, qty: 1, selectedSize }];
     });
+    return true;
   };
 
   const removeFromCart = (productId, selectedSize) => {

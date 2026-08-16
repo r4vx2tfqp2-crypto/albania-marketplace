@@ -40,26 +40,16 @@ export default function SellerOrders() {
     const myShopIds = (shopsData || []).map(s => s.id);
     if (myShopIds.length === 0) { setOrders([]); setLoading(false); return; }
     const { data: shopOrders } = await supabase.from("orders").select("*").in("shop_id", myShopIds).order("created_at", { ascending: false });
-    // Also get orders by product IDs for backward compatibility
-    const { data: productsData } = await supabase.from("products").select("id").eq("user_id", user.id);
-    const myProductIds = (productsData || []).map(p => p.id);
-    const { data: allOrders } = await supabase.from("orders").select("*").order("created_at", { ascending: false });
-    const productOrders = (allOrders || []).filter(order => order.items?.some(item => myProductIds.includes(item.id)));
-    // Merge both, removing duplicates
-    const merged = [...(shopOrders || [])];
-    for (const o of productOrders) {
-      if (!merged.find(m => m.id === o.id)) merged.push(o);
-    }
-    const myOrders = merged.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
     const { data: shopData } = await supabase.from("shops").select("*").eq("user_id", user.id).single();
     setShop(shopData || null);
-    setOrders(myOrders);
+    setOrders(shopOrders || []);
     setLoading(false);
   };
 
   const updateStatus = async (orderId, status) => {
     setUpdating(orderId);
-    await supabase.from("orders").update({ status }).eq("id", orderId);
+    const { error } = await supabase.from("orders").update({ status }).eq("id", orderId);
+    if (error) window.alert("Perditesimi deshtoi. Provoni perseri.");
     await fetchOrders();
     setUpdating(null);
   };
@@ -378,7 +368,7 @@ export default function SellerOrders() {
                     <div style={{ fontSize: 12, color: "var(--text-3)", marginBottom: 8 }}>Numri i gjurmimit</div>
                     <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 8 }}>
                       {["Albanian Courier", "DHL", "Posta Shqiptare", "Tjeter"].map(c => (
-                        <button key={c} onClick={async () => { await supabase.from("orders").update({ courier_name: c }).eq("id", order.id); await fetchOrders(); }}
+                        <button key={c} onClick={async () => { const { error } = await supabase.from("orders").update({ courier_name: c }).eq("id", order.id); if (error) window.alert("Perditesimi deshtoi."); await fetchOrders(); }}
                           style={{ padding: "4px 10px", borderRadius: 20, fontSize: 12, cursor: "pointer", fontFamily: "var(--font-body)",
                             border: "1px solid var(--border-strong)", background: order.courier_name === c ? "var(--text-1)" : "transparent",
                             color: order.courier_name === c ? "#fff" : "var(--text-2)" }}>
@@ -388,7 +378,7 @@ export default function SellerOrders() {
                     </div>
                     <div style={{ display: "flex", gap: 8 }}>
                       <input defaultValue={order.tracking_number || ""} placeholder="Shkruaj numrin e gjurmimit..."
-                        onBlur={async (e) => { if (e.target.value !== order.tracking_number) { await supabase.from("orders").update({ tracking_number: e.target.value }).eq("id", order.id); await fetchOrders(); } }}
+                        onBlur={async (e) => { if (e.target.value !== order.tracking_number) { const { error } = await supabase.from("orders").update({ tracking_number: e.target.value }).eq("id", order.id); if (error) window.alert("Perditesimi deshtoi."); await fetchOrders(); } }}
                         style={{ flex: 1, padding: "8px 12px", borderRadius: 8, border: "1px solid var(--border-strong)", fontSize: 13, fontFamily: "var(--font-body)", background: "var(--surface)", color: "var(--text-1)" }} />
                       {order.tracking_number && (
                         <a href={order.courier_name === "Albanian Courier" ? "https://al.albaniancourier.al/en/track/?code=" + order.tracking_number :

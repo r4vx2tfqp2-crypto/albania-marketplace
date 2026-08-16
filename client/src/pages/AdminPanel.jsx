@@ -224,7 +224,7 @@ export default function AdminPanel() {
                     <span style={{ fontSize: 11, fontWeight: 500, padding: '3px 10px', borderRadius: 20, background: shop.status === 'approved' ? 'var(--green-light)' : shop.status === 'pending' ? 'var(--amber-light)' : 'var(--red-light)', color: shop.status === 'approved' ? 'var(--green-dark)' : shop.status === 'pending' ? '#854F0B' : 'var(--red)' }}>
                       {shop.status}
                     </span>
-                    <button onClick={() => supabase.from('shops').update({ verified: !shop.verified }).eq('id', shop.id).then(() => fetchData())}
+                    <button onClick={() => supabase.from('shops').update({ verified: !shop.verified }).eq('id', shop.id).then(() => fetchAll())}
                       style={{ padding: '6px 12px', borderRadius: 8, border: '1px solid var(--border-strong)', fontSize: 12, fontWeight: 500, cursor: 'pointer', fontFamily: 'var(--font-body)', background: shop.verified ? 'var(--blue-light)' : 'var(--surface)', color: shop.verified ? 'var(--blue)' : 'var(--text-2)', marginRight: 4 }}>
                       {shop.verified ? '✓ Verified' : 'Verify'}
                     </button>

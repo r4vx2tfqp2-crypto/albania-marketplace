@@ -13,6 +13,8 @@ export default function Settings() {
   const [loading, setLoading] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [success, setSuccess] = useState('');
+  const [error, setError] = useState('');
+  const [deleteError, setDeleteError] = useState('');
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [form, setForm] = useState({
     name: user?.user_metadata?.name || '',
@@ -24,15 +26,18 @@ export default function Settings() {
     e.preventDefault();
     setLoading(true);
     setSuccess('');
+    setError('');
     const updates = { data: { name: form.name } };
     if (form.newPassword) updates.password = form.newPassword;
-    const { error } = await supabase.auth.updateUser(updates);
-    if (!error) setSuccess(t('settings_saved'));
+    const { error: updateError } = await supabase.auth.updateUser(updates);
+    if (updateError) setError(updateError.message);
+    else setSuccess(t('settings_saved'));
     setLoading(false);
   };
 
   const handleDeleteAccount = async () => {
     setDeleteLoading(true);
+    setDeleteError('');
     try {
       const { data: { session } } = await supabase.auth.getSession();
       const res = await fetch('https://onngupovxaequeqplikx.supabase.co/functions/v1/delete-account', {
@@ -44,10 +49,12 @@ export default function Settings() {
       });
       const result = await res.json();
       if (!res.ok || !result.success) {
+        setDeleteError(result.error || 'Dicka shkoi keq. Provoni perseri.');
         setDeleteLoading(false);
         return;
       }
     } catch (err) {
+      setDeleteError('Dicka shkoi keq. Provoni perseri.');
       setDeleteLoading(false);
       return;
     }
@@ -67,6 +74,11 @@ export default function Settings() {
         {success && (
           <div style={{ background: 'var(--green-light)', color: 'var(--green-dark)', padding: '12px 16px', borderRadius: 'var(--radius-md)', marginBottom: 16, fontSize: 14 }}>
             {success}
+          </div>
+        )}
+        {error && (
+          <div style={{ background: 'var(--red-light)', color: 'var(--red)', padding: '12px 16px', borderRadius: 'var(--radius-md)', marginBottom: 16, fontSize: 14 }}>
+            {error}
           </div>
         )}
 
@@ -102,6 +114,12 @@ export default function Settings() {
           <p style={{ fontSize: 14, color: 'var(--red)', marginBottom: 16, lineHeight: 1.6 }}>
             Kjo veprim do të fshijë përgjithmonë llogarinë tuaj, dyqanet dhe produktet tuaja. Kjo veprim nuk mund të kthehet mbrapsht.
           </p>
+
+          {deleteError && (
+            <div style={{ background: '#fff', color: 'var(--red)', padding: '10px 14px', borderRadius: 8, marginBottom: 16, fontSize: 13, border: '1px solid var(--red)' }}>
+              {deleteError}
+            </div>
+          )}
 
           {!showDeleteConfirm ? (
             <button

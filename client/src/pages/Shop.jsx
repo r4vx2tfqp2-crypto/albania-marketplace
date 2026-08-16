@@ -56,7 +56,8 @@ export default function Shop() {
           <meta property="og:title" content={shop.name + " | Tregu.store"} />
           <meta property="og:description" content={shop.description?.slice(0, 155)} />
           {shop.logo_url && <meta property="og:image" content={shop.logo_url} />}
-          <meta property="og:url" content={"https://tregu.store/shop/" + shop.id} />
+          <meta property="og:url" content={"https://www.tregu.store/shop/" + shop.id} />
+          <link rel="canonical" href={"https://www.tregu.store/shop/" + shop.id} />
         </Helmet>
         <button className={styles.back} onClick={() => navigate(-1)}>
             <ArrowLeft size={16} /> {t('back')}

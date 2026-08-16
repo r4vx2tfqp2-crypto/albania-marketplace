@@ -41,7 +41,7 @@ export default function EditProduct() {
     setLoading(true);
     setError('');
 
-    const { error } = await supabase.from('products').update({
+    const { data, error } = await supabase.from('products').update({
       name: form.name,
       price: parseFloat(form.price),
       category: form.category,
@@ -49,9 +49,13 @@ export default function EditProduct() {
       sizes: form.sizes ? form.sizes.split(',').map(s => s.trim()).filter(Boolean) : [],
       in_stock: form.in_stock,
       trending: form.trending,
-    }).eq('id', id);
+    }).eq('id', id).select();
 
-    if (error) {
+    // A blocked-by-RLS update (wrong owner, stale/invalid id) returns
+    // error: null with zero rows affected, not an error -- check the
+    // returned row explicitly instead of only checking `error`, otherwise
+    // this silently shows "saved" for a write that never happened.
+    if (error || !data || data.length === 0) {
       setError('Something went wrong. Please try again.');
       setLoading(false);
       return;

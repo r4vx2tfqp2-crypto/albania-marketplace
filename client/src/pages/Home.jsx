@@ -80,11 +80,11 @@ export default function Home() {
         <meta name="description" content="Zbulo produkte nga dyqane lokale te verifikuara ne Shqiperi. Porosit online, pagesa me dorezim. Kenge, rroba, elektronike dhe shume me teper." />
         <meta property="og:title" content="Tregu.store — Dyqanet Shqiptare Online" />
         <meta property="og:description" content="Platforma e pare shqiptare e tregtise elektronike. Bli dhe shit online me pagese me dorezim." />
-        <meta property="og:image" content="https://tregu.store/og-image.png" />
-        <meta property="og:url" content="https://tregu.store" />
+        <meta property="og:image" content="https://www.tregu.store/og-image.png" />
+        <meta property="og:url" content="https://www.tregu.store/" />
         <meta property="og:type" content="website" />
         <meta name="twitter:card" content="summary_large_image" />
-        <link rel="canonical" href="https://tregu.store" />
+        <link rel="canonical" href="https://www.tregu.store/" />
       </Helmet>
 
       <div className="container">
@@ -272,9 +272,9 @@ export default function Home() {
         <div style={{ borderTop: '1px solid var(--border)', padding: '24px 0', marginTop: 20, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
           <div style={{ fontFamily: 'var(--font-display)', fontSize: 16, fontWeight: 700, color: 'var(--text-3)' }}>tregu</div>
           <div style={{ display: 'flex', gap: 20 }}>
-            <a href="/legal" style={{ fontSize: 13, color: 'var(--text-3)' }}>{t('terms')}</a>
-            <a href="/legal" style={{ fontSize: 13, color: 'var(--text-3)' }}>{t('privacy')}</a>
-            <a href="/legal" style={{ fontSize: 13, color: 'var(--text-3)' }}>{t('copyright')}</a>
+            <a href="/legal?tab=terms" style={{ fontSize: 13, color: 'var(--text-3)' }}>{t('terms')}</a>
+            <a href="/legal?tab=privacy" style={{ fontSize: 13, color: 'var(--text-3)' }}>{t('privacy')}</a>
+            <a href="/legal?tab=copyright" style={{ fontSize: 13, color: 'var(--text-3)' }}>{t('copyright')}</a>
           </div>
           <div style={{ fontSize: 12, color: 'var(--text-3)' }}>{t('footer_rights')}</div>
         </div>
