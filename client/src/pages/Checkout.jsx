@@ -79,7 +79,6 @@ export default function Checkout() {
       mapTypeId: "roadmap",
       styles: [
         { featureType: "poi", elementType: "labels", stylers: [{ visibility: "on" }] },
-        { featureType: "building", elementType: "labels", stylers: [{ visibility: "on" }] },
       ],
     });
     mapInstanceRef.current = map;
