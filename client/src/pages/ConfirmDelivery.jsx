@@ -1,10 +1,13 @@
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { CheckCircle, XCircle } from "lucide-react";
-import { supabase } from "../lib/supabase";
 
 const ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9ubmd1cG92eGFlcXVlcXBsaWt4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcxNTUzODUsImV4cCI6MjA5MjczMTM4NX0.aTiKdVjl02JenqpQzbg2qcniscHMJyml9LMdmRsqqKg";
-const FUNCTION_URL = "https://onngupovxaequeqplikx.supabase.co/functions/v1/order-notification";
+// This flow is unauthenticated (reached from an emailed link, not a login
+// session), so the order lookup/update runs server-side via the service
+// role key instead of a direct client-side `orders` query -- see
+// supabase/functions/delivery-link-confirm.
+const LINK_CONFIRM_URL = "https://onngupovxaequeqplikx.supabase.co/functions/v1/delivery-link-confirm";
 
 const PREFERENCES = {
   delivered: { icon: "✅", title: "Dorezim personal", desc: "Dorezone tek une personalisht" },
@@ -16,7 +19,6 @@ const PREFERENCES = {
 export default function ConfirmDelivery() {
   const [searchParams] = useSearchParams();
   const [status, setStatus] = useState("loading");
-  const [order, setOrder] = useState(null);
   const orderId = searchParams.get("order");
   const confirm = searchParams.get("confirm");
   const preference = searchParams.get("preference");
@@ -33,40 +35,30 @@ export default function ConfirmDelivery() {
   }, []);
 
   const handlePreference = async () => {
-    const { data: orderData } = await supabase.from("orders").select("*").eq("id", orderId).single();
-    if (!orderData) { setStatus("error"); return; }
-    setOrder(orderData);
-
-    const prefLabels = {
-      delivered: "Dorezim personal",
-      neighbour: "Tek fqinji",
-      door: "Para deres",
-      reschedule: "Riplanifico dorezimin",
-    };
-
-    await supabase.from("orders").update({
-      delivery_preference: preference,
-      notes: (orderData.notes ? orderData.notes + " | " : "") + "Preference: " + (prefLabels[preference] || preference)
-    }).eq("id", orderId);
-
-    setStatus("preference_set");
+    try {
+      const res = await fetch(LINK_CONFIRM_URL, {
+        method: "POST",
+        headers: { "Authorization": "Bearer " + ANON_KEY, "Content-Type": "application/json" },
+        body: JSON.stringify({ orderId, preference }),
+      });
+      const result = await res.json();
+      setStatus(res.ok && result.success ? "preference_set" : "error");
+    } catch (err) {
+      setStatus("error");
+    }
   };
 
   const handleConfirmation = async () => {
-    if (confirm === "yes") {
-      const { data: orderData } = await supabase.from("orders")
-        .update({ customer_confirmed: true, status: "delivered" })
-        .eq("id", orderId).select().single();
-      try {
-        await fetch(FUNCTION_URL, {
-          method: "POST",
-          headers: { "Authorization": "Bearer " + ANON_KEY, "Content-Type": "application/json" },
-          body: JSON.stringify({ order: orderData, type: "customer_confirmed" }),
-        });
-      } catch (err) { console.log(err); }
-      setStatus("confirmed");
-    } else {
-      setStatus("problem");
+    try {
+      const res = await fetch(LINK_CONFIRM_URL, {
+        method: "POST",
+        headers: { "Authorization": "Bearer " + ANON_KEY, "Content-Type": "application/json" },
+        body: JSON.stringify({ orderId, confirm }),
+      });
+      const result = await res.json();
+      setStatus(res.ok && result.success ? result.status : "error");
+    } catch (err) {
+      setStatus("error");
     }
   };
 

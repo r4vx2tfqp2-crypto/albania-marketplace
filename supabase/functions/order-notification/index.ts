@@ -1,15 +1,39 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')
 const SITE_URL = 'https://tregu.store'
 const ADMIN_EMAIL = 'info@tregu.store'
 const FROM = 'Tregu <noreply@tregu.store>'
 
+// Service-role client: only this function's server-side code holds this key.
+// Used to re-fetch the authoritative order row instead of trusting the
+// caller-supplied `order` object, which is reachable by anyone with the
+// public anon key (see client/src/lib/supabase.js).
+const supabaseAdmin = createClient(
+  Deno.env.get('SUPABASE_URL')!,
+  Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+)
+
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 }
+
+// Minimal HTML-escaping for user-supplied text embedded in emails
+// (customer name/address/notes/item names originate from checkout form
+// input and courier-entered delivery notes).
+const esc = (v: unknown) =>
+  String(v ?? '').replace(/[&<>"']/g, (c) => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+  }[c] as string))
+
+// Signatures are canvas.toDataURL('image/jpeg', ...) output only — reject
+// anything that isn't actually a data: image URL before embedding it as
+// an <img src> in the email HTML.
+const isSafeDataImageUrl = (v: unknown) =>
+  typeof v === 'string' && /^data:image\/(png|jpe?g);base64,[A-Za-z0-9+/=]+$/.test(v)
 
 const sendEmail = async (to: string, subject: string, html: string) => {
   try {
@@ -39,14 +63,37 @@ serve(async (req) => {
     const body = await req.text()
     if (!body) return new Response(JSON.stringify({ error: 'Empty body' }), { status: 400, headers: corsHeaders })
 
-    const { order, type } = JSON.parse(body)
-    if (!order) return new Response(JSON.stringify({ error: 'No order data' }), { status: 400, headers: corsHeaders })
+    const { order: clientOrder, type } = JSON.parse(body)
+    const orderId = clientOrder?.id
+    if (!orderId) return new Response(JSON.stringify({ error: 'No order id' }), { status: 400, headers: corsHeaders })
+
+    // Re-fetch the order from the database instead of trusting the request
+    // body: this endpoint is reachable by anyone with the public anon key,
+    // and previously sent email (customer_email, customer_name, total,
+    // items, ...) built entirely from caller-supplied JSON -- letting
+    // anyone send a branded email "from noreply@tregu.store" to any address
+    // with arbitrary content. The order id itself is an unguessable UUID,
+    // so requiring it to match a real row closes that off.
+    const { data: order, error: fetchErr } = await supabaseAdmin
+      .from('orders')
+      .select('*')
+      .eq('id', orderId)
+      .single()
+    if (fetchErr || !order) {
+      return new Response(JSON.stringify({ error: 'Order not found' }), { status: 404, headers: corsHeaders })
+    }
+
+    // The courier-drawn delivery signature is the one piece of data that
+    // isn't persisted anywhere else -- accept it from the caller, but only
+    // if it's actually a data: image URL, since it's interpolated directly
+    // into the email HTML as an <img src>.
+    const signature = isSafeDataImageUrl(clientOrder?.signature) ? clientOrder.signature : null
 
     console.log('Processing type:', type, 'delivery_preference:', order.delivery_preference)
 
     const itemsRows = order.items?.map((i: any) => `
       <tr>
-        <td style="padding:8px;font-size:13px;color:#1A1916;border-bottom:1px solid #F0EFEC;">${i.name}${i.size ? ` (${i.size})` : ''}</td>
+        <td style="padding:8px;font-size:13px;color:#1A1916;border-bottom:1px solid #F0EFEC;">${esc(i.name)}${i.size ? ` (${esc(i.size)})` : ''}</td>
         <td style="padding:8px;font-size:13px;color:#5C5A55;text-align:center;border-bottom:1px solid #F0EFEC;">x${i.qty}</td>
         <td style="padding:8px;font-size:13px;color:#1A1916;text-align:right;border-bottom:1px solid #F0EFEC;font-weight:600;">${(i.price * i.qty).toLocaleString()} L</td>
       </tr>`
@@ -58,10 +105,8 @@ serve(async (req) => {
 
     if (type === 'delivery_confirmed') {
       const deliveryPref = order.delivery_preference || 'delivered'
-      const neighbourName = order.neighbour_name || ''
-      const signature = order.signature || null
 
-      console.log('Delivery pref:', deliveryPref, 'Neighbour:', neighbourName)
+      console.log('Delivery pref:', deliveryPref)
 
       const prefMap: Record<string, {icon: string, title: string, color: string}> = {
         delivered: { icon: '✅', title: 'U dorezua personalisht', color: '#1D9E75' },
@@ -80,9 +125,9 @@ serve(async (req) => {
             <h2 style="color:#fff;margin:0;">${pref.icon} ${pref.title}</h2>
           </div>
           <div style="background:#F7F6F3;padding:20px;border-radius:0 0 12px 12px;">
-            <p><strong>${order.customer_name}</strong> — ${order.customer_phone}</p>
-            <p>${order.customer_address}, ${order.customer_city}</p>
-            ${neighbourName ? `<p>Fqinji: <strong>${neighbourName}</strong></p>` : ''}
+            <p><strong>${esc(order.customer_name)}</strong> — ${esc(order.customer_phone)}</p>
+            <p>${esc(order.customer_address)}, ${esc(order.customer_city)}</p>
+            ${order.notes ? `<p>📝 ${esc(order.notes)}</p>` : ''}
             ${signature ? `<p>Firma:</p><img src="${signature}" style="max-width:200px;border:1px solid #ddd;border-radius:8px;" />` : ''}
             <p style="font-size:18px;font-weight:bold;color:${pref.color};">Totali: ${order.total?.toLocaleString()} L</p>
           </div>
@@ -99,7 +144,7 @@ serve(async (req) => {
         } else if (deliveryPref === 'neighbour') {
           deliverySection = `<div style="background:#E6F1FB;border-radius:10px;padding:16px;margin-bottom:20px;">
             <p style="margin:0 0 8px;color:#185FA5;font-size:14px;font-weight:bold;">🏠 Porosia u la tek fqinji juaj</p>
-            ${neighbourName ? `<p style="margin:0 0 8px;color:#185FA5;font-size:14px;">Emri i fqinjit: <strong>${neighbourName}</strong></p>` : ''}
+            ${order.notes ? `<p style="margin:0 0 8px;color:#185FA5;font-size:14px;">${esc(order.notes)}</p>` : ''}
             ${signature ? `<p style="margin:8px 0 4px;color:#185FA5;font-size:13px;">Firma e fqinjit:</p><img src="${signature}" style="max-width:200px;border:1px solid #ddd;border-radius:8px;" />` : ''}
             <p style="margin:8px 0 0;color:#185FA5;font-size:13px;">Ju lutem terhiqni porosine sa me shpejt.</p>
           </div>`
@@ -128,7 +173,7 @@ serve(async (req) => {
               <p style="margin:0;color:#fff;font-size:18px;font-weight:bold;">${pref.icon} ${pref.title}</p>
             </td></tr>
             <tr><td style="background:#fff;padding:24px;">
-              <p style="font-size:15px;color:#1A1916;">Pershendetje <strong>${order.customer_name}</strong>,</p>
+              <p style="font-size:15px;color:#1A1916;">Pershendetje <strong>${esc(order.customer_name)}</strong>,</p>
               ${deliverySection}
               <div style="background:#F7F6F3;border-radius:8px;padding:14px;margin-bottom:16px;">
                 <p style="margin:0;font-size:12px;color:#9A9890;text-transform:uppercase;font-weight:bold;">Porosia</p>
@@ -161,7 +206,7 @@ serve(async (req) => {
         `✅ Klienti konfirmoi — #${order.id?.slice(0, 8)}`,
         `<div style="font-family:sans-serif;padding:20px;max-width:500px;">
           <h2 style="color:#1D9E75;">Klienti konfirmoi marrjen!</h2>
-          <p><strong>${order.customer_name}</strong> konfirmoi porosine <strong>#${order.id?.slice(0, 8)}</strong></p>
+          <p><strong>${esc(order.customer_name)}</strong> konfirmoi porosine <strong>#${order.id?.slice(0, 8)}</strong></p>
           <p>Totali: ${order.total?.toLocaleString()} L</p>
         </div>`
       )
@@ -176,10 +221,10 @@ serve(async (req) => {
             <h2 style="color:#fff;margin:0;">🛍️ Porosi e re ne Tregu!</h2>
           </div>
           <div style="background:#F7F6F3;padding:20px;border-radius:0 0 12px 12px;">
-            <p><strong>${order.customer_name}</strong></p>
-            <p>📞 ${order.customer_phone}</p>
-            <p>📍 ${order.customer_address}, ${order.customer_city}</p>
-            ${order.notes ? `<p>📝 ${order.notes}</p>` : ''}
+            <p><strong>${esc(order.customer_name)}</strong></p>
+            <p>📞 ${esc(order.customer_phone)}</p>
+            <p>📍 ${esc(order.customer_address)}, ${esc(order.customer_city)}</p>
+            ${order.notes ? `<p>📝 ${esc(order.notes)}</p>` : ''}
             <table width="100%" style="margin:16px 0;">${itemsRows}</table>
             <p style="font-size:20px;font-weight:bold;color:#1D9E75;">Totali: ${order.total?.toLocaleString()} L</p>
           </div>
@@ -201,15 +246,15 @@ serve(async (req) => {
               <p style="margin:0;color:#fff;font-size:16px;font-weight:bold;">✓ Porosia juaj u konfirmua!</p>
             </td></tr>
             <tr><td style="background:#fff;padding:24px;">
-              <p style="font-size:15px;">Pershendetje <strong>${order.customer_name}</strong>, faleminderit!</p>
+              <p style="font-size:15px;">Pershendetje <strong>${esc(order.customer_name)}</strong>, faleminderit!</p>
 
               <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:16px;">
                 <tr>
                   <td width="48%" style="background:#F7F6F3;border-radius:8px;padding:12px;vertical-align:top;">
                     <p style="margin:0 0 4px;font-size:11px;color:#9A9890;text-transform:uppercase;font-weight:bold;">Bleresi</p>
-                    <p style="margin:0;font-size:13px;font-weight:bold;">${order.customer_name}</p>
-                    <p style="margin:2px 0 0;font-size:12px;color:#5C5A55;">📞 ${order.customer_phone}</p>
-                    <p style="margin:2px 0 0;font-size:12px;color:#5C5A55;">📍 ${order.customer_address}</p>
+                    <p style="margin:0;font-size:13px;font-weight:bold;">${esc(order.customer_name)}</p>
+                    <p style="margin:2px 0 0;font-size:12px;color:#5C5A55;">📞 ${esc(order.customer_phone)}</p>
+                    <p style="margin:2px 0 0;font-size:12px;color:#5C5A55;">📍 ${esc(order.customer_address)}</p>
                   </td>
                   <td width="4%"></td>
                   <td width="48%" style="background:#F7F6F3;border-radius:8px;padding:12px;vertical-align:top;">

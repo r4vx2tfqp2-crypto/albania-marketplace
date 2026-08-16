@@ -1,9 +1,11 @@
 import React, { useState, useRef } from 'react';
-import { supabase } from '../lib/supabase';
 import { CheckCircle, XCircle, Navigation } from 'lucide-react';
 
 const ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9ubmd1cG92eGFlcXVlcXBsaWt4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcxNTUzODUsImV4cCI6MjA5MjczMTM4NX0.aTiKdVjl02JenqpQzbg2qcniscHMJyml9LMdmRsqqKg';
-const FUNCTION_URL = 'https://onngupovxaequeqplikx.supabase.co/functions/v1/order-notification';
+// The PIN lookup/confirm now runs server-side (service role + rate limit)
+// instead of a direct client-side `orders` table query -- see
+// supabase/functions/delivery-pin-confirm.
+const PIN_CONFIRM_URL = 'https://onngupovxaequeqplikx.supabase.co/functions/v1/delivery-pin-confirm';
 
 export default function DeliveryConfirm() {
   const [step, setStep] = useState('form');
@@ -22,12 +24,23 @@ export default function DeliveryConfirm() {
     e.preventDefault();
     setLoading(true);
     setError('');
-    const { data, error: dbError } = await supabase
-      .from('orders').select('*').eq('delivery_pin', pin.trim()).single();
-    if (dbError || !data) { setError('PIN i gabuar. Kontrolloni dhe provoni perseri.'); setLoading(false); return; }
-    if (data.status === 'delivered') { setError('Kjo porosi eshte konfirmuar tashmë si e dorezuar.'); setLoading(false); return; }
-    setOrder(data);
-    setStep('confirm');
+    try {
+      const res = await fetch(PIN_CONFIRM_URL, {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + ANON_KEY, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'lookup', pin: pin.trim() }),
+      });
+      const result = await res.json();
+      if (!res.ok || !result.order) {
+        setError(result.error || 'PIN i gabuar. Kontrolloni dhe provoni perseri.');
+        setLoading(false);
+        return;
+      }
+      setOrder(result.order);
+      setStep('confirm');
+    } catch (err) {
+      setError('Dicka shkoi keq. Provoni perseri.');
+    }
     setLoading(false);
   };
 
@@ -74,22 +87,25 @@ export default function DeliveryConfirm() {
 
   const handleConfirm = async () => {
     setLoading(true);
-    const newStatus = deliveryOption === 'failed' ? 'confirmed' : 'delivered';
-    const deliveryNote = deliveryOption === 'neighbour' ? 'U la tek fqinji: ' + neighbourName : deliveryOption === 'door' ? 'U la para deres' : deliveryOption === 'failed' ? 'Nuk u dorezua' : 'U dorezua';
-    const { data: updatedOrder } = await supabase
-      .from('orders').update({
-        status: newStatus,
-        delivery_preference: deliveryOption,
-        notes: (order.notes ? order.notes + ' | ' : '') + deliveryNote
-      }).eq('id', order.id).select().single();
     try {
-      await fetch(FUNCTION_URL, {
+      const res = await fetch(PIN_CONFIRM_URL, {
         method: 'POST',
         headers: { 'Authorization': 'Bearer ' + ANON_KEY, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ order: { id: order.id, customer_name: order.customer_name, customer_email: order.customer_email, customer_phone: order.customer_phone, customer_address: order.customer_address, customer_city: order.customer_city, total: order.total, items: order.items, notes: deliveryNote, delivery_preference: deliveryOption, neighbour_name: neighbourName || '', signature: signature || null, status: newStatus }, type: 'delivery_confirmed' }),
+        body: JSON.stringify({
+          action: 'confirm', pin: pin.trim(), orderId: order.id,
+          deliveryOption, neighbourName, signature: signature || null,
+        }),
       });
-    } catch (err) { console.log('Email error:', err); }
-    setStep('success');
+      const result = await res.json();
+      if (!res.ok || !result.success) {
+        setError(result.error || 'Konfirmimi deshtoi.');
+        setLoading(false);
+        return;
+      }
+      setStep('success');
+    } catch (err) {
+      setError('Dicka shkoi keq. Provoni perseri.');
+    }
     setLoading(false);
   };
 
