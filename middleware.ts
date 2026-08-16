@@ -44,6 +44,22 @@ const STATIC_PAGES: Record<string, { title: string; desc: string }> = {
   },
 };
 
+// Matches client/src/i18n/sq.js's cat_* labels and the category keys stored
+// on products (see client/src/pages/AddProduct.jsx). /search?category=X
+// used to serve byte-identical title/canonical to bare /search -- and the
+// canonical explicitly pointed away to /search -- which told crawlers all
+// 5 category pages were duplicates of the search page, directly
+// contradicting the sitemap listing them as separate indexable URLs.
+const CATEGORY_LABELS: Record<string, string> = {
+  shoes: 'Këpucë',
+  clothes: 'Rroba',
+  electronics: 'Elektronikë',
+  beauty: 'Bukuri',
+  home: 'Shtëpi',
+  sports: 'Sporte',
+  gifts: 'Dhurata',
+};
+
 export const config = {
   matcher: ['/product/:id*', '/shop/:id*', '/search', '/legal', '/'],
 };
@@ -54,6 +70,18 @@ export default async function middleware(request: Request): Promise<Response | u
 
   const url = new URL(request.url);
   const pathname = url.pathname;
+
+  if (pathname === '/search') {
+    const category = url.searchParams.get('category');
+    const label = category ? CATEGORY_LABELS[category] : undefined;
+    if (label) {
+      return pageResponse({
+        title: `${label} | Tregu.store`,
+        desc: `Zbulo produkte ${label.toLowerCase()} nga dyqane shqiptare te verifikuara ne Tregu.store. Krahaso cmimet dhe porosit online.`,
+        canonical: `${SITE_URL}/search?category=${encodeURIComponent(category!)}`,
+      });
+    }
+  }
 
   const staticPage = STATIC_PAGES[pathname];
   if (staticPage) {
@@ -83,7 +111,7 @@ async function productResponse(id: string): Promise<Response | undefined> {
   let product: Record<string, any> | null = null;
   try {
     const res = await fetch(
-      `${SUPABASE_URL}/rest/v1/products?id=eq.${encodeURIComponent(id)}&select=name,description,price,category,images&limit=1`,
+      `${SUPABASE_URL}/rest/v1/products?id=eq.${encodeURIComponent(id)}&select=name,description,price,category,images,in_stock,rating,review_count&limit=1`,
       { headers: supabaseHeaders }
     );
     if (res.ok) {
@@ -101,8 +129,35 @@ async function productResponse(id: string): Promise<Response | undefined> {
   const descBits = [product.description?.slice(0, 140), product.category].filter(Boolean).join(' — ');
   const desc = `${descBits}${descBits ? '. ' : ''}Bli online ne Tregu.store — pagesa me dorezim.`;
   const image = (product.images?.[0] as string | undefined) ?? DEFAULT_IMAGE;
+  const canonical = `${SITE_URL}/product/${id}`;
 
-  return pageResponse({ title, desc, canonical: `${SITE_URL}/product/${id}`, image, refresh: true });
+  // Product rich-result schema -- lets price/availability/rating show up
+  // directly in Google search results instead of just a plain blue link.
+  const jsonLd: Record<string, any> = {
+    '@context': 'https://schema.org/',
+    '@type': 'Product',
+    name: product.name,
+    image: product.images?.length ? product.images : [DEFAULT_IMAGE],
+    description: product.description || desc,
+    offers: {
+      '@type': 'Offer',
+      url: canonical,
+      priceCurrency: 'ALL',
+      price: product.price ?? undefined,
+      availability: product.in_stock === false
+        ? 'https://schema.org/OutOfStock'
+        : 'https://schema.org/InStock',
+    },
+  };
+  if (product.rating && product.review_count) {
+    jsonLd.aggregateRating = {
+      '@type': 'AggregateRating',
+      ratingValue: product.rating,
+      reviewCount: product.review_count,
+    };
+  }
+
+  return pageResponse({ title, desc, canonical, image, refresh: true, jsonLd });
 }
 
 async function shopResponse(id: string): Promise<Response | undefined> {
@@ -151,11 +206,14 @@ function notFoundResponse(): Response {
   });
 }
 
-function pageResponse(opts: { title: string; desc: string; canonical: string; image?: string; refresh?: boolean }): Response {
+function pageResponse(opts: { title: string; desc: string; canonical: string; image?: string; refresh?: boolean; jsonLd?: Record<string, any> }): Response {
   const title = esc(opts.title);
   const desc = esc(opts.desc);
   const image = esc(opts.image ?? DEFAULT_IMAGE);
   const canonical = opts.canonical;
+  const jsonLdTag = opts.jsonLd
+    ? `<script type="application/ld+json">${safeJsonLd(opts.jsonLd)}</script>\n`
+    : '';
 
   const html = `<!DOCTYPE html>
 <html lang="sq">
@@ -176,7 +234,7 @@ function pageResponse(opts: { title: string; desc: string; canonical: string; im
 <meta name="twitter:title"       content="${title}"/>
 <meta name="twitter:description" content="${desc}"/>
 <meta name="twitter:image"       content="${image}"/>
-${opts.refresh ? `<meta http-equiv="refresh" content="0;url=${canonical}"/>\n` : ''}</head>
+${opts.refresh ? `<meta http-equiv="refresh" content="0;url=${canonical}"/>\n` : ''}${jsonLdTag}</head>
 <body>
 <a href="${canonical}">${title}</a>
 </body>
@@ -197,4 +255,12 @@ function esc(s: string): string {
     .replace(/"/g, '&quot;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;');
+}
+
+// JSON.stringify alone isn't safe to drop into a <script> body: a product
+// name/description containing "</script>" would close the tag early. `<`
+// is not meaningful JSON syntax, so escaping it as a unicode sequence is
+// enough to neutralize that without touching the parsed data.
+function safeJsonLd(obj: Record<string, any>): string {
+  return JSON.stringify(obj).replace(/</g, '\\u003c');
 }

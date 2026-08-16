@@ -4,4 +4,4 @@ Disallow: /seller
 Disallow: /admin
 Disallow: /checkout
 Disallow: /orders
-Sitemap: https://tregu.store/sitemap.xml
+Sitemap: https://www.tregu.store/sitemap.xml

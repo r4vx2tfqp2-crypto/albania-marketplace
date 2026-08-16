@@ -74,6 +74,30 @@ export default function Product() {
     : "355" + rawPhone;
   const whatsappUrl = "https://wa.me/" + whatsappPhone + "?text=" + encodeURIComponent(whatsappMessage);
 
+  const productJsonLd = {
+    "@context": "https://schema.org/",
+    "@type": "Product",
+    name: product.name,
+    image: hasImages ? product.images : [seoImage],
+    description: product.description || seoDesc,
+    offers: {
+      "@type": "Offer",
+      url: "https://www.tregu.store/product/" + product.id,
+      priceCurrency: "ALL",
+      price: product.price,
+      availability: product.in_stock === false
+        ? "https://schema.org/OutOfStock"
+        : "https://schema.org/InStock",
+    },
+    ...(product.rating && product.review_count ? {
+      aggregateRating: {
+        "@type": "AggregateRating",
+        ratingValue: product.rating,
+        reviewCount: product.review_count,
+      },
+    } : {}),
+  };
+
   return (
     <div className={styles.page}>
       <div className="container">
@@ -87,6 +111,7 @@ export default function Product() {
           <meta property="og:url" content={"https://www.tregu.store/product/" + product.id} />
           <meta property="og:type" content="product" />
           <meta name="twitter:card" content="summary_large_image" />
+          <script type="application/ld+json">{JSON.stringify(productJsonLd)}</script>
         </Helmet>
         <button className={styles.back} onClick={() => navigate(-1)}>
           <ArrowLeft size={16} /> {t("back")}
@@ -95,7 +120,7 @@ export default function Product() {
           <div className={styles.imageSection}>
             <div className={styles.imageMain} style={{ background: BG_COLORS[idx] }}>
               {hasImages ? (
-                <img src={product.images[activeImage]} alt="product" style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "var(--radius-xl)" }} />
+                <img src={product.images[activeImage]} alt={product.name} style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "var(--radius-xl)" }} />
               ) : (
                 <span className={styles.imageEmoji} style={{ color: TEXT_COLORS[idx] }}>
                   {product.category === "shoes" ? "👟" : product.category === "clothes" ? "👕" : product.category === "electronics" ? "📱" : product.category === "beauty" ? "💄" : product.category === "home" ? "🏠" : "🛍️"}
@@ -106,7 +131,7 @@ export default function Product() {
             {hasImages && product.images.length > 1 && (
               <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
                 {product.images.map((img, i) => (
-                  <img key={i} src={img} alt="thumb" onClick={() => setActiveImage(i)}
+                  <img key={i} src={img} alt={`${product.name} - foto ${i + 1}`} onClick={() => setActiveImage(i)}
                     style={{ width: 60, height: 60, objectFit: "cover", borderRadius: 8, cursor: "pointer",
                       border: activeImage === i ? "2px solid var(--text-1)" : "2px solid transparent",
                       opacity: activeImage === i ? 1 : 0.6, transition: "all 0.15s" }} />
