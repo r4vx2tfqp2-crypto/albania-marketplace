@@ -9,7 +9,7 @@ import styles from "./Checkout.module.css";
 const CITIES = ["Tirana", "Durres", "Shkoder", "Vlore", "Korce", "Fier", "Berat", "Lushnje"];
 const ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9ubmd1cG92eGFlcXVlcXBsaWt4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcxNTUzODUsImV4cCI6MjA5MjczMTM4NX0.aTiKdVjl02JenqpQzbg2qcniscHMJyml9LMdmRsqqKg";
 const FUNCTION_URL = "https://onngupovxaequeqplikx.supabase.co/functions/v1/order-notification";
-const MAPS_API_KEY = "AIzaSyCtEGe7sZA6ptmvY8HDU_54oKdVy05cDx0";
+const MAPS_API_KEY = "AIzaSyC3SYQJZ-bj3ktJy_ypTpGIGg12BQTGhYs";
 
 // Google Maps (Places) used to load globally on every page via a <script>
 // tag in index.html even though only this page uses it. Load it once, on
