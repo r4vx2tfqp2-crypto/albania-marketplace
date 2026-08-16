@@ -55,13 +55,6 @@ export default function Checkout() {
   }, [cartItems]);
   const formatPrice = (p) => p.toLocaleString("sq-AL") + " L";
 
-  // Redirect to login if not logged in
-  useEffect(() => {
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      if (!user) navigate("/login");
-    });
-  }, []);
-
   useEffect(() => {
     if (showMap) loadGoogleMaps().then(() => setTimeout(initMap, 200)).catch(() => {});
   }, [showMap]);

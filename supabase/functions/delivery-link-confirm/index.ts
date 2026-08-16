@@ -23,6 +23,24 @@ const corsHeaders = {
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
 
+const getClientIp = (req: Request) =>
+  req.headers.get('x-forwarded-for')?.split(',')[0].trim() || 'unknown'
+
+const RATE_LIMIT_WINDOW_MS = 15 * 60 * 1000
+const RATE_LIMIT_MAX_ATTEMPTS = 20
+
+async function allowAttempt(ip: string): Promise<boolean> {
+  const since = new Date(Date.now() - RATE_LIMIT_WINDOW_MS).toISOString()
+  const { count } = await supabaseAdmin
+    .from('delivery_link_attempts')
+    .select('id', { count: 'exact', head: true })
+    .eq('ip', ip)
+    .gte('created_at', since)
+  if ((count ?? 0) >= RATE_LIMIT_MAX_ATTEMPTS) return false
+  await supabaseAdmin.from('delivery_link_attempts').insert({ ip })
+  return true
+}
+
 const PREF_LABELS: Record<string, string> = {
   delivered: 'Dorezim personal',
   neighbour: 'Tek fqinji',
@@ -33,6 +51,11 @@ const PREF_LABELS: Record<string, string> = {
 serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
   if (req.method !== 'POST') return json({ error: 'Method not allowed' }, 405)
+
+  const ip = getClientIp(req)
+  if (!(await allowAttempt(ip))) {
+    return json({ error: 'Shume tentativa. Provoni perseri me vone.' }, 429)
+  }
 
   let body: any
   try { body = await req.json() } catch { return json({ error: 'Invalid JSON' }, 400) }
