@@ -26,13 +26,26 @@ export default function Login() {
     e.preventDefault();
     setLoading(true);
     setError("");
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email: form.email,
       password: form.password,
       options: { data: { name: form.name } }
     });
     if (error) { setError(error.message); setLoading(false); return; }
-    setSuccess("Llogaria u krijua! Mund te hyni tani.");
+    if (data.session) {
+      // Email confirmation is off (or already satisfied) -- Supabase
+      // handed back a live session, so the account is immediately usable.
+      // Skip the extra login step entirely instead of making them retype
+      // what they just typed.
+      navigate("/seller");
+      return;
+    }
+    // Email confirmation required -- no session yet. Switch to the sign-in
+    // tab with the same email/password already filled in (same `form`
+    // state backs both tabs) so confirming later is a single click, not a
+    // full retype.
+    setSuccess("Llogaria u krijua! Kontrolloni email-in per te konfirmuar llogarine, mandej shtypni \"Kyçu\".");
+    setTab("login");
     setLoading(false);
   };
 

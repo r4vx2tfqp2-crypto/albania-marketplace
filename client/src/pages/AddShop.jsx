@@ -1,24 +1,48 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, CheckCircle, Upload } from "lucide-react";
 import { supabase } from "../lib/supabase";
+import { resizeImage } from "../lib/resizeImage";
 import styles from "./AddProduct.module.css";
 
 const CITIES = ["Tirana", "Durres", "Shkoder", "Vlore", "Korce", "Fier", "Berat", "Lushnje"];
 const COLORS = ["#1D9E75","#D4537E","#378ADD","#993556","#BA7517","#534AB7"];
 const CATEGORIES = ["Kepuce & Sporte","Rroba & Mode","Elektronike","Bukuri & Kozmetike","Shtepi & Jetese","Kepuce","Dhurata","Vegla & Ndertim"];
+const DRAFT_KEY = "tregu_add_shop_draft";
+
+function loadDraft() {
+  try {
+    const raw = localStorage.getItem(DRAFT_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch { return null; }
+}
 
 export default function AddShop() {
   const navigate = useNavigate();
+  const draft = loadDraft();
   const [saved, setSaved] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [logoFile, setLogoFile] = useState(null);
   const [logoPreview, setLogoPreview] = useState(null);
-  const [form, setForm] = useState({
+  const [draftRestored, setDraftRestored] = useState(!!draft);
+  const [form, setForm] = useState(draft || {
     name: "", description: "", category: "Clothes & Fashion",
     location: "Tirana", phone: "", email: "", color: "#1D9E75", delivery_fee: 300,
   });
+
+  // Autosave text fields (not the logo -- Files can't survive localStorage)
+  // so an accidental refresh/back doesn't force a full restart.
+  useEffect(() => {
+    if (!form.name && !form.description && !form.phone && !form.email) return;
+    localStorage.setItem(DRAFT_KEY, JSON.stringify(form));
+  }, [form]);
+
+  const clearDraft = () => {
+    localStorage.removeItem(DRAFT_KEY);
+    setForm({ name: "", description: "", category: "Clothes & Fashion", location: "Tirana", phone: "", email: "", color: "#1D9E75", delivery_fee: 300 });
+    setDraftRestored(false);
+  };
 
   const getInitials = (name) => name.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2);
 
@@ -31,9 +55,10 @@ export default function AddShop() {
 
   const uploadLogo = async (shopId) => {
     if (!logoFile) return null;
-    const ext = logoFile.name.split(".").pop();
+    const resized = await resizeImage(logoFile, { maxDimension: 800, quality: 0.85 });
+    const ext = resized.name.split(".").pop();
     const path = "logos/" + shopId + "." + ext;
-    const { error } = await supabase.storage.from("product-images").upload(path, logoFile, { upsert: true });
+    const { error } = await supabase.storage.from("product-images").upload(path, resized, { upsert: true });
     if (error) return null;
     const { data } = supabase.storage.from("product-images").getPublicUrl(path);
     return data?.publicUrl || null;
@@ -62,7 +87,7 @@ export default function AddShop() {
       user_id: user.id,
     }).select().single();
 
-    if (shopError) { setError("Something went wrong. Please try again."); setLoading(false); return; }
+    if (shopError) { setError("Dicka shkoi gabim: " + shopError.message); setLoading(false); return; }
 
     // Upload logo if provided
     if (logoFile) {
@@ -70,6 +95,7 @@ export default function AddShop() {
       if (logoUrl) await supabase.from("shops").update({ logo_url: logoUrl }).eq("id", shop.id);
     }
 
+    localStorage.removeItem(DRAFT_KEY);
     setSaved(true);
     setTimeout(() => navigate("/seller"), 2000);
   };
@@ -96,6 +122,14 @@ export default function AddShop() {
             {error}
           </div>
         )}
+        {draftRestored && (
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, background: "var(--blue-light)", color: "var(--blue)", padding: "12px 16px", borderRadius: "var(--radius-md)", marginBottom: 16, fontSize: 13 }}>
+            <span>Rikuperuam nje draft te paplotesuar. Logo duhet shtuar perseri.</span>
+            <button type="button" onClick={clearDraft} style={{ background: "none", border: "none", color: "inherit", textDecoration: "underline", cursor: "pointer", fontFamily: "var(--font-body)", fontSize: 13, flexShrink: 0 }}>
+              Fillo nga e para
+            </button>
+          </div>
+        )}
         <form onSubmit={handleSubmit} className={styles.form}>
           <div className={styles.formGrid}>
 
@@ -118,7 +152,7 @@ export default function AddShop() {
                   </div>
                 </label>
               </div>
-              <p style={{ fontSize: 12, color: "var(--text-3)", marginTop: 6 }}>JPG ose PNG, max 2MB. Nese nuk ngarkoni logo, do te perdoren inicalet e dyqanit.</p>
+              <p style={{ fontSize: 12, color: "var(--text-3)", marginTop: 6 }}>JPG ose PNG, ngjeshet automatikisht. Nese nuk ngarkoni logo, do te perdoren inicalet e dyqanit.</p>
             </div>
 
             <div className={styles.field}>

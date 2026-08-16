@@ -201,6 +201,11 @@ export default function SellerDashboard() {
             <div className={styles.sectionHead}>
               <h2 className={styles.sectionTitle}>{t("your_shops")}</h2>
             </div>
+            {shops.some(s => s.status === "pending") && (
+              <div style={{ fontSize: 12, color: "var(--text-3)", background: "var(--amber-light)", padding: "8px 12px", borderRadius: 8, marginBottom: 12 }}>
+                "Ne shqyrtim" do te thote qe dyqani nuk ka marre ende distinktivin "Verifikuar" — mund te shesesh normalisht ndersa pret.
+              </div>
+            )}
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: 12 }}>
               {shops.map(shop => (
                 <div key={shop.id} style={{ display: "flex", alignItems: "center", gap: 12, background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--radius-lg)", padding: 16 }}>
@@ -209,7 +214,16 @@ export default function SellerDashboard() {
                       {shop.initials}
                     </div>
                     <div>
-                      <div style={{ fontSize: 14, fontWeight: 500, color: "var(--text-1)" }}>{shop.name}</div>
+                      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                        <div style={{ fontSize: 14, fontWeight: 500, color: "var(--text-1)" }}>{shop.name}</div>
+                        {shop.status && (
+                          <span style={{ fontSize: 10, fontWeight: 600, padding: "2px 8px", borderRadius: 20,
+                            background: shop.status === "approved" ? "var(--green-light)" : shop.status === "pending" ? "var(--amber-light)" : "var(--red-light)",
+                            color: shop.status === "approved" ? "var(--green-dark)" : shop.status === "pending" ? "#854F0B" : "var(--red)" }}>
+                            {shop.status === "approved" ? "Aprovuar" : shop.status === "pending" ? "Ne shqyrtim" : "Refuzuar"}
+                          </span>
+                        )}
+                      </div>
                       <div style={{ fontSize: 12, color: "var(--text-3)" }}>{shop.products?.length || 0} {t("active_products").toLowerCase()}</div>
                     </div>
                   </Link>

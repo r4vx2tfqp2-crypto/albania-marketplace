@@ -32,8 +32,9 @@ export default function Navbar() {
           <button className={styles.langBtn} onClick={toggleLanguage}>
             {i18n.language === 'sq' ? '🇦🇱 SQ' : '🇬🇧 EN'}
           </button>
-          <Link to="/seller" className={styles.actionBtn} title="Seller Dashboard">
-            <Store size={18} strokeWidth={1.8} />
+          <Link to="/seller" className={styles.sellBtn} title="Shit produktet tuaja">
+            <Store size={16} strokeWidth={1.8} />
+            <span>Shit</span>
           </Link>
           <Link to="/cart" className={styles.cartBtn}>
             <ShoppingCart size={18} strokeWidth={1.8} />

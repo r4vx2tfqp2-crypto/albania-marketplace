@@ -88,6 +88,26 @@
 }
 .actionBtn:hover { background: var(--surface-2); color: var(--text-1); }
 
+.sellBtn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 38px;
+  padding: 0 14px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-strong);
+  color: var(--text-1);
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: background 0.15s, border-color 0.15s;
+}
+.sellBtn:hover { background: var(--surface-2); border-color: var(--text-3); }
+@media (max-width: 420px) {
+  .sellBtn span { display: none; }
+  .sellBtn { width: 38px; padding: 0; justify-content: center; }
+}
+
 .cartBtn {
   position: relative;
   width: 38px;

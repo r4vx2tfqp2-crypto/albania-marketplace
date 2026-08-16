@@ -2,7 +2,10 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, CheckCircle, Upload, X, Plus } from "lucide-react";
 import { supabase } from "../lib/supabase";
+import { resizeImage } from "../lib/resizeImage";
 import styles from "./AddProduct.module.css";
+
+const DRAFT_KEY = "tregu_add_product_draft";
 
 const CATEGORIES = [
   { key: "shoes", label: "Kepuce & Sandale", icon: "👟" },
@@ -114,8 +117,16 @@ const CATEGORY_DETAILS = {
   ],
 };
 
+function loadDraft() {
+  try {
+    const raw = localStorage.getItem(DRAFT_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch { return null; }
+}
+
 export default function AddProduct() {
   const navigate = useNavigate();
+  const draft = loadDraft();
   const [saved, setSaved] = useState(false);
   const [loading, setLoading] = useState(false);
   const [shops, setShops] = useState([]);
@@ -123,15 +134,35 @@ export default function AddProduct() {
   const [images, setImages] = useState([]);
   const [imagePreviews, setImagePreviews] = useState([]);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [failedImageCount, setFailedImageCount] = useState(0);
   const [step, setStep] = useState(1);
-  const [selectedSizes, setSelectedSizes] = useState([]);
-  const [selectedColors, setSelectedColors] = useState([]);
+  const [selectedSizes, setSelectedSizes] = useState(draft?.selectedSizes || []);
+  const [selectedColors, setSelectedColors] = useState(draft?.selectedColors || []);
   const [customSize, setCustomSize] = useState("");
   const [customColor, setCustomColor] = useState("");
-  const [form, setForm] = useState({ name: "", price: "", category: "shoes", description: "", shop_id: "", trending: false });
-  const [details, setDetails] = useState({});
+  const [form, setForm] = useState(draft?.form || { name: "", price: "", category: "shoes", description: "", shop_id: "", trending: false });
+  const [details, setDetails] = useState(draft?.details || {});
+  const [draftRestored, setDraftRestored] = useState(!!draft);
 
   useEffect(() => { fetchShops(); }, []);
+
+  // Autosave text fields (not photos -- Files can't survive localStorage)
+  // so an accidental refresh/back/crash mid-listing, especially during the
+  // slow photo-upload step, doesn't force a full restart.
+  useEffect(() => {
+    const hasContent = form.name || form.price || form.description || selectedSizes.length || selectedColors.length || Object.keys(details).length;
+    if (!hasContent) return;
+    localStorage.setItem(DRAFT_KEY, JSON.stringify({ form, details, selectedSizes, selectedColors }));
+  }, [form, details, selectedSizes, selectedColors]);
+
+  const clearDraft = () => {
+    localStorage.removeItem(DRAFT_KEY);
+    setForm({ name: "", price: "", category: "shoes", description: "", shop_id: form.shop_id, trending: false });
+    setDetails({});
+    setSelectedSizes([]);
+    setSelectedColors([]);
+    setDraftRestored(false);
+  };
 
   const fetchShops = async () => {
     const { data: { user } } = await supabase.auth.getUser();
@@ -172,19 +203,28 @@ export default function AddProduct() {
     setCustomColor("");
   };
 
+  const uploadOne = async (file, path, attempt = 1) => {
+    const { error } = await supabase.storage.from("product-images").upload(path, file, { upsert: true });
+    if (error) {
+      if (attempt < 3) return uploadOne(file, path, attempt + 1); // flaky mobile connection -- retry before giving up
+      return null;
+    }
+    const { data } = supabase.storage.from("product-images").getPublicUrl(path);
+    return data?.publicUrl || null;
+  };
+
   const uploadImages = async (productId) => {
     const urls = [];
+    let failed = 0;
     for (let i = 0; i < images.length; i++) {
-      const file = images[i];
-      const ext = file.name.split(".").pop();
+      const resized = await resizeImage(images[i]);
+      const ext = resized.name.split(".").pop();
       const path = productId + "/" + i + "." + ext;
-      const { error } = await supabase.storage.from("product-images").upload(path, file, { upsert: true });
-      if (!error) {
-        const { data } = supabase.storage.from("product-images").getPublicUrl(path);
-        if (data?.publicUrl) urls.push(data.publicUrl);
-      }
+      const url = await uploadOne(resized, path);
+      if (url) urls.push(url); else failed++;
       setUploadProgress(Math.round(((i + 1) / images.length) * 100));
     }
+    setFailedImageCount(failed);
     return urls;
   };
 
@@ -208,8 +248,9 @@ export default function AddProduct() {
       const imageUrls = await uploadImages(product.id);
       await supabase.from("products").update({ images: imageUrls }).eq("id", product.id);
     }
+    localStorage.removeItem(DRAFT_KEY);
     setSaved(true);
-    setTimeout(() => navigate("/seller"), 2000);
+    setTimeout(() => navigate("/seller"), 2500);
   };
 
   if (saved) {
@@ -217,6 +258,11 @@ export default function AddProduct() {
       <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "60vh", gap: 12, textAlign: "center", color: "var(--green)" }}>
         <CheckCircle size={64} strokeWidth={1.5} />
         <h2 style={{ fontFamily: "var(--font-display)", fontSize: 24, fontWeight: 700, color: "var(--text-1)" }}>Produkti u publikua!</h2>
+        {failedImageCount > 0 && (
+          <p style={{ color: "#854F0B", fontSize: 13, background: "var(--amber-light)", padding: "8px 14px", borderRadius: 8, maxWidth: 360 }}>
+            {failedImageCount} nga fotot nuk u ngarkuan dot (lidhje e paqendrueshme). Mund t'i shtoni me vone duke redaktuar produktin.
+          </p>
+        )}
         <p style={{ color: "var(--text-3)", fontSize: 14 }}>Duke u ridrejtuar...</p>
       </div>
     );
@@ -238,6 +284,14 @@ export default function AddProduct() {
             {error}
           </div>
         )}
+        {draftRestored && (
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, background: "var(--blue-light)", color: "var(--blue)", padding: "12px 16px", borderRadius: "var(--radius-md)", marginBottom: 16, fontSize: 13 }}>
+            <span>Rikuperuam nje draft te paplotesuar. Fotot duhen shtuar perseri.</span>
+            <button type="button" onClick={clearDraft} style={{ background: "none", border: "none", color: "inherit", textDecoration: "underline", cursor: "pointer", fontFamily: "var(--font-body)", fontSize: 13, flexShrink: 0 }}>
+              Fillo nga e para
+            </button>
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} className={styles.form}>
 
@@ -254,7 +308,7 @@ export default function AddProduct() {
                 <div style={{ border: "2px dashed var(--border-strong)", borderRadius: 12, padding: 32, textAlign: "center" }}>
                   <Upload size={28} strokeWidth={1.5} style={{ color: "var(--text-3)", marginBottom: 8 }} />
                   <div style={{ fontSize: 14, fontWeight: 500, marginBottom: 4 }}>Kliko per te ngarkuar foto</div>
-                  <div style={{ fontSize: 12, color: "var(--text-3)" }}>JPG, PNG — Max 5MB secila — Deri ne 10 foto</div>
+                  <div style={{ fontSize: 12, color: "var(--text-3)" }}>JPG, PNG — ngjeshen automatikisht — Deri ne 10 foto</div>
                 </div>
               ) : (
                 <div style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" }}>
