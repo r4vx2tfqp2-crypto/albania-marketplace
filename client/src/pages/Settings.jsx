@@ -33,14 +33,24 @@ export default function Settings() {
 
   const handleDeleteAccount = async () => {
     setDeleteLoading(true);
-
-    // Delete user's products
-    await supabase.from('products').delete().eq('user_id', user.id);
-
-    // Delete user's shops
-    await supabase.from('shops').delete().eq('user_id', user.id);
-
-    // Sign out and delete account
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const res = await fetch('https://onngupovxaequeqplikx.supabase.co/functions/v1/delete-account', {
+        method: 'POST',
+        headers: {
+          'Authorization': 'Bearer ' + session?.access_token,
+          'Content-Type': 'application/json',
+        },
+      });
+      const result = await res.json();
+      if (!res.ok || !result.success) {
+        setDeleteLoading(false);
+        return;
+      }
+    } catch (err) {
+      setDeleteLoading(false);
+      return;
+    }
     await signOut();
     navigate('/');
   };

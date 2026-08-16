@@ -422,3 +422,8 @@ entrypoint = "./functions/delivery-pin-confirm/index.ts"
 enabled = true
 verify_jwt = true
 entrypoint = "./functions/delivery-link-confirm/index.ts"
+
+[functions.delete-account]
+enabled = true
+verify_jwt = true
+entrypoint = "./functions/delete-account/index.ts"

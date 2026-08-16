@@ -1,3 +1,4 @@
+import { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { CartProvider } from './context/CartContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
@@ -12,22 +13,31 @@ import Checkout from './pages/Checkout';
 import Orders from './pages/Orders';
 import Favorites from './pages/Favorites';
 import Profile from './pages/Profile';
-import SellerDashboard from './pages/SellerDashboard';
-import SellerOrders from './pages/SellerOrders';
-import EditProduct from './pages/EditProduct';
 import DeliveryConfirm from './pages/DeliveryConfirm';
 import ConfirmDelivery from './pages/ConfirmDelivery';
 import Feed from './pages/Feed';
-import AddProduct from './pages/AddProduct';
-import AddShop from './pages/AddShop';
-import AdminSubscriptions from './pages/AdminSubscriptions';
-import AdminPanel from './pages/AdminPanel';
 import Legal from './pages/Legal';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
 import Settings from './pages/Settings';
 import Onboarding from './pages/Onboarding';
 import Login from './pages/Login';
+
+// Seller/admin pages pull in heavy dependencies (jspdf, html2canvas, qrcode)
+// and are only ever reached by a signed-in seller or the single admin
+// account -- code-split them instead of shipping them in the bundle every
+// visitor downloads to just browse products.
+const SellerDashboard = lazy(() => import('./pages/SellerDashboard'));
+const SellerOrders = lazy(() => import('./pages/SellerOrders'));
+const EditProduct = lazy(() => import('./pages/EditProduct'));
+const AddProduct = lazy(() => import('./pages/AddProduct'));
+const AddShop = lazy(() => import('./pages/AddShop'));
+const AdminSubscriptions = lazy(() => import('./pages/AdminSubscriptions'));
+const AdminPanel = lazy(() => import('./pages/AdminPanel'));
+
+function RouteFallback() {
+  return <div style={{ padding: 80, textAlign: 'center', color: 'var(--text-3)' }}>Duke ngarkuar…</div>;
+}
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
@@ -67,32 +77,34 @@ function MainLayout() {
   return (
     <div style={{ paddingBottom: '72px' }}>
       <Navbar />
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/search" element={<Search />} />
-        <Route path="/product/:id" element={<Product />} />
-        <Route path="/shop/:id" element={<Shop />} />
-        <Route path="/cart" element={<Cart />} />
-        <Route path="/checkout" element={<Checkout />} />
-        <Route path="/orders" element={<Orders />} />
-        <Route path="/favorites" element={<Favorites />} />
-        <Route path="/profile" element={<Profile />} />
-        <Route path="/seller" element={
-          <ProtectedRoute><SellerDashboard /></ProtectedRoute>
-        } />
-        <Route path="/seller/add-product" element={
-          <ProtectedRoute><AddProduct /></ProtectedRoute>
-        } />
-        <Route path="/legal" element={<Legal />} />
-        <Route path="/admin" element={<AdminRoute><AdminPanel /></AdminRoute>} />
-        <Route path="/admin/subscriptions" element={<AdminRoute><AdminSubscriptions /></AdminRoute>} />
-        <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
-        <Route path="/seller/edit-product/:id" element={<ProtectedRoute><EditProduct /></ProtectedRoute>} />
-        <Route path="/seller/orders" element={<ProtectedRoute><SellerOrders /></ProtectedRoute>} />
-        <Route path="/seller/add-shop" element={
-          <ProtectedRoute><AddShop /></ProtectedRoute>
-        } />
-      </Routes>
+      <Suspense fallback={<RouteFallback />}>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/search" element={<Search />} />
+          <Route path="/product/:id" element={<Product />} />
+          <Route path="/shop/:id" element={<Shop />} />
+          <Route path="/cart" element={<Cart />} />
+          <Route path="/checkout" element={<Checkout />} />
+          <Route path="/orders" element={<Orders />} />
+          <Route path="/favorites" element={<Favorites />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/seller" element={
+            <ProtectedRoute><SellerDashboard /></ProtectedRoute>
+          } />
+          <Route path="/seller/add-product" element={
+            <ProtectedRoute><AddProduct /></ProtectedRoute>
+          } />
+          <Route path="/legal" element={<Legal />} />
+          <Route path="/admin" element={<AdminRoute><AdminPanel /></AdminRoute>} />
+          <Route path="/admin/subscriptions" element={<AdminRoute><AdminSubscriptions /></AdminRoute>} />
+          <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+          <Route path="/seller/edit-product/:id" element={<ProtectedRoute><EditProduct /></ProtectedRoute>} />
+          <Route path="/seller/orders" element={<ProtectedRoute><SellerOrders /></ProtectedRoute>} />
+          <Route path="/seller/add-shop" element={
+            <ProtectedRoute><AddShop /></ProtectedRoute>
+          } />
+        </Routes>
+      </Suspense>
       <BottomNav />
     </div>
   );
