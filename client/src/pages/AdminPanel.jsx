@@ -51,11 +51,13 @@ export default function AdminPanel() {
   const [orders, setOrders] = useState([]);
   const [products, setProducts] = useState([]);
   const [users, setUsers] = useState([]);
+  const [userStats, setUserStats] = useState(null); // { total, createdDates } -- null while loading/unavailable
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(null);
 
   useEffect(() => {
     fetchAll();
+    fetchUserStats();
   }, []);
 
   const fetchAll = async () => {
@@ -69,6 +71,22 @@ export default function AdminPanel() {
     setOrders(ordersData || []);
     setProducts(productsData || []);
     setLoading(false);
+  };
+
+  // Signup counts live in Supabase Auth, not a client-readable table --
+  // fetched via an admin-only edge function using the service-role key.
+  const fetchUserStats = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) return;
+    try {
+      const res = await fetch('https://onngupovxaequeqplikx.supabase.co/functions/v1/admin-user-stats', {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + session.access_token, 'Content-Type': 'application/json' },
+      });
+      if (!res.ok) return;
+      const data = await res.json();
+      setUserStats(data);
+    } catch { /* leave userStats null -- section just won't render */ }
   };
 
   const updateShop = async (shopId, updates) => {
@@ -154,6 +172,14 @@ export default function AdminPanel() {
     count: shops.filter(s => { const c = new Date(s.created_at); return c >= start && c < end; }).length,
   }));
   const maxShopsByWeek = Math.max(1, ...shopsByWeek.map(w => w.count));
+
+  const userDates = (userStats?.createdDates || []).map(d => new Date(d));
+  const usersByWeek = weeks8.map(({ start, end }) => ({
+    label: start.toLocaleDateString('sq-AL', { day: 'numeric', month: 'short' }),
+    count: userDates.filter(c => c >= start && c < end).length,
+  }));
+  const maxUsersByWeek = Math.max(1, ...usersByWeek.map(w => w.count));
+  const usersThisWeek = usersByWeek[usersByWeek.length - 1]?.count || 0;
 
   const Bar = ({ pct, color }) => (
     <div style={{ flex: 1, background: 'var(--surface-2)', borderRadius: 6, overflow: 'hidden', height: 8 }}>
@@ -277,6 +303,7 @@ export default function AdminPanel() {
                 { label: 'Porosi kete jave', value: ordersThisWeek, sub: ordersPrevWeek > 0 || ordersThisWeek > 0 ? `${ordersTrend >= 0 ? '+' : ''}${ordersTrend}% vs java e kaluar` : null, bg: 'var(--amber-light)', color: '#854F0B' },
                 { label: 'Produkte aktive', value: inStockProducts, sub: `${products.length} total`, bg: 'var(--green-light)', color: 'var(--green-dark)' },
                 { label: 'Dyqane aktive', value: approvedShops.length, sub: `${shops.length} total`, bg: 'var(--blue-light)', color: 'var(--blue)' },
+                { label: 'Perdorues te regjistruar', value: userStats ? userStats.total : '—', sub: userStats ? `+${usersThisWeek} kete jave` : 'Duke ngarkuar...', bg: '#F0EEFF', color: '#3C3489' },
               ].map(stat => (
                 <div key={stat.label} style={{ background: stat.bg, borderRadius: 16, padding: '18px 20px' }}>
                   <div style={{ fontSize: 22, fontWeight: 800, fontFamily: 'var(--font-display)', color: stat.color }}>{stat.value}</div>
@@ -379,17 +406,37 @@ export default function AdminPanel() {
               </div>
             </div>
 
-            {/* Shop growth */}
-            <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 16, padding: 20 }}>
-              <div style={{ fontSize: 15, fontWeight: 600, marginBottom: 16 }}>Dyqane te reja, 8 javet e fundit</div>
-              <div style={{ display: 'flex', alignItems: 'flex-end', gap: 8, height: 90 }}>
-                {shopsByWeek.map((w, i) => (
-                  <div key={i} title={`${w.label}: ${w.count} dyqane te reja`} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-end', height: '100%', gap: 4 }}>
-                    <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-2)' }}>{w.count > 0 ? w.count : ''}</div>
-                    <div style={{ width: '100%', height: `${Math.max(2, (w.count / maxShopsByWeek) * 100)}%`, background: w.count > 0 ? 'var(--blue)' : 'var(--border)', borderRadius: '4px 4px 0 0', minHeight: 2 }} />
-                    <div style={{ fontSize: 9, color: 'var(--text-3)' }}>{w.label}</div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 16 }}>
+              {/* Shop growth */}
+              <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 16, padding: 20 }}>
+                <div style={{ fontSize: 15, fontWeight: 600, marginBottom: 16 }}>Dyqane te reja, 8 javet e fundit</div>
+                <div style={{ display: 'flex', alignItems: 'flex-end', gap: 8, height: 90 }}>
+                  {shopsByWeek.map((w, i) => (
+                    <div key={i} title={`${w.label}: ${w.count} dyqane te reja`} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-end', height: '100%', gap: 4 }}>
+                      <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-2)' }}>{w.count > 0 ? w.count : ''}</div>
+                      <div style={{ width: '100%', height: `${Math.max(2, (w.count / maxShopsByWeek) * 100)}%`, background: w.count > 0 ? 'var(--blue)' : 'var(--border)', borderRadius: '4px 4px 0 0', minHeight: 2 }} />
+                      <div style={{ fontSize: 9, color: 'var(--text-3)' }}>{w.label}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* User growth */}
+              <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 16, padding: 20 }}>
+                <div style={{ fontSize: 15, fontWeight: 600, marginBottom: 16 }}>Regjistrime te reja, 8 javet e fundit</div>
+                {!userStats ? (
+                  <div style={{ color: 'var(--text-3)', fontSize: 13 }}>Duke ngarkuar...</div>
+                ) : (
+                  <div style={{ display: 'flex', alignItems: 'flex-end', gap: 8, height: 90 }}>
+                    {usersByWeek.map((w, i) => (
+                      <div key={i} title={`${w.label}: ${w.count} regjistrime`} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-end', height: '100%', gap: 4 }}>
+                        <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-2)' }}>{w.count > 0 ? w.count : ''}</div>
+                        <div style={{ width: '100%', height: `${Math.max(2, (w.count / maxUsersByWeek) * 100)}%`, background: w.count > 0 ? '#3C3489' : 'var(--border)', borderRadius: '4px 4px 0 0', minHeight: 2 }} />
+                        <div style={{ fontSize: 9, color: 'var(--text-3)' }}>{w.label}</div>
+                      </div>
+                    ))}
                   </div>
-                ))}
+                )}
               </div>
             </div>
           </div>
