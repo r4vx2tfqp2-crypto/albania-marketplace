@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import ProductCard from '../components/ProductCard';
 import ShopCard from '../components/ShopCard';
 import { supabase } from '../lib/supabase';
-import { categories } from '../data/mockData';
+import { categories } from '../data/categories';
 import styles from './Home.module.css';
 import { Helmet } from 'react-helmet-async';
 
