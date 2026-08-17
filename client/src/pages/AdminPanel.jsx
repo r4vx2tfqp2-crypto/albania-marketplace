@@ -10,6 +10,15 @@ const PLANS = [
 
 const TABS = ['overview', 'analytics', 'pending', 'shops', 'orders', 'subscriptions'];
 
+const ORDER_STATUSES = ['confirmed', 'packed', 'picked_up', 'on_the_way', 'delivered'];
+const STATUS_COLORS = {
+  confirmed: { bg: 'var(--blue-light)', color: 'var(--blue)' },
+  packed: { bg: 'var(--amber-light)', color: '#854F0B' },
+  picked_up: { bg: 'var(--amber-light)', color: '#854F0B' },
+  on_the_way: { bg: 'var(--blue-light)', color: 'var(--blue)' },
+  delivered: { bg: 'var(--green-light)', color: 'var(--green-dark)' },
+};
+
 const CATEGORY_LABELS = {
   shoes: 'Kepuce & Sandale', clothes: 'Rroba & Mode', electronics: 'Elektronike',
   beauty: 'Bukuri & Kozmetike', home: 'Shtepi & Jetese', sports: 'Sporte & Fitness',
@@ -186,15 +195,6 @@ export default function AdminPanel() {
       <div style={{ width: `${pct}%`, height: '100%', background: color, borderRadius: 6, transition: 'width 0.3s' }} />
     </div>
   );
-
-  const ORDER_STATUSES = ['confirmed', 'packed', 'picked_up', 'on_the_way', 'delivered'];
-  const STATUS_COLORS = {
-    confirmed: { bg: 'var(--blue-light)', color: 'var(--blue)' },
-    packed: { bg: 'var(--amber-light)', color: '#854F0B' },
-    picked_up: { bg: 'var(--amber-light)', color: '#854F0B' },
-    on_the_way: { bg: 'var(--blue-light)', color: 'var(--blue)' },
-    delivered: { bg: 'var(--green-light)', color: 'var(--green-dark)' },
-  };
 
   if (loading) return (
     <div style={{ minHeight: '100vh', background: 'var(--bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-3)' }}>
