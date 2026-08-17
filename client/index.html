@@ -27,7 +27,12 @@
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
-    gtag('config', 'G-WVPQN5HMYR');
+    // send_page_view: false -- this is a client-side-routed SPA, so the
+    // in-app GAListener (client/src/App.jsx) fires every page_view
+    // (including the first one) instead. Without this the landing page
+    // would be double-counted: once automatically here, once by the
+    // listener's initial effect run.
+    gtag('config', 'G-WVPQN5HMYR', { send_page_view: false });
   </script>
 </head>
   <body>

@@ -1,5 +1,5 @@
-import { lazy, Suspense } from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { lazy, Suspense, useEffect } from 'react';
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { CartProvider } from './context/CartContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import Navbar from './components/Navbar';
@@ -52,11 +52,29 @@ function AdminRoute({ children }) {
   return children;
 }
 
+// index.html's gtag snippet only fires a page_view on the initial full
+// page load -- this is a client-side-routed SPA, so every in-app
+// navigation (Home -> Product, Search, Shop, etc.) was invisible to
+// Analytics. Fires a page_view event manually on every route change.
+function GAListener() {
+  const location = useLocation();
+  useEffect(() => {
+    if (typeof window.gtag !== 'function') return;
+    window.gtag('event', 'page_view', {
+      page_path: location.pathname + location.search,
+      page_location: window.location.href,
+      page_title: document.title,
+    });
+  }, [location]);
+  return null;
+}
+
 export default function App() {
   return (
     <AuthProvider>
       <CartProvider>
         <BrowserRouter>
+          <GAListener />
           <Routes>
             <Route path="/onboarding" element={<Onboarding />} />
             <Route path="/feed" element={<Feed />} />
