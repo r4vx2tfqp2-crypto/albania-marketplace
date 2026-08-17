@@ -2,6 +2,7 @@ import { lazy, Suspense, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { CartProvider } from './context/CartContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { ErrorBoundary, lazyImport } from './components/ErrorBoundary';
 import Navbar from './components/Navbar';
 import BottomNav from './components/BottomNav';
 import Home from './pages/Home';
@@ -27,13 +28,13 @@ import Login from './pages/Login';
 // and are only ever reached by a signed-in seller or the single admin
 // account -- code-split them instead of shipping them in the bundle every
 // visitor downloads to just browse products.
-const SellerDashboard = lazy(() => import('./pages/SellerDashboard'));
-const SellerOrders = lazy(() => import('./pages/SellerOrders'));
-const EditProduct = lazy(() => import('./pages/EditProduct'));
-const AddProduct = lazy(() => import('./pages/AddProduct'));
-const AddShop = lazy(() => import('./pages/AddShop'));
-const AdminSubscriptions = lazy(() => import('./pages/AdminSubscriptions'));
-const AdminPanel = lazy(() => import('./pages/AdminPanel'));
+const SellerDashboard = lazy(lazyImport(() => import('./pages/SellerDashboard')));
+const SellerOrders = lazy(lazyImport(() => import('./pages/SellerOrders')));
+const EditProduct = lazy(lazyImport(() => import('./pages/EditProduct')));
+const AddProduct = lazy(lazyImport(() => import('./pages/AddProduct')));
+const AddShop = lazy(lazyImport(() => import('./pages/AddShop')));
+const AdminSubscriptions = lazy(lazyImport(() => import('./pages/AdminSubscriptions')));
+const AdminPanel = lazy(lazyImport(() => import('./pages/AdminPanel')));
 
 function RouteFallback() {
   return <div style={{ padding: 80, textAlign: 'center', color: 'var(--text-3)' }}>Duke ngarkuar…</div>;
@@ -71,6 +72,7 @@ function GAListener() {
 
 export default function App() {
   return (
+    <ErrorBoundary>
     <AuthProvider>
       <CartProvider>
         <BrowserRouter>
@@ -88,6 +90,7 @@ export default function App() {
         </BrowserRouter>
       </CartProvider>
     </AuthProvider>
+    </ErrorBoundary>
   );
 }
 
