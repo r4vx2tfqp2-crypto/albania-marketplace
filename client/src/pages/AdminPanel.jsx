@@ -8,13 +8,48 @@ const PLANS = [
   { key: 'premium', label: 'Premium', price: 4000 },
 ];
 
-const TABS = ['overview', 'pending', 'shops', 'orders', 'subscriptions'];
+const TABS = ['overview', 'analytics', 'pending', 'shops', 'orders', 'subscriptions'];
+
+const CATEGORY_LABELS = {
+  shoes: 'Kepuce & Sandale', clothes: 'Rroba & Mode', electronics: 'Elektronike',
+  beauty: 'Bukuri & Kozmetike', home: 'Shtepi & Jetese', sports: 'Sporte & Fitness',
+  gifts: 'Dhurata', construction: 'Vegla & Ndertim',
+};
+
+// last N whole calendar days, oldest first, each as a [start, end) range
+function lastNDays(n) {
+  const days = [];
+  for (let i = n - 1; i >= 0; i--) {
+    const start = new Date();
+    start.setHours(0, 0, 0, 0);
+    start.setDate(start.getDate() - i);
+    const end = new Date(start);
+    end.setDate(end.getDate() + 1);
+    days.push({ start, end });
+  }
+  return days;
+}
+
+// last N whole weeks, oldest first
+function lastNWeeks(n) {
+  const weeks = [];
+  for (let i = n - 1; i >= 0; i--) {
+    const end = new Date();
+    end.setHours(0, 0, 0, 0);
+    end.setDate(end.getDate() - i * 7);
+    const start = new Date(end);
+    start.setDate(start.getDate() - 7);
+    weeks.push({ start, end });
+  }
+  return weeks;
+}
 
 export default function AdminPanel() {
   const navigate = useNavigate();
   const [tab, setTab] = useState('overview');
   const [shops, setShops] = useState([]);
   const [orders, setOrders] = useState([]);
+  const [products, setProducts] = useState([]);
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(null);
@@ -25,12 +60,14 @@ export default function AdminPanel() {
 
   const fetchAll = async () => {
     setLoading(true);
-    const [{ data: shopsData }, { data: ordersData }] = await Promise.all([
+    const [{ data: shopsData }, { data: ordersData }, { data: productsData }] = await Promise.all([
       supabase.from('shops').select('*').order('created_at', { ascending: false }),
       supabase.from('orders').select('*').order('created_at', { ascending: false }),
+      supabase.from('products').select('*').order('created_at', { ascending: false }),
     ]);
     setShops(shopsData || []);
     setOrders(ordersData || []);
+    setProducts(productsData || []);
     setLoading(false);
   };
 
@@ -64,6 +101,65 @@ export default function AdminPanel() {
   const approvedShops = shops.filter(s => s.status === 'approved');
   const totalRevenue = orders.reduce((sum, o) => sum + (o.total || 0), 0);
   const formatPrice = (p) => p?.toLocaleString('sq-AL') + ' L';
+
+  // ---- Analytics ----
+  const deliveredOrders = orders.filter(o => o.status === 'delivered');
+  const deliveredRevenue = deliveredOrders.reduce((s, o) => s + (o.total || 0), 0);
+  const avgOrderValue = orders.length ? Math.round(totalRevenue / orders.length) : 0;
+  const inStockProducts = products.filter(p => p.in_stock !== false).length;
+
+  const days14 = lastNDays(14);
+  const revenueByDay = days14.map(({ start, end }) => {
+    const dayOrders = orders.filter(o => { const c = new Date(o.created_at); return c >= start && c < end; });
+    return { label: start.toLocaleDateString('sq-AL', { day: 'numeric', month: 'short' }), revenue: dayOrders.reduce((s, o) => s + (o.total || 0), 0), count: dayOrders.length };
+  });
+  const maxDayRevenue = Math.max(1, ...revenueByDay.map(d => d.revenue));
+
+  const ordersThisWeek = orders.filter(o => new Date(o.created_at) >= lastNDays(7)[0].start).length;
+  const ordersPrevWeek = orders.filter(o => { const c = new Date(o.created_at); return c >= lastNDays(14)[0].start && c < lastNDays(7)[0].start; }).length;
+  const ordersTrend = ordersPrevWeek === 0 ? (ordersThisWeek > 0 ? 100 : 0) : Math.round(((ordersThisWeek - ordersPrevWeek) / ordersPrevWeek) * 100);
+
+  const statusCounts = ORDER_STATUSES.reduce((acc, s) => { acc[s] = orders.filter(o => o.status === s).length; return acc; }, {});
+  const maxStatusCount = Math.max(1, ...Object.values(statusCounts));
+
+  const shopRevenueMap = {};
+  orders.forEach(o => { if (o.shop_id) shopRevenueMap[o.shop_id] = (shopRevenueMap[o.shop_id] || 0) + (o.total || 0); });
+  const topShops = Object.entries(shopRevenueMap)
+    .map(([shopId, revenue]) => ({ shop: shops.find(s => s.id === shopId), revenue, orderCount: orders.filter(o => o.shop_id === shopId).length }))
+    .filter(x => x.shop)
+    .sort((a, b) => b.revenue - a.revenue)
+    .slice(0, 5);
+  const maxShopRevenue = Math.max(1, ...topShops.map(s => s.revenue));
+
+  const productStatsMap = {};
+  orders.forEach(o => {
+    (o.items || []).forEach(item => {
+      const key = item.id || item.name;
+      if (!productStatsMap[key]) productStatsMap[key] = { name: item.name, units: 0, revenue: 0 };
+      productStatsMap[key].units += item.qty || 1;
+      productStatsMap[key].revenue += (item.price || 0) * (item.qty || 1);
+    });
+  });
+  const topProducts = Object.values(productStatsMap).sort((a, b) => b.units - a.units).slice(0, 5);
+  const maxProductUnits = Math.max(1, ...topProducts.map(p => p.units));
+
+  const categoryCounts = {};
+  products.forEach(p => { categoryCounts[p.category] = (categoryCounts[p.category] || 0) + 1; });
+  const categoryList = Object.entries(categoryCounts).sort((a, b) => b[1] - a[1]);
+  const maxCategoryCount = Math.max(1, ...categoryList.map(c => c[1]));
+
+  const weeks8 = lastNWeeks(8);
+  const shopsByWeek = weeks8.map(({ start, end }) => ({
+    label: start.toLocaleDateString('sq-AL', { day: 'numeric', month: 'short' }),
+    count: shops.filter(s => { const c = new Date(s.created_at); return c >= start && c < end; }).length,
+  }));
+  const maxShopsByWeek = Math.max(1, ...shopsByWeek.map(w => w.count));
+
+  const Bar = ({ pct, color }) => (
+    <div style={{ flex: 1, background: 'var(--surface-2)', borderRadius: 6, overflow: 'hidden', height: 8 }}>
+      <div style={{ width: `${pct}%`, height: '100%', background: color, borderRadius: 6, transition: 'width 0.3s' }} />
+    </div>
+  );
 
   const ORDER_STATUSES = ['confirmed', 'packed', 'picked_up', 'on_the_way', 'delivered'];
   const STATUS_COLORS = {
@@ -167,6 +263,135 @@ export default function AdminPanel() {
                 ))}
               </div>
             )}
+          </div>
+        )}
+
+        {/* ANALYTICS */}
+        {tab === 'analytics' && (
+          <div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 14, marginBottom: 24 }}>
+              {[
+                { label: 'Te ardhura (dorezuar)', value: formatPrice(deliveredRevenue), bg: 'var(--green-light)', color: 'var(--green-dark)' },
+                { label: 'Te ardhura (te gjitha)', value: formatPrice(totalRevenue), bg: '#F0EEFF', color: '#3C3489' },
+                { label: 'Vlera mesatare porosise', value: formatPrice(avgOrderValue), bg: 'var(--blue-light)', color: 'var(--blue)' },
+                { label: 'Porosi kete jave', value: ordersThisWeek, sub: ordersPrevWeek > 0 || ordersThisWeek > 0 ? `${ordersTrend >= 0 ? '+' : ''}${ordersTrend}% vs java e kaluar` : null, bg: 'var(--amber-light)', color: '#854F0B' },
+                { label: 'Produkte aktive', value: inStockProducts, sub: `${products.length} total`, bg: 'var(--green-light)', color: 'var(--green-dark)' },
+                { label: 'Dyqane aktive', value: approvedShops.length, sub: `${shops.length} total`, bg: 'var(--blue-light)', color: 'var(--blue)' },
+              ].map(stat => (
+                <div key={stat.label} style={{ background: stat.bg, borderRadius: 16, padding: '18px 20px' }}>
+                  <div style={{ fontSize: 22, fontWeight: 800, fontFamily: 'var(--font-display)', color: stat.color }}>{stat.value}</div>
+                  <div style={{ fontSize: 12, color: stat.color, opacity: 0.8, marginTop: 4 }}>{stat.label}</div>
+                  {stat.sub && <div style={{ fontSize: 11, color: stat.color, opacity: 0.65, marginTop: 2 }}>{stat.sub}</div>}
+                </div>
+              ))}
+            </div>
+
+            {/* Revenue last 14 days */}
+            <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 16, padding: 20, marginBottom: 16 }}>
+              <div style={{ fontSize: 15, fontWeight: 600, marginBottom: 16 }}>Te ardhurat, 14 ditet e fundit</div>
+              <div style={{ display: 'flex', alignItems: 'flex-end', gap: 4, height: 120 }}>
+                {revenueByDay.map((d, i) => (
+                  <div key={i} title={`${d.label}: ${formatPrice(d.revenue)} (${d.count} porosi)`} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-end', height: '100%', gap: 4 }}>
+                    <div style={{ width: '100%', height: `${Math.max(2, (d.revenue / maxDayRevenue) * 100)}%`, background: d.revenue > 0 ? 'var(--green)' : 'var(--border)', borderRadius: '4px 4px 0 0', minHeight: 2 }} />
+                  </div>
+                ))}
+              </div>
+              <div style={{ display: 'flex', gap: 4, marginTop: 6 }}>
+                {revenueByDay.map((d, i) => (
+                  <div key={i} style={{ flex: 1, fontSize: 9, color: 'var(--text-3)', textAlign: 'center' }}>{i % 2 === 0 ? d.label : ''}</div>
+                ))}
+              </div>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 16, marginBottom: 16 }}>
+              {/* Orders by status */}
+              <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 16, padding: 20 }}>
+                <div style={{ fontSize: 15, fontWeight: 600, marginBottom: 16 }}>Porosite sipas statusit</div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  {ORDER_STATUSES.map(status => (
+                    <div key={status} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                      <div style={{ width: 90, fontSize: 12, color: 'var(--text-2)', textTransform: 'capitalize' }}>{status.replace('_', ' ')}</div>
+                      <Bar pct={(statusCounts[status] / maxStatusCount) * 100} color={STATUS_COLORS[status]?.color || 'var(--text-3)'} />
+                      <div style={{ width: 24, fontSize: 12, fontWeight: 600, textAlign: 'right' }}>{statusCounts[status]}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Products by category */}
+              <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 16, padding: 20 }}>
+                <div style={{ fontSize: 15, fontWeight: 600, marginBottom: 16 }}>Produktet sipas kategorise</div>
+                {categoryList.length === 0 ? (
+                  <div style={{ color: 'var(--text-3)', fontSize: 13 }}>Ende pa produkte</div>
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                    {categoryList.map(([cat, count]) => (
+                      <div key={cat} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                        <div style={{ width: 110, fontSize: 12, color: 'var(--text-2)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{CATEGORY_LABELS[cat] || cat}</div>
+                        <Bar pct={(count / maxCategoryCount) * 100} color="var(--blue)" />
+                        <div style={{ width: 24, fontSize: 12, fontWeight: 600, textAlign: 'right' }}>{count}</div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 16, marginBottom: 16 }}>
+              {/* Top shops */}
+              <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 16, padding: 20 }}>
+                <div style={{ fontSize: 15, fontWeight: 600, marginBottom: 16 }}>Top 5 dyqane sipas te ardhurave</div>
+                {topShops.length === 0 ? (
+                  <div style={{ color: 'var(--text-3)', fontSize: 13 }}>Ende pa porosi</div>
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                    {topShops.map(({ shop, revenue, orderCount }) => (
+                      <div key={shop.id}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, marginBottom: 4 }}>
+                          <span style={{ fontWeight: 500 }}>{shop.name}</span>
+                          <span style={{ color: 'var(--text-3)' }}>{formatPrice(revenue)} · {orderCount} porosi</span>
+                        </div>
+                        <Bar pct={(revenue / maxShopRevenue) * 100} color="var(--green)" />
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Top products */}
+              <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 16, padding: 20 }}>
+                <div style={{ fontSize: 15, fontWeight: 600, marginBottom: 16 }}>Top 5 produkte sipas shitjeve</div>
+                {topProducts.length === 0 ? (
+                  <div style={{ color: 'var(--text-3)', fontSize: 13 }}>Ende pa shitje</div>
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                    {topProducts.map((p, i) => (
+                      <div key={i}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, marginBottom: 4 }}>
+                          <span style={{ fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 200 }}>{p.name}</span>
+                          <span style={{ color: 'var(--text-3)', flexShrink: 0 }}>{p.units} njesi · {formatPrice(p.revenue)}</span>
+                        </div>
+                        <Bar pct={(p.units / maxProductUnits) * 100} color="#3C3489" />
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Shop growth */}
+            <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 16, padding: 20 }}>
+              <div style={{ fontSize: 15, fontWeight: 600, marginBottom: 16 }}>Dyqane te reja, 8 javet e fundit</div>
+              <div style={{ display: 'flex', alignItems: 'flex-end', gap: 8, height: 90 }}>
+                {shopsByWeek.map((w, i) => (
+                  <div key={i} title={`${w.label}: ${w.count} dyqane te reja`} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-end', height: '100%', gap: 4 }}>
+                    <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-2)' }}>{w.count > 0 ? w.count : ''}</div>
+                    <div style={{ width: '100%', height: `${Math.max(2, (w.count / maxShopsByWeek) * 100)}%`, background: w.count > 0 ? 'var(--blue)' : 'var(--border)', borderRadius: '4px 4px 0 0', minHeight: 2 }} />
+                    <div style={{ fontSize: 9, color: 'var(--text-3)' }}>{w.label}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         )}
 
