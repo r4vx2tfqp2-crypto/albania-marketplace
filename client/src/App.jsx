@@ -10,30 +10,31 @@ import Search from './pages/Search';
 import Product from './pages/Product';
 import Shop from './pages/Shop';
 import Cart from './pages/Cart';
-import Checkout from './pages/Checkout';
-import Orders from './pages/Orders';
-import Favorites from './pages/Favorites';
-import Profile from './pages/Profile';
-import DeliveryConfirm from './pages/DeliveryConfirm';
-import ConfirmDelivery from './pages/ConfirmDelivery';
-import Feed from './pages/Feed';
-import Legal from './pages/Legal';
-import ForgotPassword from './pages/ForgotPassword';
-import ResetPassword from './pages/ResetPassword';
-import Settings from './pages/Settings';
-import Onboarding from './pages/Onboarding';
 import Login from './pages/Login';
+import { ADMIN_EMAIL } from './lib/constants';
 
-// Seller/admin pages pull in heavy dependencies (jspdf, html2canvas, qrcode)
-// and are only ever reached by a signed-in seller or the single admin
-// account -- code-split them instead of shipping them in the bundle every
-// visitor downloads to just browse products.
+// Everything below is code-split: none of it is needed for the core
+// browse-and-buy path (Home/Search/Product/Shop/Cart/Login, imported
+// eagerly above), so there's no reason a first-time visitor's initial
+// bundle should include checkout, settings, legal pages, password reset,
+// the delivery-confirmation flows, or the seller/admin tools (which also
+// pull in jspdf/qrcode). Loaded on demand instead.
+const Checkout = lazy(lazyImport(() => import('./pages/Checkout')));
+const Orders = lazy(lazyImport(() => import('./pages/Orders')));
+const Favorites = lazy(lazyImport(() => import('./pages/Favorites')));
+const Profile = lazy(lazyImport(() => import('./pages/Profile')));
+const Feed = lazy(lazyImport(() => import('./pages/Feed')));
+const Legal = lazy(lazyImport(() => import('./pages/Legal')));
+const Settings = lazy(lazyImport(() => import('./pages/Settings')));
+const ForgotPassword = lazy(lazyImport(() => import('./pages/ForgotPassword')));
+const ResetPassword = lazy(lazyImport(() => import('./pages/ResetPassword')));
+const ConfirmDelivery = lazy(lazyImport(() => import('./pages/ConfirmDelivery')));
+const DeliveryConfirm = lazy(lazyImport(() => import('./pages/DeliveryConfirm')));
 const SellerDashboard = lazy(lazyImport(() => import('./pages/SellerDashboard')));
 const SellerOrders = lazy(lazyImport(() => import('./pages/SellerOrders')));
 const EditProduct = lazy(lazyImport(() => import('./pages/EditProduct')));
 const AddProduct = lazy(lazyImport(() => import('./pages/AddProduct')));
 const AddShop = lazy(lazyImport(() => import('./pages/AddShop')));
-const AdminSubscriptions = lazy(lazyImport(() => import('./pages/AdminSubscriptions')));
 const AdminPanel = lazy(lazyImport(() => import('./pages/AdminPanel')));
 
 function RouteFallback() {
@@ -49,7 +50,7 @@ function ProtectedRoute({ children }) {
 function AdminRoute({ children }) {
   const { user, loading } = useAuth();
   if (loading) return <div style={{ padding: 80, textAlign: 'center', color: 'var(--text-3)' }}>Loading…</div>;
-  if (!user || user.email !== 'julsina76@gmail.com') return <Navigate to="/" replace />;
+  if (!user || user.email !== ADMIN_EMAIL) return <Navigate to="/" replace />;
   return children;
 }
 
@@ -77,16 +78,17 @@ export default function App() {
       <CartProvider>
         <BrowserRouter>
           <GAListener />
-          <Routes>
-            <Route path="/onboarding" element={<Onboarding />} />
-            <Route path="/feed" element={<Feed />} />
-        <Route path="/confirm-delivery" element={<ConfirmDelivery />} />
-            <Route path="/delivery" element={<DeliveryConfirm />} />
-            <Route path="/forgot-password" element={<ForgotPassword />} />
-        <Route path="/reset-password" element={<ResetPassword />} />
-        <Route path="/login" element={<Login />} />
-            <Route path="/*" element={<MainLayout />} />
-          </Routes>
+          <Suspense fallback={<RouteFallback />}>
+            <Routes>
+              <Route path="/feed" element={<Feed />} />
+              <Route path="/confirm-delivery" element={<ConfirmDelivery />} />
+              <Route path="/delivery" element={<DeliveryConfirm />} />
+              <Route path="/forgot-password" element={<ForgotPassword />} />
+              <Route path="/reset-password" element={<ResetPassword />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/*" element={<MainLayout />} />
+            </Routes>
+          </Suspense>
         </BrowserRouter>
       </CartProvider>
     </AuthProvider>
@@ -117,7 +119,6 @@ function MainLayout() {
           } />
           <Route path="/legal" element={<Legal />} />
           <Route path="/admin" element={<AdminRoute><AdminPanel /></AdminRoute>} />
-          <Route path="/admin/subscriptions" element={<AdminRoute><AdminSubscriptions /></AdminRoute>} />
           <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
           <Route path="/seller/edit-product/:id" element={<ProtectedRoute><EditProduct /></ProtectedRoute>} />
           <Route path="/seller/orders" element={<ProtectedRoute><SellerOrders /></ProtectedRoute>} />

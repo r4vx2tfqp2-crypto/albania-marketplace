@@ -7,6 +7,7 @@ import styles from "./AddProduct.module.css";
 
 const CITIES = ["Tirana", "Durres", "Shkoder", "Vlore", "Korce", "Fier", "Berat", "Lushnje"];
 const COLORS = ["#1D9E75","#D4537E","#378ADD","#993556","#BA7517","#534AB7"];
+const COLOR_NAMES = ["E gjelber","Rozë","Blu","Bordo","Kafe","Vjollce"];
 const CATEGORIES = ["Kepuce & Sporte","Rroba & Mode","Elektronike","Bukuri & Kozmetike","Shtepi & Jetese","Kepuce","Dhurata","Vegla & Ndertim"];
 const DRAFT_KEY = "tregu_add_shop_draft";
 
@@ -156,28 +157,28 @@ export default function AddShop() {
             </div>
 
             <div className={styles.field}>
-              <label className={styles.label}>Emri i dyqanit *</label>
-              <input required className={styles.input} placeholder="p.sh. SportShop Tirana"
+              <label className={styles.label} htmlFor="shop-name">Emri i dyqanit *</label>
+              <input id="shop-name" required className={styles.input} placeholder="p.sh. SportShop Tirana"
                 value={form.name} onChange={e => setForm({...form, name: e.target.value})} />
             </div>
 
             <div className={styles.field}>
-              <label className={styles.label}>Pershkrimi *</label>
-              <textarea required className={styles.textarea} placeholder="Cfare shisni..." rows={3}
+              <label className={styles.label} htmlFor="shop-description">Pershkrimi *</label>
+              <textarea id="shop-description" required className={styles.textarea} placeholder="Cfare shisni..." rows={3}
                 value={form.description} onChange={e => setForm({...form, description: e.target.value})} />
             </div>
 
             <div className={styles.fieldRow}>
               <div className={styles.field}>
-                <label className={styles.label}>Kategoria *</label>
-                <select required className={styles.select} value={form.category}
+                <label className={styles.label} htmlFor="shop-category">Kategoria *</label>
+                <select id="shop-category" required className={styles.select} value={form.category}
                   onChange={e => setForm({...form, category: e.target.value})}>
                   {CATEGORIES.map(c => <option key={c}>{c}</option>)}
                 </select>
               </div>
               <div className={styles.field}>
-                <label className={styles.label}>Qyteti *</label>
-                <select required className={styles.select} value={form.location}
+                <label className={styles.label} htmlFor="shop-location">Qyteti *</label>
+                <select id="shop-location" required className={styles.select} value={form.location}
                   onChange={e => setForm({...form, location: e.target.value})}>
                   {CITIES.map(c => <option key={c}>{c}</option>)}
                 </select>
@@ -186,20 +187,20 @@ export default function AddShop() {
 
             <div className={styles.fieldRow}>
               <div className={styles.field}>
-                <label className={styles.label}>Telefon (WhatsApp) *</label>
-                <input required className={styles.input} placeholder="+355 69 123 4567"
+                <label className={styles.label} htmlFor="shop-phone">Telefon (WhatsApp) *</label>
+                <input id="shop-phone" required className={styles.input} placeholder="+355 69 123 4567"
                   value={form.phone} onChange={e => setForm({...form, phone: e.target.value})} />
               </div>
               <div className={styles.field}>
-                <label className={styles.label}>Email i dyqanit *</label>
-                <input required type="email" className={styles.input} placeholder="dyqani@example.com"
+                <label className={styles.label} htmlFor="shop-email">Email i dyqanit *</label>
+                <input id="shop-email" required type="email" className={styles.input} placeholder="dyqani@example.com"
                   value={form.email} onChange={e => setForm({...form, email: e.target.value})} />
               </div>
             </div>
 
             <div className={styles.field}>
-              <label className={styles.label}>Tarifa e dorezimit (ALL)</label>
-              <input type="number" className={styles.input} placeholder="300"
+              <label className={styles.label} htmlFor="shop-delivery-fee">Tarifa e dorezimit (ALL)</label>
+              <input id="shop-delivery-fee" type="number" className={styles.input} placeholder="300"
                 value={form.delivery_fee}
                 onChange={e => setForm({...form, delivery_fee: e.target.value})} />
               <span style={{ fontSize: 12, color: "var(--text-3)", marginTop: 4, display: "block" }}>
@@ -208,10 +209,11 @@ export default function AddShop() {
             </div>
 
             <div className={styles.field}>
-              <label className={styles.label}>Ngjyra e dyqanit</label>
-              <div style={{ display: "flex", gap: 8, marginTop: 4 }}>
-                {COLORS.map(c => (
+              <span className={styles.label}>Ngjyra e dyqanit</span>
+              <div style={{ display: "flex", gap: 8, marginTop: 4 }} role="radiogroup" aria-label="Ngjyra e dyqanit">
+                {COLORS.map((c, i) => (
                   <button type="button" key={c} onClick={() => setForm({...form, color: c})}
+                    role="radio" aria-checked={form.color === c} aria-label={COLOR_NAMES[i]}
                     style={{ width: 32, height: 32, borderRadius: "50%", background: c,
                       border: form.color === c ? "3px solid var(--text-1)" : "2px solid transparent",
                       transition: "border 0.15s" }} />

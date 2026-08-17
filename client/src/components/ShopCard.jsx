@@ -1,8 +1,9 @@
+import { memo } from 'react';
 import { Link } from 'react-router-dom';
 import { MapPin, CheckCircle } from 'lucide-react';
 import styles from './ShopCard.module.css';
 
-export default function ShopCard({ shop }) {
+function ShopCard({ shop }) {
   return (
     <Link to={`/shop/${shop.id}`} className={styles.card}>
       <div className={styles.avatar} style={{ background: shop.color + '22', color: shop.color }}>
@@ -26,3 +27,5 @@ export default function ShopCard({ shop }) {
     </Link>
   );
 }
+
+export default memo(ShopCard);

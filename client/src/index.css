@@ -9,7 +9,7 @@
   --pink: #D4537E;
   --amber: #EF9F27;
   --amber-light: #FAEEDA;
-  --red: #E24B4A;
+  --red: #C23B3A;
   --red-light: #FCEBEB;
 
   --bg: #F7F6F3;
@@ -20,7 +20,10 @@
 
   --text-1: #1A1916;
   --text-2: #5C5A55;
-  --text-3: #9A9890;
+  /* Was #9A9890 (~2.9:1 on white/--bg) -- fails WCAG AA (4.5:1) for the
+     normal-size text it's used on throughout the app (delivery notes,
+     footer links, spec labels, review counts). Darkened to ~4.9:1. */
+  --text-3: #706E68;
 
   --font-display: 'Syne', sans-serif;
   --font-body: 'DM Sans', sans-serif;
@@ -51,6 +54,34 @@ body {
 a { color: inherit; text-decoration: none; }
 button { font-family: var(--font-body); cursor: pointer; border: none; background: none; }
 input, select, textarea { font-family: var(--font-body); }
+
+/* Base keyboard-focus indicator. Several components set `outline: none`
+   on inputs/buttons with nothing replacing it (audit finding: no focus
+   indicator at all on the hero/search-page search bars, review form
+   fields), and others only had a subtle 1px border-color shift. This
+   selector's specificity (element + pseudo-class) beats a plain class
+   selector's `outline: none`, so it applies even where a component's own
+   CSS module tries to suppress it -- inline `style={{outline:"none"}}`
+   still wins over any stylesheet rule and has to be removed at the
+   source (done separately for Reviews.jsx / Checkout.jsx's map search). */
+input:focus-visible, textarea:focus-visible, select:focus-visible,
+button:focus-visible, a:focus-visible, [tabindex]:focus-visible {
+  outline: 2px solid var(--text-1);
+  outline-offset: 2px;
+}
+
+/* Visually hidden but still announced by screen readers -- for headings
+   that exist purely for AT navigation on pages where a visible <h1>
+   would duplicate/clash with the existing design (Search, Login). */
+.sr-only {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
 
 /* Scrollbar */
 ::-webkit-scrollbar { width: 6px; }

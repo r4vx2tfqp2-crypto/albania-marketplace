@@ -140,7 +140,7 @@ export default function AddProduct() {
   const [selectedColors, setSelectedColors] = useState(draft?.selectedColors || []);
   const [customSize, setCustomSize] = useState("");
   const [customColor, setCustomColor] = useState("");
-  const [form, setForm] = useState(draft?.form || { name: "", price: "", category: "shoes", description: "", shop_id: "", trending: false });
+  const [form, setForm] = useState(draft?.form || { name: "", price: "", category: "shoes", description: "", shop_id: "" });
   const [details, setDetails] = useState(draft?.details || {});
   const [draftRestored, setDraftRestored] = useState(!!draft);
 
@@ -157,7 +157,7 @@ export default function AddProduct() {
 
   const clearDraft = () => {
     localStorage.removeItem(DRAFT_KEY);
-    setForm({ name: "", price: "", category: "shoes", description: "", shop_id: form.shop_id, trending: false });
+    setForm({ name: "", price: "", category: "shoes", description: "", shop_id: form.shop_id });
     setDetails({});
     setSelectedSizes([]);
     setSelectedColors([]);
@@ -241,7 +241,7 @@ export default function AddProduct() {
       description: form.description, shop_id: form.shop_id,
       sizes: selectedSizes,
       details: productDetails,
-      in_stock: true, trending: form.trending, rating: 0, review_count: 0, user_id: user.id,
+      in_stock: true, rating: 0, review_count: 0, user_id: user.id,
     }).select().single();
     if (insertError) { setError("Dicka shkoi gabim: " + insertError.message); setLoading(false); return; }
     if (images.length > 0) {
@@ -317,6 +317,7 @@ export default function AddProduct() {
                       <img src={src} style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: 10, border: i === 0 ? "2px solid var(--green)" : "1px solid var(--border)" }} alt="" />
                       {i === 0 && <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, background: "var(--green)", color: "#fff", fontSize: 9, textAlign: "center", borderRadius: "0 0 8px 8px", padding: "2px 0" }}>KRYESORE</div>}
                       <button type="button" onClick={(e) => { e.preventDefault(); removeImage(i); }}
+                        aria-label={"Hiq foton " + (i + 1)}
                         style={{ position: "absolute", top: -6, right: -6, width: 20, height: 20, borderRadius: "50%", background: "var(--red)", color: "#fff", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
                         <X size={11} />
                       </button>
@@ -349,28 +350,28 @@ export default function AddProduct() {
             </div>
 
             <div className={styles.field} style={{ marginBottom: 14 }}>
-              <label className={styles.label}>Dyqani *</label>
-              <select required className={styles.select} value={form.shop_id} onChange={e => setForm({...form, shop_id: e.target.value})}>
+              <label className={styles.label} htmlFor="product-shop">Dyqani *</label>
+              <select id="product-shop" required className={styles.select} value={form.shop_id} onChange={e => setForm({...form, shop_id: e.target.value})}>
                 {shops.length === 0 && <option value="">Nuk ka dyqane — krijo nje dyqan fillimisht</option>}
                 {shops.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
               </select>
             </div>
 
             <div className={styles.field} style={{ marginBottom: 14 }}>
-              <label className={styles.label}>Emri i produktit *</label>
-              <input required className={styles.input} placeholder="p.sh. Nike Air Max 270 — Madhesia 42"
+              <label className={styles.label} htmlFor="product-name">Emri i produktit *</label>
+              <input id="product-name" required className={styles.input} placeholder="p.sh. Nike Air Max 270 — Madhesia 42"
                 value={form.name} onChange={e => setForm({...form, name: e.target.value})} />
             </div>
 
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(140px, 1fr))", gap: 12, marginBottom: 14 }}>
               <div className={styles.field}>
-                <label className={styles.label}>Çmimi (ALL) *</label>
-                <input required type="number" className={styles.input} placeholder="3200"
+                <label className={styles.label} htmlFor="product-price">Çmimi (ALL) *</label>
+                <input id="product-price" required type="number" className={styles.input} placeholder="3200"
                   value={form.price} onChange={e => setForm({...form, price: e.target.value})} />
               </div>
               <div className={styles.field}>
-                <label className={styles.label}>Kategoria *</label>
-                <select required className={styles.select} value={form.category}
+                <label className={styles.label} htmlFor="product-category">Kategoria *</label>
+                <select id="product-category" required className={styles.select} value={form.category}
                   onChange={e => { setForm(f => ({...f, category: e.target.value})); setSelectedSizes([]); setDetails({}); }}>
                   {CATEGORIES.map(c => <option key={c.key} value={c.key}>{c.icon} {c.label}</option>)}
                 </select>
@@ -378,8 +379,8 @@ export default function AddProduct() {
             </div>
 
             <div className={styles.field}>
-              <label className={styles.label}>Pershkrimi *</label>
-              <textarea required className={styles.textarea} rows={3}
+              <label className={styles.label} htmlFor="product-description">Pershkrimi *</label>
+              <textarea id="product-description" required className={styles.textarea} rows={3}
                 placeholder="Pershkruaj produktin — materiali, veçorite kryesore, gjendja..."
                 value={form.description} onChange={e => setForm({...form, description: e.target.value})} />
             </div>
@@ -498,18 +499,6 @@ export default function AddProduct() {
               </div>
             </div>
           )}
-
-          {/* TRENDING */}
-          <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--radius-lg)", padding: 16, marginBottom: 24 }}>
-            <label style={{ display: "flex", alignItems: "center", gap: 10, cursor: "pointer" }}>
-              <input type="checkbox" checked={form.trending} onChange={e => setForm({...form, trending: e.target.checked})}
-                style={{ width: 16, height: 16, cursor: "pointer" }} />
-              <div>
-                <div style={{ fontSize: 14, fontWeight: 500 }}>Shenjo si Trending 🔥</div>
-                <div style={{ fontSize: 12, color: "var(--text-3)" }}>Produkti do te shfaqet ne seksionin Trending</div>
-              </div>
-            </label>
-          </div>
 
           <div className={styles.actions}>
             <button type="button" className="btn-secondary" onClick={() => navigate("/seller")}>Anulo</button>

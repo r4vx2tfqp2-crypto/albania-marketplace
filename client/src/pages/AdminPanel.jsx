@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 
@@ -8,7 +8,7 @@ const PLANS = [
   { key: 'premium', label: 'Premium', price: 4000 },
 ];
 
-const TABS = ['overview', 'analytics', 'pending', 'shops', 'orders', 'subscriptions'];
+const TABS = ['overview', 'analytics', 'pending', 'shops', 'products', 'orders', 'subscriptions'];
 
 const ORDER_STATUSES = ['confirmed', 'packed', 'picked_up', 'on_the_way', 'delivered'];
 const STATUS_COLORS = {
@@ -123,72 +123,104 @@ export default function AdminPanel() {
     await fetchAll();
     setSaving(null);
   };
+  // products.trending is now admin-only (DB trigger enforces this
+  // regardless of caller -- see 20260817000001_protect_products_trending)
+  // since any seller could otherwise self-promote to the homepage's
+  // Trending section for free. This is the only place left to set it.
+  const toggleTrending = async (product) => {
+    setSaving(product.id);
+    await supabase.from('products').update({ trending: !product.trending }).eq('id', product.id);
+    await fetchAll();
+    setSaving(null);
+  };
 
-  const pendingShops = shops.filter(s => s.status === 'pending');
-  const approvedShops = shops.filter(s => s.status === 'approved');
-  const totalRevenue = orders.reduce((sum, o) => sum + (o.total || 0), 0);
   const formatPrice = (p) => p?.toLocaleString('sq-AL') + ' L';
 
-  // ---- Analytics ----
-  const deliveredOrders = orders.filter(o => o.status === 'delivered');
-  const deliveredRevenue = deliveredOrders.reduce((s, o) => s + (o.total || 0), 0);
-  const avgOrderValue = orders.length ? Math.round(totalRevenue / orders.length) : 0;
-  const inStockProducts = products.filter(p => p.in_stock !== false).length;
+  // All of this only depends on shops/orders/products/userStats, not on
+  // saving/tab/etc -- previously recomputed on every render (including
+  // every "saving" spinner toggle from an unrelated button click), each
+  // pass rescanning the full shops/orders/products arrays ~20 times over.
+  const {
+    pendingShops, approvedShops, totalRevenue,
+    deliveredRevenue, avgOrderValue, inStockProducts,
+    revenueByDay, maxDayRevenue, ordersThisWeek, ordersTrend,
+    statusCounts, maxStatusCount, topShops, maxShopRevenue,
+    topProducts, maxProductUnits, categoryList, maxCategoryCount,
+    shopsByWeek, maxShopsByWeek, usersByWeek, maxUsersByWeek, usersThisWeek,
+  } = useMemo(() => {
+    const pendingShops = shops.filter(s => s.status === 'pending');
+    const approvedShops = shops.filter(s => s.status === 'approved');
+    const totalRevenue = orders.reduce((sum, o) => sum + (o.total || 0), 0);
 
-  const days14 = lastNDays(14);
-  const revenueByDay = days14.map(({ start, end }) => {
-    const dayOrders = orders.filter(o => { const c = new Date(o.created_at); return c >= start && c < end; });
-    return { label: start.toLocaleDateString('sq-AL', { day: 'numeric', month: 'short' }), revenue: dayOrders.reduce((s, o) => s + (o.total || 0), 0), count: dayOrders.length };
-  });
-  const maxDayRevenue = Math.max(1, ...revenueByDay.map(d => d.revenue));
+    const deliveredOrders = orders.filter(o => o.status === 'delivered');
+    const deliveredRevenue = deliveredOrders.reduce((s, o) => s + (o.total || 0), 0);
+    const avgOrderValue = orders.length ? Math.round(totalRevenue / orders.length) : 0;
+    const inStockProducts = products.filter(p => p.in_stock !== false).length;
 
-  const ordersThisWeek = orders.filter(o => new Date(o.created_at) >= lastNDays(7)[0].start).length;
-  const ordersPrevWeek = orders.filter(o => { const c = new Date(o.created_at); return c >= lastNDays(14)[0].start && c < lastNDays(7)[0].start; }).length;
-  const ordersTrend = ordersPrevWeek === 0 ? (ordersThisWeek > 0 ? 100 : 0) : Math.round(((ordersThisWeek - ordersPrevWeek) / ordersPrevWeek) * 100);
-
-  const statusCounts = ORDER_STATUSES.reduce((acc, s) => { acc[s] = orders.filter(o => o.status === s).length; return acc; }, {});
-  const maxStatusCount = Math.max(1, ...Object.values(statusCounts));
-
-  const shopRevenueMap = {};
-  orders.forEach(o => { if (o.shop_id) shopRevenueMap[o.shop_id] = (shopRevenueMap[o.shop_id] || 0) + (o.total || 0); });
-  const topShops = Object.entries(shopRevenueMap)
-    .map(([shopId, revenue]) => ({ shop: shops.find(s => s.id === shopId), revenue, orderCount: orders.filter(o => o.shop_id === shopId).length }))
-    .filter(x => x.shop)
-    .sort((a, b) => b.revenue - a.revenue)
-    .slice(0, 5);
-  const maxShopRevenue = Math.max(1, ...topShops.map(s => s.revenue));
-
-  const productStatsMap = {};
-  orders.forEach(o => {
-    (o.items || []).forEach(item => {
-      const key = item.id || item.name;
-      if (!productStatsMap[key]) productStatsMap[key] = { name: item.name, units: 0, revenue: 0 };
-      productStatsMap[key].units += item.qty || 1;
-      productStatsMap[key].revenue += (item.price || 0) * (item.qty || 1);
+    const days14 = lastNDays(14);
+    const revenueByDay = days14.map(({ start, end }) => {
+      const dayOrders = orders.filter(o => { const c = new Date(o.created_at); return c >= start && c < end; });
+      return { label: start.toLocaleDateString('sq-AL', { day: 'numeric', month: 'short' }), revenue: dayOrders.reduce((s, o) => s + (o.total || 0), 0), count: dayOrders.length };
     });
-  });
-  const topProducts = Object.values(productStatsMap).sort((a, b) => b.units - a.units).slice(0, 5);
-  const maxProductUnits = Math.max(1, ...topProducts.map(p => p.units));
+    const maxDayRevenue = Math.max(1, ...revenueByDay.map(d => d.revenue));
 
-  const categoryCounts = {};
-  products.forEach(p => { categoryCounts[p.category] = (categoryCounts[p.category] || 0) + 1; });
-  const categoryList = Object.entries(categoryCounts).sort((a, b) => b[1] - a[1]);
-  const maxCategoryCount = Math.max(1, ...categoryList.map(c => c[1]));
+    const ordersThisWeek = orders.filter(o => new Date(o.created_at) >= lastNDays(7)[0].start).length;
+    const ordersPrevWeek = orders.filter(o => { const c = new Date(o.created_at); return c >= lastNDays(14)[0].start && c < lastNDays(7)[0].start; }).length;
+    const ordersTrend = ordersPrevWeek === 0 ? (ordersThisWeek > 0 ? 100 : 0) : Math.round(((ordersThisWeek - ordersPrevWeek) / ordersPrevWeek) * 100);
 
-  const weeks8 = lastNWeeks(8);
-  const shopsByWeek = weeks8.map(({ start, end }) => ({
-    label: start.toLocaleDateString('sq-AL', { day: 'numeric', month: 'short' }),
-    count: shops.filter(s => { const c = new Date(s.created_at); return c >= start && c < end; }).length,
-  }));
-  const maxShopsByWeek = Math.max(1, ...shopsByWeek.map(w => w.count));
+    const statusCounts = ORDER_STATUSES.reduce((acc, s) => { acc[s] = orders.filter(o => o.status === s).length; return acc; }, {});
+    const maxStatusCount = Math.max(1, ...Object.values(statusCounts));
 
-  const userDates = (userStats?.createdDates || []).map(d => new Date(d));
-  const usersByWeek = weeks8.map(({ start, end }) => ({
-    label: start.toLocaleDateString('sq-AL', { day: 'numeric', month: 'short' }),
-    count: userDates.filter(c => c >= start && c < end).length,
-  }));
-  const maxUsersByWeek = Math.max(1, ...usersByWeek.map(w => w.count));
-  const usersThisWeek = usersByWeek[usersByWeek.length - 1]?.count || 0;
+    const shopRevenueMap = {};
+    orders.forEach(o => { if (o.shop_id) shopRevenueMap[o.shop_id] = (shopRevenueMap[o.shop_id] || 0) + (o.total || 0); });
+    const topShops = Object.entries(shopRevenueMap)
+      .map(([shopId, revenue]) => ({ shop: shops.find(s => s.id === shopId), revenue, orderCount: orders.filter(o => o.shop_id === shopId).length }))
+      .filter(x => x.shop)
+      .sort((a, b) => b.revenue - a.revenue)
+      .slice(0, 5);
+    const maxShopRevenue = Math.max(1, ...topShops.map(s => s.revenue));
+
+    const productStatsMap = {};
+    orders.forEach(o => {
+      (o.items || []).forEach(item => {
+        const key = item.id || item.name;
+        if (!productStatsMap[key]) productStatsMap[key] = { name: item.name, units: 0, revenue: 0 };
+        productStatsMap[key].units += item.qty || 1;
+        productStatsMap[key].revenue += (item.price || 0) * (item.qty || 1);
+      });
+    });
+    const topProducts = Object.values(productStatsMap).sort((a, b) => b.units - a.units).slice(0, 5);
+    const maxProductUnits = Math.max(1, ...topProducts.map(p => p.units));
+
+    const categoryCounts = {};
+    products.forEach(p => { categoryCounts[p.category] = (categoryCounts[p.category] || 0) + 1; });
+    const categoryList = Object.entries(categoryCounts).sort((a, b) => b[1] - a[1]);
+    const maxCategoryCount = Math.max(1, ...categoryList.map(c => c[1]));
+
+    const weeks8 = lastNWeeks(8);
+    const shopsByWeek = weeks8.map(({ start, end }) => ({
+      label: start.toLocaleDateString('sq-AL', { day: 'numeric', month: 'short' }),
+      count: shops.filter(s => { const c = new Date(s.created_at); return c >= start && c < end; }).length,
+    }));
+    const maxShopsByWeek = Math.max(1, ...shopsByWeek.map(w => w.count));
+
+    const userDates = (userStats?.createdDates || []).map(d => new Date(d));
+    const usersByWeek = weeks8.map(({ start, end }) => ({
+      label: start.toLocaleDateString('sq-AL', { day: 'numeric', month: 'short' }),
+      count: userDates.filter(c => c >= start && c < end).length,
+    }));
+    const maxUsersByWeek = Math.max(1, ...usersByWeek.map(w => w.count));
+    const usersThisWeek = usersByWeek[usersByWeek.length - 1]?.count || 0;
+
+    return {
+      pendingShops, approvedShops, totalRevenue,
+      deliveredRevenue, avgOrderValue, inStockProducts,
+      revenueByDay, maxDayRevenue, ordersThisWeek, ordersTrend,
+      statusCounts, maxStatusCount, topShops, maxShopRevenue,
+      topProducts, maxProductUnits, categoryList, maxCategoryCount,
+      shopsByWeek, maxShopsByWeek, usersByWeek, maxUsersByWeek, usersThisWeek,
+    };
+  }, [shops, orders, products, userStats]);
 
   const Bar = ({ pct, color }) => (
     <div style={{ flex: 1, background: 'var(--surface-2)', borderRadius: 6, overflow: 'hidden', height: 8 }}>
@@ -515,6 +547,40 @@ export default function AdminPanel() {
                 </div>
               ))}
             </div>
+          </div>
+        )}
+
+        {/* PRODUCTS */}
+        {tab === 'products' && (
+          <div>
+            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 20, fontWeight: 700, marginBottom: 8 }}>All products ({products.length})</h2>
+            <p style={{ color: 'var(--text-3)', fontSize: 14, marginBottom: 20 }}>
+              "Trending" places a product on the homepage's Trending Now section -- sellers can no longer set this themselves.
+            </p>
+            {products.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: 60, color: 'var(--text-3)' }}>No products yet</div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                {products.map(product => {
+                  const shop = shops.find(s => s.id === product.shop_id);
+                  return (
+                    <div key={product.id} style={{ display: 'flex', alignItems: 'center', gap: 12, background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 14, padding: 16 }}>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontSize: 14, fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{product.name}</div>
+                        <div style={{ fontSize: 12, color: 'var(--text-3)' }}>{shop?.name || 'Dyqan i panjohur'} · {formatPrice(product.price)} · {CATEGORY_LABELS[product.category] || product.category}</div>
+                      </div>
+                      <button onClick={() => toggleTrending(product)} disabled={saving === product.id}
+                        style={{ padding: '6px 14px', borderRadius: 20, border: '1px solid', fontSize: 12, fontWeight: 500, cursor: 'pointer', fontFamily: 'var(--font-body)', whiteSpace: 'nowrap',
+                          borderColor: product.trending ? 'var(--amber)' : 'var(--border-strong)',
+                          background: product.trending ? 'var(--amber-light)' : 'transparent',
+                          color: product.trending ? '#854F0B' : 'var(--text-2)' }}>
+                        {saving === product.id ? '…' : product.trending ? '🔥 Trending' : 'Shenjo Trending'}
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
         )}
 

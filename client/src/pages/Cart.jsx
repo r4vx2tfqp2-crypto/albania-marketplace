@@ -18,7 +18,7 @@ export default function Cart() {
     return (
       <div className={styles.empty}>
         <ShoppingCart size={48} strokeWidth={1} style={{ color: 'var(--text-3)' }} />
-        <h2 className={styles.emptyTitle}>{t('cart_empty')}</h2>
+        <h1 className={styles.emptyTitle}>{t('cart_empty')}</h1>
         <p className={styles.emptySub}>{t('cart_empty_sub')}</p>
         <Link to="/" className="btn-primary" style={{ marginTop: 24 }}>{t('browse_products')}</Link>
       </div>
@@ -48,12 +48,12 @@ export default function Cart() {
                   <div className={styles.itemPrice}>{formatPrice(item.price)}</div>
                 </div>
                 <div className={styles.qtyControl}>
-                  <button onClick={() => updateQty(item.id, item.selectedSize, item.qty - 1)}><Minus size={13} /></button>
-                  <span>{item.qty}</span>
-                  <button onClick={() => updateQty(item.id, item.selectedSize, item.qty + 1)}><Plus size={13} /></button>
+                  <button onClick={() => updateQty(item.id, item.selectedSize, item.qty - 1)} aria-label={"Pakeso sasine per " + item.name}><Minus size={13} /></button>
+                  <span aria-live="polite">{item.qty}</span>
+                  <button onClick={() => updateQty(item.id, item.selectedSize, item.qty + 1)} aria-label={"Rrit sasine per " + item.name}><Plus size={13} /></button>
                 </div>
                 <div className={styles.itemTotal}>{formatPrice(item.price * item.qty)}</div>
-                <button className={styles.removeBtn} onClick={() => removeFromCart(item.id, item.selectedSize)}>
+                <button className={styles.removeBtn} onClick={() => removeFromCart(item.id, item.selectedSize)} aria-label={"Hiq " + item.name + " nga shporta"}>
                   <Trash2 size={15} />
                 </button>
               </div>

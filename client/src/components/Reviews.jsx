@@ -108,21 +108,22 @@ export default function Reviews({ productId, shopId, type = "product", onReviewA
       {showForm && (
         <form onSubmit={handleSubmit} style={{ background: "var(--surface-2)", padding: 16, borderRadius: 12, marginBottom: 20 }}>
           {submitError && (
-            <div style={{ background: "var(--red-light)", color: "var(--red)", padding: "10px 14px", borderRadius: 8, marginBottom: 12, fontSize: 13 }}>
+            <div role="alert" style={{ background: "var(--red-light)", color: "var(--red)", padding: "10px 14px", borderRadius: 8, marginBottom: 12, fontSize: 13 }}>
               {submitError}
             </div>
           )}
           <div style={{ marginBottom: 12 }}>
-            <label style={{ fontSize: 13, fontWeight: 500, color: "var(--text-2)", display: "block", marginBottom: 6 }}>Emri juaj</label>
-            <input style={{ width: "100%", padding: "8px 12px", borderRadius: 8, border: "1px solid var(--border-strong)", fontSize: 14, fontFamily: "var(--font-body)", background: "var(--surface)", color: "var(--text-1)", outline: "none", boxSizing: "border-box" }}
+            <label htmlFor="review-author" style={{ fontSize: 13, fontWeight: 500, color: "var(--text-2)", display: "block", marginBottom: 6 }}>Emri juaj</label>
+            <input id="review-author" style={{ width: "100%", padding: "8px 12px", borderRadius: 8, border: "1px solid var(--border-strong)", fontSize: 14, fontFamily: "var(--font-body)", background: "var(--surface)", color: "var(--text-1)", boxSizing: "border-box" }}
               placeholder="p.sh. Erion B." value={form.author}
               onChange={e => setForm({...form, author: e.target.value})} />
           </div>
           <div style={{ marginBottom: 12 }}>
-            <label style={{ fontSize: 13, fontWeight: 500, color: "var(--text-2)", display: "block", marginBottom: 6 }}>Vleresimi</label>
-            <div style={{ display: "flex", gap: 6 }}>
+            <span style={{ fontSize: 13, fontWeight: 500, color: "var(--text-2)", display: "block", marginBottom: 6 }}>Vleresimi</span>
+            <div style={{ display: "flex", gap: 6 }} role="radiogroup" aria-label="Vleresimi ne yje">
               {[1,2,3,4,5].map(n => (
                 <button key={n} type="button" onClick={() => setForm({...form, rating: n})}
+                  role="radio" aria-checked={n === form.rating} aria-label={n + (n === 1 ? " yll" : " yje")}
                   style={{ fontSize: 28, background: "none", border: "none", cursor: "pointer", opacity: n <= form.rating ? 1 : 0.3, transition: "opacity 0.15s", color: "#F59E0B" }}>
                   ★
                 </button>
@@ -130,8 +131,8 @@ export default function Reviews({ productId, shopId, type = "product", onReviewA
             </div>
           </div>
           <div style={{ marginBottom: 12 }}>
-            <label style={{ fontSize: 13, fontWeight: 500, color: "var(--text-2)", display: "block", marginBottom: 6 }}>Komenti (opsional)</label>
-            <textarea style={{ width: "100%", padding: "8px 12px", borderRadius: 8, border: "1px solid var(--border-strong)", fontSize: 14, fontFamily: "var(--font-body)", background: "var(--surface)", color: "var(--text-1)", outline: "none", resize: "vertical", boxSizing: "border-box" }}
+            <label htmlFor="review-text" style={{ fontSize: 13, fontWeight: 500, color: "var(--text-2)", display: "block", marginBottom: 6 }}>Komenti (opsional)</label>
+            <textarea id="review-text" style={{ width: "100%", padding: "8px 12px", borderRadius: 8, border: "1px solid var(--border-strong)", fontSize: 14, fontFamily: "var(--font-body)", background: "var(--surface)", color: "var(--text-1)", resize: "vertical", boxSizing: "border-box" }}
               rows={3} placeholder="Cfar mendoni per kete produkt?"
               value={form.text} onChange={e => setForm({...form, text: e.target.value})} />
           </div>

@@ -15,7 +15,7 @@ export default function EditProduct() {
   const [error, setError] = useState('');
   const [form, setForm] = useState({
     name: '', price: '', category: 'shoes',
-    description: '', sizes: '', in_stock: true, trending: false
+    description: '', sizes: '', in_stock: true
   });
 
   useEffect(() => { fetchProduct(); }, [id]);
@@ -30,7 +30,6 @@ export default function EditProduct() {
         description: data.description || '',
         sizes: data.sizes?.join(', ') || '',
         in_stock: data.in_stock ?? true,
-        trending: data.trending || false,
       });
     }
     setFetching(false);
@@ -48,7 +47,6 @@ export default function EditProduct() {
       description: form.description,
       sizes: form.sizes ? form.sizes.split(',').map(s => s.trim()).filter(Boolean) : [],
       in_stock: form.in_stock,
-      trending: form.trending,
     }).eq('id', id).select();
 
     // A blocked-by-RLS update (wrong owner, stale/invalid id) returns
@@ -126,10 +124,6 @@ export default function EditProduct() {
               <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 14, color: 'var(--text-2)', cursor: 'pointer' }}>
                 <input type="checkbox" checked={form.in_stock} onChange={e => setForm({...form, in_stock: e.target.checked})} />
                 In stock
-              </label>
-              <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 14, color: 'var(--text-2)', cursor: 'pointer' }}>
-                <input type="checkbox" checked={form.trending} onChange={e => setForm({...form, trending: e.target.checked})} />
-                Mark as trending
               </label>
             </div>
           </div>

@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { Link } from "react-router-dom";
 import { Heart, ShoppingCart } from "lucide-react";
 import { useCart } from "../context/CartContext";
@@ -13,7 +14,7 @@ const COLOR_MAP = {
   "rozë": "#ED64A6", "vjollce": "#805AD5", "ari": "#B7791F", "argjend": "#A0AEC0"
 };
 
-export default function ProductCard({ product, index = 0 }) {
+function ProductCard({ product, index = 0 }) {
   const { toggleSaved, isSaved, addToCart } = useCart();
   const saved = isSaved(product.id);
   const colorIdx = index % BG_COLORS.length;
@@ -29,7 +30,7 @@ export default function ProductCard({ product, index = 0 }) {
     <div className={styles.card}>
       <Link to={"/product/" + product.id} className={styles.imageWrap} style={{ background: BG_COLORS[colorIdx] }}>
         {product.images && product.images.length > 0 ? (
-          <img src={product.images[0]} alt={product.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+          <img src={product.images[0]} alt={product.name} loading="lazy" decoding="async" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
         ) : (
           <div className={styles.imagePlaceholder} style={{ color: TEXT_COLORS[colorIdx] }}>
             {product.category === "shoes" ? "👟" :
@@ -50,6 +51,7 @@ export default function ProductCard({ product, index = 0 }) {
         <button
           className={styles.saveBtn + (saved ? " " + styles.saved : "")}
           onClick={(e) => { e.preventDefault(); toggleSaved(product); }}
+          aria-label={saved ? "Hiq nga te ruajturat" : "Shto te te ruajturat"} aria-pressed={saved}
         >
           <Heart size={15} fill={saved ? "currentColor" : "none"} strokeWidth={2} />
         </button>
@@ -61,7 +63,7 @@ export default function ProductCard({ product, index = 0 }) {
         {shop && (
           <Link to={"/shop/" + shop.id} className={styles.shop}>
             <div style={{ width: 16, height: 16, borderRadius: "50%", background: shop.color + "22", color: shop.color, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 8, fontWeight: 700, flexShrink: 0, overflow: "hidden" }}>
-              {shop.logo_url ? <img src={shop.logo_url} alt={shop.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : shop.initials}
+              {shop.logo_url ? <img src={shop.logo_url} alt={shop.name} loading="lazy" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : shop.initials}
             </div>
             {shop.name}
             {shop.verified && <span style={{ background: "#1877F2", color: "#fff", fontSize: 8, fontWeight: 700, padding: "1px 4px", borderRadius: 8 }}>✓</span>}
@@ -115,3 +117,5 @@ export default function ProductCard({ product, index = 0 }) {
     </div>
   );
 }
+
+export default memo(ProductCard);

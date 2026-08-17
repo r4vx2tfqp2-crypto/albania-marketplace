@@ -63,12 +63,13 @@ export default function Login() {
   return (
     <div className={styles.page}>
       <div className={styles.card}>
+        <h1 className="sr-only">{tab === "login" ? t('sign_in_title') : t('register')} — Tregu</h1>
         <div className={styles.logo}>
           <div className={styles.logoMark}>T</div>
           <span className={styles.logoText}>tregu</span>
         </div>
-        {error && <div className={styles.error}>{error}</div>}
-        {success && <div className={styles.successMsg}>{success}</div>}
+        {error && <div className={styles.error} role="alert">{error}</div>}
+        {success && <div className={styles.successMsg} role="status">{success}</div>}
 
         <button type="button" className={styles.googleBtn} onClick={handleGoogleSignIn}>
           <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">
@@ -88,13 +89,13 @@ export default function Login() {
         {tab === "login" ? (
           <form onSubmit={handleLogin} className={styles.form}>
             <div className={styles.field}>
-              <label className={styles.label}>{t("email")}</label>
-              <input required type="email" className={styles.input} placeholder="you@example.com"
+              <label className={styles.label} htmlFor="login-email">{t("email")}</label>
+              <input id="login-email" required type="email" className={styles.input} placeholder="you@example.com"
                 value={form.email} onChange={e => setForm({...form, email: e.target.value})} />
             </div>
             <div className={styles.field}>
-              <label className={styles.label}>{t("password")}</label>
-              <input required type="password" className={styles.input} placeholder="••••••••"
+              <label className={styles.label} htmlFor="login-password">{t("password")}</label>
+              <input id="login-password" required type="password" className={styles.input} placeholder="••••••••"
                 value={form.password} onChange={e => setForm({...form, password: e.target.value})} />
             </div>
             <button type="submit" className={styles.submitBtn} disabled={loading}>
@@ -109,18 +110,18 @@ export default function Login() {
         ) : (
           <form onSubmit={handleRegister} className={styles.form}>
             <div className={styles.field}>
-              <label className={styles.label}>{t("name")}</label>
-              <input required className={styles.input} placeholder="Erion Brahimi"
+              <label className={styles.label} htmlFor="register-name">{t("name")}</label>
+              <input id="register-name" required className={styles.input} placeholder="Erion Brahimi"
                 value={form.name} onChange={e => setForm({...form, name: e.target.value})} />
             </div>
             <div className={styles.field}>
-              <label className={styles.label}>{t("email")}</label>
-              <input required type="email" className={styles.input} placeholder="you@example.com"
+              <label className={styles.label} htmlFor="register-email">{t("email")}</label>
+              <input id="register-email" required type="email" className={styles.input} placeholder="you@example.com"
                 value={form.email} onChange={e => setForm({...form, email: e.target.value})} />
             </div>
             <div className={styles.field}>
-              <label className={styles.label}>{t("password")}</label>
-              <input required type="password" className={styles.input} placeholder="min 6 karaktere"
+              <label className={styles.label} htmlFor="register-password">{t("password")}</label>
+              <input id="register-password" required type="password" className={styles.input} placeholder="min 6 karaktere"
                 value={form.password} onChange={e => setForm({...form, password: e.target.value})} />
             </div>
             <button type="submit" className={styles.submitBtn} disabled={loading}>

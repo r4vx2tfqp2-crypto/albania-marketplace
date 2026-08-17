@@ -36,7 +36,7 @@ export default function Navbar() {
             <Store size={16} strokeWidth={1.8} />
             <span>Shit</span>
           </Link>
-          <Link to="/cart" className={styles.cartBtn}>
+          <Link to="/cart" className={styles.cartBtn} aria-label={cartCount > 0 ? `Shporta (${cartCount} produkte)` : "Shporta"}>
             <ShoppingCart size={18} strokeWidth={1.8} />
             {cartCount > 0 && <span className={styles.badge}>{cartCount}</span>}
           </Link>

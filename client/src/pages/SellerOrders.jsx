@@ -46,11 +46,20 @@ export default function SellerOrders() {
     setLoading(false);
   };
 
+  // Patches the single changed order in local state instead of the
+  // previous fetchOrders() (3 sequential queries: shops -> orders -> shops
+  // again) on every status change, courier pick, or tracking-number edit
+  // -- those were each triggering a full reload of the seller's entire
+  // order list for a one-field change.
+  const patchOrder = (orderId, updates) => {
+    setOrders(prev => prev.map(o => o.id === orderId ? { ...o, ...updates } : o));
+  };
+
   const updateStatus = async (orderId, status) => {
     setUpdating(orderId);
     const { error } = await supabase.from("orders").update({ status }).eq("id", orderId);
     if (error) window.alert("Perditesimi deshtoi. Provoni perseri.");
-    await fetchOrders();
+    else patchOrder(orderId, { status });
     setUpdating(null);
   };
 
@@ -368,7 +377,7 @@ export default function SellerOrders() {
                     <div style={{ fontSize: 12, color: "var(--text-3)", marginBottom: 8 }}>Numri i gjurmimit</div>
                     <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 8 }}>
                       {["Albanian Courier", "DHL", "Posta Shqiptare", "Tjeter"].map(c => (
-                        <button key={c} onClick={async () => { const { error } = await supabase.from("orders").update({ courier_name: c }).eq("id", order.id); if (error) window.alert("Perditesimi deshtoi."); await fetchOrders(); }}
+                        <button key={c} onClick={async () => { const { error } = await supabase.from("orders").update({ courier_name: c }).eq("id", order.id); if (error) window.alert("Perditesimi deshtoi."); else patchOrder(order.id, { courier_name: c }); }}
                           style={{ padding: "4px 10px", borderRadius: 20, fontSize: 12, cursor: "pointer", fontFamily: "var(--font-body)",
                             border: "1px solid var(--border-strong)", background: order.courier_name === c ? "var(--text-1)" : "transparent",
                             color: order.courier_name === c ? "#fff" : "var(--text-2)" }}>
@@ -378,7 +387,7 @@ export default function SellerOrders() {
                     </div>
                     <div style={{ display: "flex", gap: 8 }}>
                       <input defaultValue={order.tracking_number || ""} placeholder="Shkruaj numrin e gjurmimit..."
-                        onBlur={async (e) => { if (e.target.value !== order.tracking_number) { const { error } = await supabase.from("orders").update({ tracking_number: e.target.value }).eq("id", order.id); if (error) window.alert("Perditesimi deshtoi."); await fetchOrders(); } }}
+                        onBlur={async (e) => { if (e.target.value !== order.tracking_number) { const { error } = await supabase.from("orders").update({ tracking_number: e.target.value }).eq("id", order.id); if (error) window.alert("Perditesimi deshtoi."); else patchOrder(order.id, { tracking_number: e.target.value }); } }}
                         style={{ flex: 1, padding: "8px 12px", borderRadius: 8, border: "1px solid var(--border-strong)", fontSize: 13, fontFamily: "var(--font-body)", background: "var(--surface)", color: "var(--text-1)" }} />
                       {order.tracking_number && (
                         <a href={order.courier_name === "Albanian Courier" ? "https://al.albaniancourier.al/en/track/?code=" + order.tracking_number :

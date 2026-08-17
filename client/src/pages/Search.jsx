@@ -59,6 +59,7 @@ export default function SearchPage() {
 
   return (
     <div className={styles.page}>
+      <h1 className="sr-only">{t('products')} — Tregu</h1>
       <div className={styles.searchHeader}>
         <div className="container">
           <div className={styles.searchBar}>
@@ -66,12 +67,13 @@ export default function SearchPage() {
             <input
               type="text"
               placeholder={t('search_placeholder')}
+              aria-label={t('search_placeholder')}
               value={query}
               onChange={e => setQuery(e.target.value)}
               className={styles.input}
               autoFocus
             />
-            {query && <button onClick={() => setQuery('')} className={styles.clearBtn}><X size={14} /></button>}
+            {query && <button onClick={() => setQuery('')} className={styles.clearBtn} aria-label={t('clear') || 'Clear search'}><X size={14} /></button>}
           </div>
         </div>
       </div>
@@ -113,8 +115,8 @@ export default function SearchPage() {
               </div>
             </div>
             <div className={styles.filterGroup}>
-              <div className={styles.filterLabel}>{t('sort_by')}</div>
-              <select className={styles.sortSelect} value={sort} onChange={e => setSort(e.target.value)}>
+              <label className={styles.filterLabel} htmlFor="search-sort">{t('sort_by')}</label>
+              <select id="search-sort" className={styles.sortSelect} value={sort} onChange={e => setSort(e.target.value)}>
                 {SORT_OPTIONS_KEYS.map(o => <option key={o.value} value={o.value}>{t(o.key)}</option>)}
               </select>
             </div>

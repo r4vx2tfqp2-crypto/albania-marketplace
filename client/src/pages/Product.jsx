@@ -132,6 +132,8 @@ export default function Product() {
               <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
                 {product.images.map((img, i) => (
                   <img key={i} src={img} alt={`${product.name} - foto ${i + 1}`} onClick={() => setActiveImage(i)}
+                    role="button" tabIndex={0} aria-pressed={activeImage === i}
+                    onKeyDown={e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setActiveImage(i); } }}
                     style={{ width: 60, height: 60, objectFit: "cover", borderRadius: 8, cursor: "pointer",
                       border: activeImage === i ? "2px solid var(--text-1)" : "2px solid transparent",
                       opacity: activeImage === i ? 1 : 0.6, transition: "all 0.15s" }} />
@@ -199,11 +201,15 @@ export default function Product() {
                       </div>
                       {options ? (
                         <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                          {/* Informational only (this spec has multiple comma-separated
+                              values, e.g. available colorways) -- not a real button
+                              since there's no click handler, so it's rendered as
+                              non-interactive to avoid a focusable no-op control. */}
                           {options.map(opt => (
-                            <button key={opt} className={styles.sizeBtn}
+                            <span key={opt} className={styles.sizeBtn}
                               style={{ fontSize: 13 }}>
                               {opt}
-                            </button>
+                            </span>
                           ))}
                         </div>
                       ) : (
@@ -227,7 +233,8 @@ export default function Product() {
                 <ShoppingCart size={16} />
                 {added ? t("added_to_cart") : t("add_to_cart")}
               </button>
-              <button className={styles.saveBtn + (saved ? " " + styles.saved : "")} onClick={() => toggleSaved(product)}>
+              <button className={styles.saveBtn + (saved ? " " + styles.saved : "")} onClick={() => toggleSaved(product)}
+                aria-label={saved ? "Hiq nga te ruajturat" : "Shto te te ruajturat"} aria-pressed={saved}>
                 <Heart size={18} fill={saved ? "currentColor" : "none"} strokeWidth={2} />
               </button>
             </div>

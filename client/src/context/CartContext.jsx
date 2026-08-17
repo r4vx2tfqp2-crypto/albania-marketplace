@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect, useMemo } from 'react';
 
 const CartContext = createContext();
 
@@ -65,11 +65,17 @@ export function CartProvider({ children }) {
   const cartCount = cartItems.reduce((s, i) => s + i.qty, 0);
   const cartTotal = cartItems.reduce((s, i) => s + i.price * i.qty, 0);
 
+  // Without this, a new object literal every render meant every useCart()
+  // consumer re-rendered on any context change -- e.g. clicking "add to
+  // cart" on one ProductCard in a grid re-rendered every other card on
+  // screen too, since none of them are memoized (see ProductCard.jsx).
+  const value = useMemo(() => ({
+    cartItems, savedItems, addToCart, removeFromCart, updateQty,
+    toggleSaved, isSaved, cartCount, cartTotal
+  }), [cartItems, savedItems, cartCount, cartTotal]);
+
   return (
-    <CartContext.Provider value={{
-      cartItems, savedItems, addToCart, removeFromCart, updateQty,
-      toggleSaved, isSaved, cartCount, cartTotal
-    }}>
+    <CartContext.Provider value={value}>
       {children}
     </CartContext.Provider>
   );

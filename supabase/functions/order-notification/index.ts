@@ -89,8 +89,6 @@ serve(async (req) => {
     // into the email HTML as an <img src>.
     const signature = isSafeDataImageUrl(clientOrder?.signature) ? clientOrder.signature : null
 
-    console.log('Processing type:', type, 'delivery_preference:', order.delivery_preference)
-
     const itemsRows = order.items?.map((i: any) => `
       <tr>
         <td style="padding:8px;font-size:13px;color:#1A1916;border-bottom:1px solid #F0EFEC;">${esc(i.name)}${i.size ? ` (${esc(i.size)})` : ''}</td>
@@ -105,8 +103,6 @@ serve(async (req) => {
 
     if (type === 'delivery_confirmed') {
       const deliveryPref = order.delivery_preference || 'delivered'
-
-      console.log('Delivery pref:', deliveryPref)
 
       const prefMap: Record<string, {icon: string, title: string, color: string}> = {
         delivered: { icon: '✅', title: 'U dorezua personalisht', color: '#1D9E75' },

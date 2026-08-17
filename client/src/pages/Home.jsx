@@ -66,6 +66,7 @@ export default function Home() {
             <input
               type="text"
               placeholder={t('search_placeholder')}
+              aria-label={t('search_placeholder')}
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
               className={styles.searchInput}

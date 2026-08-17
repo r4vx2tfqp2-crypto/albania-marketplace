@@ -4,6 +4,7 @@ import { Plus, TrendingUp, Package, DollarSign, Star, ArrowRight } from 'lucide-
 import { useTranslation } from 'react-i18next';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
+import { ADMIN_EMAIL } from '../lib/constants';
 import QRCode from 'qrcode';
 import styles from './SellerDashboard.module.css';
 
@@ -84,7 +85,7 @@ export default function SellerDashboard() {
             <p className={styles.sub}>{t("manage_shops")}</p>
           </div>
           <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-            {user?.email === "julsina76@gmail.com" && (
+            {user?.email === ADMIN_EMAIL && (
               <Link to="/admin" className={styles.addBtn} style={{ background: "var(--amber-light)", color: "#854F0B", border: "none" }}>
                 Admin Panel
               </Link>

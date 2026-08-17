@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { CheckCircle, MapPin } from "lucide-react";
 import { useTranslation } from "react-i18next";
@@ -152,7 +152,7 @@ export default function Checkout() {
         headers: { "Authorization": "Bearer " + ANON_KEY, "Content-Type": "application/json" },
         body: JSON.stringify({ order: orderData }),
       });
-    } catch (err) { console.log("Email error:", err); }
+    } catch (err) { console.error("Email error:", err); }
     setPlaced(true);
     setTimeout(() => navigate("/orders"), 2500);
   };
@@ -177,32 +177,40 @@ export default function Checkout() {
               <h2 className={styles.sectionTitle}>{t("delivery_info")}</h2>
               <div className={styles.fieldRow}>
                 <div className={styles.field}>
-                  <label className={styles.label}>{t("full_name")} *</label>
-                  <input className={styles.input + (errors.name ? " " + styles.inputError : "")}
+                  <label className={styles.label} htmlFor="checkout-name">{t("full_name")} *</label>
+                  <input id="checkout-name" required aria-required="true"
+                    aria-invalid={!!errors.name} aria-describedby={errors.name ? "checkout-name-error" : undefined}
+                    className={styles.input + (errors.name ? " " + styles.inputError : "")}
                     placeholder="Erion Brahimi" value={form.name}
                     onChange={e => setForm({...form, name: e.target.value})} />
-                  {errors.name && <span className={styles.errorMsg}>{errors.name}</span>}
+                  {errors.name && <span id="checkout-name-error" className={styles.errorMsg} role="alert">{errors.name}</span>}
                 </div>
                 <div className={styles.field}>
-                  <label className={styles.label}>{t("phone_number")} *</label>
-                  <input className={styles.input + (errors.phone ? " " + styles.inputError : "")}
+                  <label className={styles.label} htmlFor="checkout-phone">{t("phone_number")} *</label>
+                  <input id="checkout-phone" required aria-required="true"
+                    aria-invalid={!!errors.phone} aria-describedby={errors.phone ? "checkout-phone-error" : undefined}
+                    className={styles.input + (errors.phone ? " " + styles.inputError : "")}
                     placeholder="+355 69 123 4567" value={form.phone}
                     onChange={e => setForm({...form, phone: e.target.value})} />
-                  {errors.phone && <span className={styles.errorMsg}>{errors.phone}</span>}
+                  {errors.phone && <span id="checkout-phone-error" className={styles.errorMsg} role="alert">{errors.phone}</span>}
                 </div>
               </div>
 
               <div className={styles.field}>
-                <label className={styles.label}>Email (per konfirmim porosie) *</label>
-                <input required className={styles.input + (errors.email ? " " + styles.inputError : "")} placeholder="you@example.com" type="email"
+                <label className={styles.label} htmlFor="checkout-email">Email (per konfirmim porosie) *</label>
+                <input id="checkout-email" required aria-required="true"
+                  aria-invalid={!!errors.email} aria-describedby={errors.email ? "checkout-email-error" : undefined}
+                  className={styles.input + (errors.email ? " " + styles.inputError : "")} placeholder="you@example.com" type="email"
                   value={form.email} onChange={e => setForm({...form, email: e.target.value})} />
-                {errors.email && <span className={styles.errorMsg}>{errors.email}</span>}
+                {errors.email && <span id="checkout-email-error" className={styles.errorMsg} role="alert">{errors.email}</span>}
               </div>
 
               <div className={styles.field}>
-                <label className={styles.label}>{t("address")} *</label>
+                <label className={styles.label} htmlFor="checkout-address">{t("address")} *</label>
                 <div style={{ display: "flex", gap: 8 }}>
-                  <input className={styles.input + (errors.address ? " " + styles.inputError : "")}
+                  <input id="checkout-address" required aria-required="true"
+                    aria-invalid={!!errors.address} aria-describedby={errors.address ? "checkout-address-error" : undefined}
+                    className={styles.input + (errors.address ? " " + styles.inputError : "")}
                     placeholder="Rruga Myslym Shyri, Nr. 14" value={form.address}
                     onChange={e => setForm({...form, address: e.target.value})}
                     style={{ flex: 1 }} />
@@ -216,7 +224,7 @@ export default function Checkout() {
                     {pinLocation ? "Pin vendosur!" : "Pin vendndodhjen"}
                   </button>
                 </div>
-                {errors.address && <span className={styles.errorMsg}>{errors.address}</span>}
+                {errors.address && <span id="checkout-address-error" className={styles.errorMsg} role="alert">{errors.address}</span>}
               </div>
 
               {showMap && (
@@ -231,8 +239,8 @@ export default function Checkout() {
                         {pinLocation ? "✓ Konfirmo" : "Mbyll"}
                       </button>
                     </div>
-                    <input ref={searchBoxRef} type="text" placeholder="🔍 Kërko adresën tuaj..."
-                      style={{ width: "100%", padding: "10px 14px", borderRadius: "var(--radius-md)", border: "1px solid var(--border-strong)", fontSize: 14, fontFamily: "var(--font-body)", outline: "none", boxSizing: "border-box" }} />
+                    <input ref={searchBoxRef} type="text" placeholder="🔍 Kërko adresën tuaj..." aria-label="Kerko adresen tuaj"
+                      style={{ width: "100%", padding: "10px 14px", borderRadius: "var(--radius-md)", border: "1px solid var(--border-strong)", fontSize: 14, fontFamily: "var(--font-body)", boxSizing: "border-box" }} />
                   </div>
                   <div ref={mapRef} style={{ flex: 1, width: "100%" }} />
                   {pinLocation && (
@@ -244,18 +252,18 @@ export default function Checkout() {
               )}
 
               <div className={styles.field}>
-                <label className={styles.label}>{t("city")} *</label>
-                <select className={styles.select} value={form.city} onChange={e => setForm({...form, city: e.target.value})}>
+                <label className={styles.label} htmlFor="checkout-city">{t("city")} *</label>
+                <select id="checkout-city" className={styles.select} value={form.city} onChange={e => setForm({...form, city: e.target.value})}>
                   {CITIES.map(c => <option key={c}>{c}</option>)}
                 </select>
               </div>
 
               <div className={styles.field}>
-                <label className={styles.label}>{t("notes")}</label>
-                <textarea className={styles.textarea} placeholder={t("notes_placeholder")} rows={3}
+                <label className={styles.label} htmlFor="checkout-notes">{t("notes")}</label>
+                <textarea id="checkout-notes" className={styles.textarea} placeholder={t("notes_placeholder")} rows={3}
                   value={form.notes} onChange={e => setForm({...form, notes: e.target.value})} />
               </div>
-              {errors.submit && <div style={{ color: "var(--red)", fontSize: 13 }}>{errors.submit}</div>}
+              {errors.submit && <div style={{ color: "var(--red)", fontSize: 13 }} role="alert">{errors.submit}</div>}
             </div>
 
             <div className={styles.formSection}>
