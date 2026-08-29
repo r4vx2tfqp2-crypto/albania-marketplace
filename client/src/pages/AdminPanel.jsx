@@ -14,6 +14,7 @@ const AUDIENCES = [
   { key: 'sellers', label: 'Vetem shitesit (pronaret e dyqaneve)' },
   { key: 'buyers', label: 'Vetem bleresit (pa dyqan)' },
   { key: 'all', label: 'Te gjithe perdoruesit' },
+  { key: 'individual', label: 'Vetem nje perdorues (pergjigje email-i)' },
 ];
 
 const ORDER_STATUSES = ['confirmed', 'packed', 'picked_up', 'on_the_way', 'delivered'];
@@ -72,6 +73,7 @@ export default function AdminPanel() {
 
   // Announcements tab
   const [announceAudience, setAnnounceAudience] = useState('sellers');
+  const [announceRecipientEmail, setAnnounceRecipientEmail] = useState(''); // only used when audience === 'individual'
   const [announceSubject, setAnnounceSubject] = useState('');
   const [announceMessage, setAnnounceMessage] = useState('');
   const [recipientCount, setRecipientCount] = useState(null); // null = not checked yet for the current audience
@@ -88,7 +90,10 @@ export default function AdminPanel() {
   // Re-checking recipient count is required before every send: it both
   // shows the admin who they're about to email and (via dryRun) proves
   // the edge function + auth are working before the irreversible send.
-  useEffect(() => { setRecipientCount(null); setConfirmSend(false); }, [announceAudience]);
+  // For "individual" it also doubles as the actual validation step --
+  // the address isn't confirmed to be a real registered account until
+  // this check (server-side) succeeds.
+  useEffect(() => { setRecipientCount(null); setConfirmSend(false); }, [announceAudience, announceRecipientEmail]);
 
   const callSendEmail = async (payload) => {
     const { data: { session } } = await supabase.auth.getSession();
@@ -107,7 +112,7 @@ export default function AdminPanel() {
     setCheckingRecipients(true);
     setAnnounceResult(null);
     try {
-      const { recipientCount } = await callSendEmail({ audience: announceAudience, subject: 'x', message: 'x', dryRun: true });
+      const { recipientCount } = await callSendEmail({ audience: announceAudience, recipientEmail: announceRecipientEmail, subject: 'x', message: 'x', dryRun: true });
       setRecipientCount(recipientCount);
     } catch (err) {
       setAnnounceResult({ ok: false, message: err.message });
@@ -119,10 +124,13 @@ export default function AdminPanel() {
     setSendingAnnouncement(true);
     setAnnounceResult(null);
     try {
-      const result = await callSendEmail({ audience: announceAudience, subject: announceSubject, message: announceMessage });
-      setAnnounceResult({ ok: true, message: `U dergua tek ${result.sent} nga ${result.total} perdorues.${result.failed ? ` ${result.failed} deshtuan.` : ''}` });
+      const result = await callSendEmail({ audience: announceAudience, recipientEmail: announceRecipientEmail, subject: announceSubject, message: announceMessage });
+      setAnnounceResult({ ok: true, message: announceAudience === 'individual'
+        ? `Email-i u dergua tek ${announceRecipientEmail}.`
+        : `U dergua tek ${result.sent} nga ${result.total} perdorues.${result.failed ? ` ${result.failed} deshtuan.` : ''}` });
       setAnnounceSubject('');
       setAnnounceMessage('');
+      setAnnounceRecipientEmail('');
       setConfirmSend(false);
       setRecipientCount(null);
     } catch (err) {
@@ -773,14 +781,28 @@ export default function AdminPanel() {
               </div>
             </div>
 
+            {announceAudience === 'individual' && (
+              <div style={{ marginBottom: 16 }}>
+                <label htmlFor="announce-recipient" style={{ fontSize: 13, fontWeight: 500, color: 'var(--text-2)', display: 'block', marginBottom: 6 }}>Email i perdoruesit</label>
+                <input id="announce-recipient" type="email" value={announceRecipientEmail} onChange={e => setAnnounceRecipientEmail(e.target.value)}
+                  placeholder="perdoruesi@example.com"
+                  style={{ width: '100%', padding: '10px 14px', borderRadius: 10, border: '1px solid var(--border-strong)', fontSize: 14, fontFamily: 'var(--font-body)', background: 'var(--surface)', color: 'var(--text-1)', boxSizing: 'border-box' }} />
+                <p style={{ fontSize: 12, color: 'var(--text-3)', marginTop: 6 }}>
+                  Dergohet vetem nese kjo eshte email-i i llogarise se regjistruar te perdoruesit ne Tregu -- nuk mund t'i dergosh nje adrese arbitrare.
+                </p>
+              </div>
+            )}
+
             <div style={{ marginBottom: 12 }}>
-              <button type="button" onClick={checkRecipients} disabled={checkingRecipients}
+              <button type="button" onClick={checkRecipients} disabled={checkingRecipients || (announceAudience === 'individual' && !announceRecipientEmail.trim())}
                 style={{ padding: '8px 16px', borderRadius: 8, border: '1px solid var(--border-strong)', background: 'var(--surface)', fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'var(--font-body)', color: 'var(--text-2)' }}>
-                {checkingRecipients ? 'Duke kontrolluar...' : 'Shiko sa perdorues do ta marrin'}
+                {checkingRecipients ? 'Duke kontrolluar...' : announceAudience === 'individual' ? 'Konfirmo qe eshte llogari e regjistruar' : 'Shiko sa perdorues do ta marrin'}
               </button>
               {recipientCount !== null && (
                 <span style={{ marginLeft: 10, fontSize: 13, color: 'var(--text-2)' }}>
-                  → do te dergohet tek <strong>{recipientCount}</strong> perdorues
+                  {announceAudience === 'individual'
+                    ? <>✓ {announceRecipientEmail} eshte nje llogari e vlefshme</>
+                    : <>→ do te dergohet tek <strong>{recipientCount}</strong> perdorues</>}
                 </span>
               )}
             </div>
@@ -807,16 +829,20 @@ export default function AdminPanel() {
 
             {!confirmSend ? (
               <button type="button" onClick={() => setConfirmSend(true)}
-                disabled={!announceSubject.trim() || !announceMessage.trim()}
+                disabled={!announceSubject.trim() || !announceMessage.trim() || (announceAudience === 'individual' && !announceRecipientEmail.trim())}
                 style={{ padding: '10px 20px', borderRadius: 10, background: 'var(--text-1)', color: '#fff', fontSize: 14, fontWeight: 500, border: 'none', cursor: announceSubject.trim() && announceMessage.trim() ? 'pointer' : 'not-allowed', fontFamily: 'var(--font-body)', opacity: announceSubject.trim() && announceMessage.trim() ? 1 : 0.5 }}>
                 Rishiko para dergimit
               </button>
             ) : (
               <div style={{ background: 'var(--amber-light)', border: '1px solid var(--amber)', borderRadius: 12, padding: 16 }}>
                 <div style={{ fontSize: 14, color: '#854F0B', marginBottom: 12 }}>
-                  {recipientCount === null
-                    ? 'Nuk e ke kontrolluar numrin e marresve. Do te dergohet tek te gjithe perdoruesit e audiences "' + AUDIENCES.find(a => a.key === announceAudience)?.label + '".'
-                    : `Ky email do te dergohet tek ${recipientCount} perdorues (${AUDIENCES.find(a => a.key === announceAudience)?.label}). Kjo veprim nuk kthehet mbrapsht.`}
+                  {announceAudience === 'individual'
+                    ? (recipientCount === null
+                        ? `Nuk e ke konfirmuar akoma qe "${announceRecipientEmail}" eshte nje llogari e vlefshme -- do te kontrollohet automatikisht para dergimit, dhe nuk do te dergohet nese nuk eshte nje llogari e regjistruar.`
+                        : `Ky email do te dergohet vetem tek ${announceRecipientEmail}. Kjo veprim nuk kthehet mbrapsht.`)
+                    : (recipientCount === null
+                        ? 'Nuk e ke kontrolluar numrin e marresve. Do te dergohet tek te gjithe perdoruesit e audiences "' + AUDIENCES.find(a => a.key === announceAudience)?.label + '".'
+                        : `Ky email do te dergohet tek ${recipientCount} perdorues (${AUDIENCES.find(a => a.key === announceAudience)?.label}). Kjo veprim nuk kthehet mbrapsht.`)}
                 </div>
                 <div style={{ display: 'flex', gap: 8 }}>
                   <button type="button" onClick={sendAnnouncement} disabled={sendingAnnouncement}

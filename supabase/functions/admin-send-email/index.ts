@@ -52,11 +52,32 @@ async function allUsers() {
   return users
 }
 
-async function resolveRecipients(audience: string): Promise<string[]> {
+// A dedicated error type for "individual" mode so the caller can tell
+// "no such registered user" apart from a generic 500 and return the
+// right status/message (400, not 500 -- it's a bad request, not a
+// server fault).
+class UnknownRecipientError extends Error {}
+
+async function resolveRecipients(audience: string, recipientEmail?: string): Promise<string[]> {
   const users = await allUsers()
   const emailById = new Map(users.filter(u => u.email).map(u => [u.id, u.email!]))
 
   if (audience === 'all') return [...new Set(emailById.values())]
+
+  if (audience === 'individual') {
+    // Deliberately does NOT accept an arbitrary address: this only ever
+    // sends to an email that's already a real Tregu account's login
+    // email, resolved by looking it up against auth.users server-side --
+    // never trusting the client's claim that an address is valid. Emails
+    // are compared case-insensitively (RFC 5321 treats the local part as
+    // technically case-sensitive, but in practice -- and how Supabase
+    // Auth itself normalizes signups -- nobody relies on that, and a
+    // case mismatch here would otherwise cause a confusing "not found").
+    const target = (recipientEmail || '').trim().toLowerCase()
+    const match = [...emailById.values()].find(e => e.toLowerCase() === target)
+    if (!match) throw new UnknownRecipientError('Ky email nuk i perket asnje llogarie te regjistruar ne Tregu.')
+    return [match]
+  }
 
   const { data: shops, error } = await supabaseAdmin.from('shops').select('user_id')
   if (error) throw error
@@ -142,22 +163,28 @@ serve(async (req) => {
   try { body = await req.json() } catch { return json({ error: 'Invalid JSON' }, 400) }
 
   const audience = String(body?.audience || '')
-  if (!['all', 'sellers', 'buyers'].includes(audience)) {
-    return json({ error: 'audience must be all, sellers, or buyers' }, 400)
+  if (!['all', 'sellers', 'buyers', 'individual'].includes(audience)) {
+    return json({ error: 'audience must be all, sellers, buyers, or individual' }, 400)
+  }
+  const recipientEmail = String(body?.recipientEmail || '').trim()
+  if (audience === 'individual' && !recipientEmail) {
+    return json({ error: 'recipientEmail is required for audience=individual' }, 400)
   }
   const subject = String(body?.subject || '').trim().slice(0, 200)
   const message = String(body?.message || '').trim().slice(0, 20000)
   if (!subject || !message) return json({ error: 'Subject and message are required' }, 400)
 
   // dryRun: resolve + return the recipient list/count without sending --
-  // lets the admin panel show "this will go to N people" before the
-  // irreversible send action.
+  // lets the admin panel show "this will go to N people" (or, in
+  // individual mode, confirm the address really is a registered account)
+  // before the irreversible send action.
   const dryRun = body?.dryRun === true
 
   let recipients: string[]
   try {
-    recipients = await resolveRecipients(audience)
+    recipients = await resolveRecipients(audience, recipientEmail)
   } catch (err: any) {
+    if (err instanceof UnknownRecipientError) return json({ error: err.message }, 400)
     return json({ error: err.message || 'Failed to resolve recipients' }, 500)
   }
 
