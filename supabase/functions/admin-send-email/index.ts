@@ -17,7 +17,13 @@ const SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 const ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY')!
 const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')
 const ADMIN_EMAIL = 'julsina76@gmail.com'
-const FROM = 'Tregu <noreply@tregu.store>'
+// info@ rather than noreply@ -- announcements/individual replies from
+// this function are meant to look and function like a real message from
+// Tregu, especially the "reply to a specific user" mode. tregu.store is
+// already a Resend-verified sending domain (order-notification sends
+// from it too), so no new DNS/domain setup is needed -- verification is
+// per-domain, not per local-part.
+const FROM = 'Tregu <info@tregu.store>'
 
 const supabaseAdmin = createClient(SUPABASE_URL, SERVICE_ROLE_KEY)
 
