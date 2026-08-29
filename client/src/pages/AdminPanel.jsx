@@ -133,15 +133,21 @@ export default function AdminPanel() {
 
   const fetchAll = async () => {
     setLoading(true);
-    const [{ data: shopsData }, { data: ordersData }, { data: productsData }] = await Promise.all([
-      supabase.from('shops').select('*').order('created_at', { ascending: false }),
-      supabase.from('orders').select('*').order('created_at', { ascending: false }),
-      supabase.from('products').select('*').order('created_at', { ascending: false }),
-    ]);
-    setShops(shopsData || []);
-    setOrders(ordersData || []);
-    setProducts(productsData || []);
-    setLoading(false);
+    // A thrown (network-level, not query-level) error here previously left
+    // setLoading(false) unreached -- the whole panel stuck on "Loading
+    // admin panel..." forever with no way to retry short of a page reload.
+    try {
+      const [{ data: shopsData }, { data: ordersData }, { data: productsData }] = await Promise.all([
+        supabase.from('shops').select('*').order('created_at', { ascending: false }),
+        supabase.from('orders').select('*').order('created_at', { ascending: false }),
+        supabase.from('products').select('*').order('created_at', { ascending: false }),
+      ]);
+      setShops(shopsData || []);
+      setOrders(ordersData || []);
+      setProducts(productsData || []);
+    } finally {
+      setLoading(false);
+    }
   };
 
   // Signup counts live in Supabase Auth, not a client-readable table --
@@ -160,11 +166,17 @@ export default function AdminPanel() {
     } catch { /* leave userStats null -- section just won't render */ }
   };
 
+  // try/finally on all four of these: a thrown (network-level) error
+  // previously left setSaving(null) unreached, permanently disabling that
+  // row's buttons (disabled={saving === id}) until a full page reload.
   const updateShop = async (shopId, updates) => {
     setSaving(shopId);
-    await supabase.from('shops').update(updates).eq('id', shopId);
-    await fetchAll();
-    setSaving(null);
+    try {
+      await supabase.from('shops').update(updates).eq('id', shopId);
+      await fetchAll();
+    } finally {
+      setSaving(null);
+    }
   };
 
   const approveShop = (shop) => updateShop(shop.id, { status: 'approved', subscription_active: true });
@@ -181,9 +193,12 @@ export default function AdminPanel() {
   };
   const updateOrderStatus = async (orderId, status) => {
     setSaving(orderId);
-    await supabase.from('orders').update({ status }).eq('id', orderId);
-    await fetchAll();
-    setSaving(null);
+    try {
+      await supabase.from('orders').update({ status }).eq('id', orderId);
+      await fetchAll();
+    } finally {
+      setSaving(null);
+    }
   };
   // products.trending is now admin-only (DB trigger enforces this
   // regardless of caller -- see 20260817000001_protect_products_trending)
@@ -191,9 +206,12 @@ export default function AdminPanel() {
   // Trending section for free. This is the only place left to set it.
   const toggleTrending = async (product) => {
     setSaving(product.id);
-    await supabase.from('products').update({ trending: !product.trending }).eq('id', product.id);
-    await fetchAll();
-    setSaving(null);
+    try {
+      await supabase.from('products').update({ trending: !product.trending }).eq('id', product.id);
+      await fetchAll();
+    } finally {
+      setSaving(null);
+    }
   };
 
   const formatPrice = (p) => p?.toLocaleString('sq-AL') + ' L';
@@ -205,7 +223,7 @@ export default function AdminPanel() {
   const {
     pendingShops, approvedShops, totalRevenue,
     deliveredRevenue, avgOrderValue, inStockProducts,
-    revenueByDay, maxDayRevenue, ordersThisWeek, ordersTrend,
+    revenueByDay, maxDayRevenue, ordersThisWeek, ordersPrevWeek, ordersTrend,
     statusCounts, maxStatusCount, topShops, maxShopRevenue,
     topProducts, maxProductUnits, categoryList, maxCategoryCount,
     shopsByWeek, maxShopsByWeek, usersByWeek, maxUsersByWeek, usersThisWeek,
@@ -277,7 +295,7 @@ export default function AdminPanel() {
     return {
       pendingShops, approvedShops, totalRevenue,
       deliveredRevenue, avgOrderValue, inStockProducts,
-      revenueByDay, maxDayRevenue, ordersThisWeek, ordersTrend,
+      revenueByDay, maxDayRevenue, ordersThisWeek, ordersPrevWeek, ordersTrend,
       statusCounts, maxStatusCount, topShops, maxShopRevenue,
       topProducts, maxProductUnits, categoryList, maxCategoryCount,
       shopsByWeek, maxShopsByWeek, usersByWeek, maxUsersByWeek, usersThisWeek,

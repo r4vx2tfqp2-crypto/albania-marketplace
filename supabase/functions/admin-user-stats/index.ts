@@ -17,6 +17,9 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
 const SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 const ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY')!
+// Deno edge functions run in a separate build/runtime from the client and
+// can't import client/src/lib/constants.js -- kept in sync with that
+// file (and the RLS policies' hardcoded copies) by hand.
 const ADMIN_EMAIL = 'julsina76@gmail.com'
 
 const supabaseAdmin = createClient(SUPABASE_URL, SERVICE_ROLE_KEY)
@@ -44,6 +47,9 @@ serve(async (req) => {
   if (authError || !user) return json({ error: 'Not authenticated' }, 401)
   if (user.email !== ADMIN_EMAIL) return json({ error: 'Forbidden' }, 403)
 
+  // Hard cap at 20,000 users (20 pages x 1000/page) -- see the matching
+  // note in admin-send-email/index.ts. Silent at this scale, worth
+  // revisiting if the platform ever grows past it.
   const createdDates: string[] = []
   let total = 0
   const perPage = 1000

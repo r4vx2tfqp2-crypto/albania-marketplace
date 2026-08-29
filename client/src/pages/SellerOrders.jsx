@@ -16,6 +16,19 @@ const ALL_STEPS = [
   { key: 'delivered', label_key: 'delivered' },
 ];
 
+// jsPDF invoice generation runs outside the component's render (called
+// directly from a click handler), so it can't use the i18n t() function --
+// a plain Albanian label map instead of ALL_STEPS's label_key. Previously
+// generateInvoice hardcoded "KONFIRMUAR" here regardless of order.status,
+// so a delivered order's invoice would still print "confirmed".
+const STATUS_LABELS_SQ = {
+  confirmed: "KONFIRMUAR",
+  packed: "PAKETUAR",
+  picked_up: "MARRE NGA KURIERI",
+  on_the_way: "NE RRUGE",
+  delivered: "DOREZUAR",
+};
+
 const STATUS_COLORS = {
   confirmed: { color: 'var(--blue)', bg: 'var(--blue-light)' },
   packed: { color: 'var(--amber)', bg: 'var(--amber-light)' },
@@ -130,7 +143,7 @@ export default function SellerOrders() {
     doc.text(new Date(order.created_at).toLocaleDateString("sq-AL"), pageW - mr, 32, { align: "right" });
     doc.setFont("helvetica", "normal");
     doc.setTextColor(...DARK);
-    doc.text("KONFIRMUAR", pageW - mr, 38, { align: "right" });
+    doc.text(STATUS_LABELS_SQ[order.status] || STATUS_LABELS_SQ.confirmed, pageW - mr, 38, { align: "right" });
 
     // Thin divider
     y = 44;
