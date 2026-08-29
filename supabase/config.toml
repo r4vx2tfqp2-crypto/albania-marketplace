@@ -432,3 +432,8 @@ entrypoint = "./functions/delete-account/index.ts"
 enabled = true
 verify_jwt = true
 entrypoint = "./functions/admin-user-stats/index.ts"
+
+[functions.admin-send-email]
+enabled = true
+verify_jwt = true
+entrypoint = "./functions/admin-send-email/index.ts"

@@ -8,7 +8,13 @@ const PLANS = [
   { key: 'premium', label: 'Premium', price: 4000 },
 ];
 
-const TABS = ['overview', 'analytics', 'pending', 'shops', 'products', 'orders', 'subscriptions'];
+const TABS = ['overview', 'analytics', 'pending', 'shops', 'products', 'orders', 'subscriptions', 'announcements'];
+
+const AUDIENCES = [
+  { key: 'sellers', label: 'Vetem shitesit (pronaret e dyqaneve)' },
+  { key: 'buyers', label: 'Vetem bleresit (pa dyqan)' },
+  { key: 'all', label: 'Te gjithe perdoruesit' },
+];
 
 const ORDER_STATUSES = ['confirmed', 'packed', 'picked_up', 'on_the_way', 'delivered'];
 const STATUS_COLORS = {
@@ -64,10 +70,66 @@ export default function AdminPanel() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(null);
 
+  // Announcements tab
+  const [announceAudience, setAnnounceAudience] = useState('sellers');
+  const [announceSubject, setAnnounceSubject] = useState('');
+  const [announceMessage, setAnnounceMessage] = useState('');
+  const [recipientCount, setRecipientCount] = useState(null); // null = not checked yet for the current audience
+  const [checkingRecipients, setCheckingRecipients] = useState(false);
+  const [sendingAnnouncement, setSendingAnnouncement] = useState(false);
+  const [announceResult, setAnnounceResult] = useState(null); // { ok, message }
+  const [confirmSend, setConfirmSend] = useState(false);
+
   useEffect(() => {
     fetchAll();
     fetchUserStats();
   }, []);
+
+  // Re-checking recipient count is required before every send: it both
+  // shows the admin who they're about to email and (via dryRun) proves
+  // the edge function + auth are working before the irreversible send.
+  useEffect(() => { setRecipientCount(null); setConfirmSend(false); }, [announceAudience]);
+
+  const callSendEmail = async (payload) => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) throw new Error('Not signed in');
+    const res = await fetch('https://onngupovxaequeqplikx.supabase.co/functions/v1/admin-send-email', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + session.access_token, 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Kerkesa deshtoi');
+    return data;
+  };
+
+  const checkRecipients = async () => {
+    setCheckingRecipients(true);
+    setAnnounceResult(null);
+    try {
+      const { recipientCount } = await callSendEmail({ audience: announceAudience, subject: 'x', message: 'x', dryRun: true });
+      setRecipientCount(recipientCount);
+    } catch (err) {
+      setAnnounceResult({ ok: false, message: err.message });
+    }
+    setCheckingRecipients(false);
+  };
+
+  const sendAnnouncement = async () => {
+    setSendingAnnouncement(true);
+    setAnnounceResult(null);
+    try {
+      const result = await callSendEmail({ audience: announceAudience, subject: announceSubject, message: announceMessage });
+      setAnnounceResult({ ok: true, message: `U dergua tek ${result.sent} nga ${result.total} perdorues.${result.failed ? ` ${result.failed} deshtuan.` : ''}` });
+      setAnnounceSubject('');
+      setAnnounceMessage('');
+      setConfirmSend(false);
+      setRecipientCount(null);
+    } catch (err) {
+      setAnnounceResult({ ok: false, message: err.message });
+    }
+    setSendingAnnouncement(false);
+  };
 
   const fetchAll = async () => {
     setLoading(true);
@@ -670,6 +732,86 @@ export default function AdminPanel() {
                 </div>
               ))}
             </div>
+          </div>
+        )}
+
+        {/* ANNOUNCEMENTS */}
+        {tab === 'announcements' && (
+          <div style={{ maxWidth: 640 }}>
+            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 20, fontWeight: 700, marginBottom: 8 }}>Dergo njoftim</h2>
+            <p style={{ color: 'var(--text-3)', fontSize: 14, marginBottom: 24 }}>
+              Dergon nje email tek te gjithe perdoruesit e audiences se zgjedhur. Adresat vijne nga llogaria e tyre e regjistrimit (Supabase Auth) -- nuk ekziston nje tabele e vecante email marketingu.
+            </p>
+
+            <div style={{ marginBottom: 16 }}>
+              <label style={{ fontSize: 13, fontWeight: 500, color: 'var(--text-2)', display: 'block', marginBottom: 8 }}>Kujt i dergohet</label>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                {AUDIENCES.map(a => (
+                  <label key={a.key} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 14, color: 'var(--text-1)', cursor: 'pointer' }}>
+                    <input type="radio" name="audience" checked={announceAudience === a.key} onChange={() => setAnnounceAudience(a.key)} />
+                    {a.label}
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            <div style={{ marginBottom: 12 }}>
+              <button type="button" onClick={checkRecipients} disabled={checkingRecipients}
+                style={{ padding: '8px 16px', borderRadius: 8, border: '1px solid var(--border-strong)', background: 'var(--surface)', fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'var(--font-body)', color: 'var(--text-2)' }}>
+                {checkingRecipients ? 'Duke kontrolluar...' : 'Shiko sa perdorues do ta marrin'}
+              </button>
+              {recipientCount !== null && (
+                <span style={{ marginLeft: 10, fontSize: 13, color: 'var(--text-2)' }}>
+                  → do te dergohet tek <strong>{recipientCount}</strong> perdorues
+                </span>
+              )}
+            </div>
+
+            <div style={{ marginBottom: 12 }}>
+              <label htmlFor="announce-subject" style={{ fontSize: 13, fontWeight: 500, color: 'var(--text-2)', display: 'block', marginBottom: 6 }}>Subjekti</label>
+              <input id="announce-subject" value={announceSubject} onChange={e => setAnnounceSubject(e.target.value)}
+                placeholder="p.sh. Ndryshim i rendesishem ne Tregu"
+                style={{ width: '100%', padding: '10px 14px', borderRadius: 10, border: '1px solid var(--border-strong)', fontSize: 14, fontFamily: 'var(--font-body)', background: 'var(--surface)', color: 'var(--text-1)', boxSizing: 'border-box' }} />
+            </div>
+
+            <div style={{ marginBottom: 16 }}>
+              <label htmlFor="announce-message" style={{ fontSize: 13, fontWeight: 500, color: 'var(--text-2)', display: 'block', marginBottom: 6 }}>Mesazhi</label>
+              <textarea id="announce-message" rows={8} value={announceMessage} onChange={e => setAnnounceMessage(e.target.value)}
+                placeholder="Shkruaj mesazhin tend ketu..."
+                style={{ width: '100%', padding: '10px 14px', borderRadius: 10, border: '1px solid var(--border-strong)', fontSize: 14, fontFamily: 'var(--font-body)', background: 'var(--surface)', color: 'var(--text-1)', resize: 'vertical', boxSizing: 'border-box' }} />
+            </div>
+
+            {announceResult && (
+              <div role="alert" style={{ background: announceResult.ok ? 'var(--green-light)' : 'var(--red-light)', color: announceResult.ok ? 'var(--green-dark)' : 'var(--red)', padding: '10px 14px', borderRadius: 8, marginBottom: 16, fontSize: 13 }}>
+                {announceResult.message}
+              </div>
+            )}
+
+            {!confirmSend ? (
+              <button type="button" onClick={() => setConfirmSend(true)}
+                disabled={!announceSubject.trim() || !announceMessage.trim()}
+                style={{ padding: '10px 20px', borderRadius: 10, background: 'var(--text-1)', color: '#fff', fontSize: 14, fontWeight: 500, border: 'none', cursor: announceSubject.trim() && announceMessage.trim() ? 'pointer' : 'not-allowed', fontFamily: 'var(--font-body)', opacity: announceSubject.trim() && announceMessage.trim() ? 1 : 0.5 }}>
+                Rishiko para dergimit
+              </button>
+            ) : (
+              <div style={{ background: 'var(--amber-light)', border: '1px solid var(--amber)', borderRadius: 12, padding: 16 }}>
+                <div style={{ fontSize: 14, color: '#854F0B', marginBottom: 12 }}>
+                  {recipientCount === null
+                    ? 'Nuk e ke kontrolluar numrin e marresve. Do te dergohet tek te gjithe perdoruesit e audiences "' + AUDIENCES.find(a => a.key === announceAudience)?.label + '".'
+                    : `Ky email do te dergohet tek ${recipientCount} perdorues (${AUDIENCES.find(a => a.key === announceAudience)?.label}). Kjo veprim nuk kthehet mbrapsht.`}
+                </div>
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <button type="button" onClick={sendAnnouncement} disabled={sendingAnnouncement}
+                    style={{ padding: '8px 18px', borderRadius: 8, background: 'var(--red)', color: '#fff', fontSize: 13, fontWeight: 500, border: 'none', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>
+                    {sendingAnnouncement ? 'Duke derguar...' : 'Po, dergo tani'}
+                  </button>
+                  <button type="button" onClick={() => setConfirmSend(false)} disabled={sendingAnnouncement}
+                    style={{ padding: '8px 18px', borderRadius: 8, background: 'transparent', color: '#854F0B', fontSize: 13, border: '1px solid var(--amber)', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>
+                    Anulo
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         )}
 
