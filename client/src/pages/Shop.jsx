@@ -63,7 +63,11 @@ export default function Shop() {
             <ArrowLeft size={16} /> {t('back')}
           </button>
           <div className={styles.shopHero}>
-            <div className={styles.avatar} style={{ background: shop.color + '33', color: shop.color }}>{shop.initials}</div>
+            <div className={styles.avatar} style={{ background: shop.color + '33', color: shop.color, overflow: 'hidden' }}>
+              {shop.logo_url ? (
+                <img src={shop.logo_url} alt={shop.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              ) : shop.initials}
+            </div>
             <div className={styles.heroInfo}>
               <div className={styles.nameRow}>
                 <h1 className={styles.name}>{shop.name}</h1>
