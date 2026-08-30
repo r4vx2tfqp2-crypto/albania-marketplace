@@ -4,6 +4,13 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+    <!-- Google's search-result favicon specifically wants a size that's a
+         multiple of 48px (their own stated minimum recommendation) --
+         32x32 doesn't qualify, which likely explains a generic globe
+         showing in search results instead of the logo. Browsers already
+         had a fine icon via the SVG above; this is specifically for
+         Google's crawler, which is stricter about size than any browser. -->
+    <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48.png" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/manifest.json" />
     <meta name="theme-color" content="#1A1916" />
