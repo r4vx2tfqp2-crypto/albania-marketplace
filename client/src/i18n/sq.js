@@ -13,6 +13,8 @@ export default {
       verified_shops: "Dyqane të verifikuara",
       all_products: "Të gjitha produktet",
       see_all: "Shiko të gjitha",
+      load_more: "Shfaq më shumë",
+      loading_more: "Duke ngarkuar...",
       no_products_yet: "Asnjë produkt ende",
       be_first: "Bëhu i pari që shton një produkt!",
       add_first_product: "Shto produktin e parë",
@@ -35,6 +37,7 @@ export default {
       cat_home: "Shtëpi",
       cat_sports: "Sporte",
       cat_gifts: "Dhurata",
+      cat_construction: "Vegla & Ndertim",
   
       // Search
       search_results: "rezultate",

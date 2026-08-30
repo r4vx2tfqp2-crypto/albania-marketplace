@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, ArrowRight, TrendingUp, Zap } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -6,8 +6,41 @@ import ProductCard from '../components/ProductCard';
 import ShopCard from '../components/ShopCard';
 import { supabase } from '../lib/supabase';
 import { categories } from '../data/categories';
+import { CATEGORIES } from '../data/productCategoryData';
 import styles from './Home.module.css';
 import { Helmet } from 'react-helmet-async';
+
+// How many products to pull per category per fetch. Was a single
+// `order('created_at').limit(8)` query -- purely recency-based, so a
+// seller bulk-uploading a burst of e.g. clothes could fill the entire
+// homepage grid (and keep filling every subsequent page) before an older
+// product in any other category ever had a chance to surface. Fetching a
+// slice PER category and interleaving them instead guarantees every
+// category with stock gets seen on the homepage regardless of upload date.
+const PER_CATEGORY_INITIAL = 3; // ~24 products across 8 categories on first load
+const PER_CATEGORY_MORE = 2;    // ~16 more per "Shfaq me shume" click
+
+// Round-robins one item at a time from each category's batch (in
+// CATEGORIES order) so the displayed order actually mixes categories
+// instead of running through one category's whole batch before the next.
+function interleaveByCategory(batchByCategory, categoryOrder) {
+  const result = [];
+  const cursors = Object.fromEntries(categoryOrder.map(k => [k, 0]));
+  let added = true;
+  while (added) {
+    added = false;
+    for (const key of categoryOrder) {
+      const arr = batchByCategory[key] || [];
+      const idx = cursors[key];
+      if (idx < arr.length) {
+        result.push(arr[idx]);
+        cursors[key] = idx + 1;
+        added = true;
+      }
+    }
+  }
+  return result;
+}
 
 export default function Home() {
   const navigate = useNavigate();
@@ -18,7 +51,15 @@ export default function Home() {
   const [featuredShops, setFeaturedShops] = useState([]);
   const [allProducts, setAllProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMoreProducts, setHasMoreProducts] = useState(true);
   const [activeTab, setActiveTab] = useState('buyer');
+
+  // Per-category pagination cursors -- kept in refs (not state) since
+  // they're only ever read/written inside fetchProductsPage itself and
+  // don't need to trigger a re-render on their own.
+  const offsetsRef = useRef(Object.fromEntries(CATEGORIES.map(c => [c.key, 0])));
+  const exhaustedRef = useRef(Object.fromEntries(CATEGORIES.map(c => [c.key, false])));
 
   useEffect(() => {
     const timer = setTimeout(() => setVisible(true), 50);
@@ -26,17 +67,44 @@ export default function Home() {
     return () => clearTimeout(timer);
   }, []);
 
+  const fetchProductsPage = async (perCategory) => {
+    const activeCats = CATEGORIES.filter(c => !exhaustedRef.current[c.key]);
+    if (activeCats.length === 0) return [];
+    const results = await Promise.all(activeCats.map(c =>
+      supabase.from('products').select('*, shops(*)').eq('category', c.key)
+        .order('created_at', { ascending: false })
+        .range(offsetsRef.current[c.key], offsetsRef.current[c.key] + perCategory - 1)
+    ));
+    const batchByCategory = {};
+    activeCats.forEach((c, i) => {
+      const rows = results[i].data || [];
+      batchByCategory[c.key] = rows;
+      offsetsRef.current[c.key] += perCategory;
+      if (rows.length < perCategory) exhaustedRef.current[c.key] = true;
+    });
+    return interleaveByCategory(batchByCategory, CATEGORIES.map(c => c.key));
+  };
+
   const fetchData = async () => {
     setLoading(true);
-    const [{ data: trending }, { data: shops }, { data: products }] = await Promise.all([
+    const [{ data: trending }, { data: shops }, firstPage] = await Promise.all([
       supabase.from('products').select('*, shops(*)').eq('trending', true).order('created_at', { ascending: false }).limit(4),
       supabase.from('shops').select('*').eq('verified', true).limit(4),
-      supabase.from('products').select('*, shops(*)').order('created_at', { ascending: false }).limit(8),
+      fetchProductsPage(PER_CATEGORY_INITIAL),
     ]);
     setTrendingProducts(trending || []);
     setFeaturedShops(shops || []);
-    setAllProducts(products || []);
+    setAllProducts(firstPage);
+    setHasMoreProducts(Object.values(exhaustedRef.current).some(v => !v));
     setLoading(false);
+  };
+
+  const handleLoadMore = async () => {
+    setLoadingMore(true);
+    const nextPage = await fetchProductsPage(PER_CATEGORY_MORE);
+    setAllProducts(prev => [...prev, ...nextPage]);
+    setHasMoreProducts(Object.values(exhaustedRef.current).some(v => !v));
+    setLoadingMore(false);
   };
 
   const handleSearch = (e) => {
@@ -155,6 +223,14 @@ export default function Home() {
                 <div className={styles.productGrid}>
                   {allProducts.map((p, i) => <ProductCard key={p.id} product={p} index={i} />)}
                 </div>
+                {hasMoreProducts && (
+                  <div style={{ textAlign: 'center', marginTop: 24 }}>
+                    <button onClick={handleLoadMore} disabled={loadingMore} className="btn-secondary"
+                      style={{ padding: '12px 32px', fontSize: 14, fontWeight: 500, cursor: loadingMore ? 'default' : 'pointer', opacity: loadingMore ? 0.7 : 1 }}>
+                      {loadingMore ? t('loading_more') : t('load_more')}
+                    </button>
+                  </div>
+                )}
               </section>
             )}
 

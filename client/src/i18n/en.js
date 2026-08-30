@@ -13,6 +13,8 @@ export default {
       verified_shops: "Verified shops",
       all_products: "All products",
       see_all: "See all",
+      load_more: "Load more",
+      loading_more: "Loading...",
       no_products_yet: "No products yet",
       be_first: "Be the first to add a product!",
       add_first_product: "Add first product",
@@ -35,6 +37,7 @@ export default {
       cat_home: "Home",
       cat_sports: "Sports",
       cat_gifts: "Gifts",
+      cat_construction: "Tools & Construction",
   
       // Search
       search_results: "results",
