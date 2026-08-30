@@ -38,6 +38,16 @@
   --shadow-lg: 0 8px 24px rgba(0,0,0,0.10), 0 4px 8px rgba(0,0,0,0.06);
 
   --nav-h: 64px;
+  /* Installed as a standalone app on iOS, the status bar (clock/battery/
+     signal) is transparent and overlays page content instead of pushing
+     it down (apple-mobile-web-app-status-bar-style: black-translucent in
+     index.html, chosen for a full-bleed app look) -- without this, the
+     sticky navbar sits directly under/behind the status bar instead of
+     below it. env() resolves to 0px in a normal browser tab and on
+     devices with no notch/inset, so this is a no-op outside standalone
+     iOS. Requires viewport-fit=cover (also set in index.html) or env()
+     always reports 0. */
+  --safe-top: env(safe-area-inset-top, 0px);
   --max-w: 1200px;
 }
 

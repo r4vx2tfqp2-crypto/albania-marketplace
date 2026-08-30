@@ -242,7 +242,11 @@ export default function Checkout() {
 
               {showMap && (
                 <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, zIndex: 1000, background: "rgba(0,0,0,0.8)", display: "flex", flexDirection: "column" }}>
-                  <div style={{ background: "var(--surface)", padding: "12px 16px" }}>
+                  {/* This overlay covers the full viewport independent of Navbar
+                      (position:fixed, top:0), so it needs its own safe-area
+                      padding -- otherwise its own close/confirm bar sits behind
+                      the status bar the same way Navbar did before --safe-top. */}
+                  <div style={{ background: "var(--surface)", padding: "calc(env(safe-area-inset-top, 0px) + 12px) 16px 12px" }}>
                     <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
                       <p style={{ fontSize: 14, color: "var(--text-1)", margin: 0, fontWeight: 500 }}>
                         📍 Vendosni vendndodhjen tuaj

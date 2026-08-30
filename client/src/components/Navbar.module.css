@@ -6,7 +6,12 @@
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--border);
-  height: var(--nav-h);
+  /* padding-top pushes the actual logo/search/actions row below the
+     status bar; box-sizing:border-box (global) means .inner's height:100%
+     still gets exactly --nav-h of space, so this only grows the bar
+     upward into the status bar area, not the visible content below it. */
+  height: calc(var(--nav-h) + var(--safe-top));
+  padding-top: var(--safe-top);
 }
 
 .inner {

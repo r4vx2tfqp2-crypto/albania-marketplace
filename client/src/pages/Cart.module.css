@@ -99,7 +99,7 @@
   border-radius: var(--radius-xl);
   padding: 24px;
   position: sticky;
-  top: calc(var(--nav-h) + 20px);
+  top: calc(var(--nav-h) + var(--safe-top) + 20px);
 }
 
 .summaryTitle {
