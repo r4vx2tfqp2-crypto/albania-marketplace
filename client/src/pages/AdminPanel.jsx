@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { CATEGORY_LABELS } from '../data/productCategoryData';
+import { optimizedImageUrl } from '../lib/imageUrl';
 
 const PLANS = [
   { key: 'free', label: 'Free', price: 0 },
@@ -389,7 +390,7 @@ export default function AdminPanel() {
                 {pendingShops.map(shop => (
                   <div key={shop.id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 0', borderBottom: '1px solid var(--border)' }}>
                     <div style={{ width: 38, height: 38, borderRadius: 8, background: (shop.color || '#1D9E75') + '22', color: shop.color || '#1D9E75', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 14, overflow: 'hidden' }}>
-                      {shop.logo_url ? <img src={shop.logo_url} alt={shop.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : shop.initials}
+                      {shop.logo_url ? <img src={optimizedImageUrl(shop.logo_url, 96)} alt={shop.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : shop.initials}
                     </div>
                     <div style={{ flex: 1 }}>
                       <div style={{ fontSize: 14, fontWeight: 500 }}>{shop.name}</div>
@@ -572,7 +573,7 @@ export default function AdminPanel() {
               <div key={shop.id} style={{ background: 'var(--surface)', border: '1px solid var(--amber)', borderRadius: 16, padding: 20 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
                   <div style={{ width: 48, height: 48, borderRadius: 10, background: (shop.color || '#1D9E75') + '22', color: shop.color || '#1D9E75', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 18, flexShrink: 0, overflow: 'hidden' }}>
-                    {shop.logo_url ? <img src={shop.logo_url} alt={shop.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : shop.initials}
+                    {shop.logo_url ? <img src={optimizedImageUrl(shop.logo_url, 96)} alt={shop.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : shop.initials}
                   </div>
                   <div style={{ flex: 1 }}>
                     <div style={{ fontSize: 16, fontWeight: 600 }}>{shop.name}</div>
@@ -607,7 +608,7 @@ export default function AdminPanel() {
                 <div key={shop.id} style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 14, padding: 18, opacity: shop.subscription_active ? 1 : 0.6 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
                     <div style={{ width: 42, height: 42, borderRadius: 8, background: (shop.color || '#1D9E75') + '22', color: shop.color || '#1D9E75', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 15, flexShrink: 0, overflow: 'hidden' }}>
-                      {shop.logo_url ? <img src={shop.logo_url} alt={shop.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : shop.initials}
+                      {shop.logo_url ? <img src={optimizedImageUrl(shop.logo_url, 96)} alt={shop.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : shop.initials}
                     </div>
                     <div style={{ flex: 1 }}>
                       <div style={{ fontSize: 14, fontWeight: 500 }}>{shop.name}</div>
@@ -737,7 +738,7 @@ export default function AdminPanel() {
               {approvedShops.map(shop => (
                 <div key={shop.id} style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, display: 'flex', alignItems: 'center', gap: 12 }}>
                   <div style={{ width: 38, height: 38, borderRadius: 8, background: (shop.color || '#1D9E75') + '22', color: shop.color || '#1D9E75', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 14, flexShrink: 0, overflow: 'hidden' }}>
-                    {shop.logo_url ? <img src={shop.logo_url} alt={shop.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : shop.initials}
+                    {shop.logo_url ? <img src={optimizedImageUrl(shop.logo_url, 96)} alt={shop.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : shop.initials}
                   </div>
                   <div style={{ flex: 1 }}>
                     <div style={{ fontSize: 14, fontWeight: 500 }}>{shop.name}</div>

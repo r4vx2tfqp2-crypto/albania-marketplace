@@ -1,6 +1,7 @@
 import { memo } from 'react';
 import { Link } from 'react-router-dom';
 import { MapPin, CheckCircle } from 'lucide-react';
+import { optimizedImageUrl } from '../lib/imageUrl';
 import styles from './ShopCard.module.css';
 
 function ShopCard({ shop }) {
@@ -8,7 +9,7 @@ function ShopCard({ shop }) {
     <Link to={`/shop/${shop.id}`} className={styles.card}>
       <div className={styles.avatar} style={{ background: shop.color + '22', color: shop.color, overflow: 'hidden' }}>
         {shop.logo_url ? (
-          <img src={shop.logo_url} alt={shop.name} loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          <img src={optimizedImageUrl(shop.logo_url, 96)} alt={shop.name} loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
         ) : shop.initials}
       </div>
       <div className={styles.info}>

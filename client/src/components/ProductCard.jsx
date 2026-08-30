@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { Heart, ShoppingCart } from "lucide-react";
 import { useCart } from "../context/CartContext";
 import { colorToHex } from "../lib/colors";
+import { optimizedImageUrl } from "../lib/imageUrl";
 import styles from "./ProductCard.module.css";
 
 const BG_COLORS = ["#E1F5EE","#E6F1FB","#FBEAF0","#FAEEDA","#EAF3DE","#EEEDFE"];
@@ -24,7 +25,7 @@ function ProductCard({ product, index = 0 }) {
     <div className={styles.card}>
       <Link to={"/product/" + product.id} className={styles.imageWrap} style={{ background: BG_COLORS[colorIdx] }}>
         {product.images && product.images.length > 0 ? (
-          <img src={product.images[0]} alt={product.name} loading="lazy" decoding="async" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+          <img src={optimizedImageUrl(product.images[0], 400)} alt={product.name} loading="lazy" decoding="async" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
         ) : (
           <div className={styles.imagePlaceholder} style={{ color: TEXT_COLORS[colorIdx] }}>
             {product.category === "shoes" ? "👟" :
@@ -57,7 +58,7 @@ function ProductCard({ product, index = 0 }) {
         {shop && (
           <Link to={"/shop/" + shop.id} className={styles.shop}>
             <div style={{ width: 16, height: 16, borderRadius: "50%", background: shop.color + "22", color: shop.color, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 8, fontWeight: 700, flexShrink: 0, overflow: "hidden" }}>
-              {shop.logo_url ? <img src={shop.logo_url} alt={shop.name} loading="lazy" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : shop.initials}
+              {shop.logo_url ? <img src={optimizedImageUrl(shop.logo_url, 64)} alt={shop.name} loading="lazy" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : shop.initials}
             </div>
             {shop.name}
             {shop.verified && <span style={{ background: "#1877F2", color: "#fff", fontSize: 8, fontWeight: 700, padding: "1px 4px", borderRadius: 8 }}>✓</span>}

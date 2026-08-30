@@ -2,6 +2,20 @@
   "buildCommand": "cd client && npm install && node scripts/generate-sitemap.js && npm run build",
   "outputDirectory": "client/dist",
   "framework": null,
+  "images": {
+    "sizes": [64, 96, 128, 200, 256, 400, 640, 828, 1080, 1600],
+    "domains": ["onngupovxaequeqplikx.supabase.co"],
+    "minimumCacheTTL": 31536000,
+    "formats": ["image/avif", "image/webp"]
+  },
+  "headers": [
+    {
+      "source": "/assets/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
+      ]
+    }
+  ],
   "rewrites": [
     { "source": "/(.*)", "destination": "/index.html" }
   ]

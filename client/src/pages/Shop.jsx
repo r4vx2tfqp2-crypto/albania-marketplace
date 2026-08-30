@@ -6,6 +6,7 @@ import ProductCard from '../components/ProductCard';
 import { supabase } from '../lib/supabase';
 import { Helmet } from 'react-helmet-async';
 import Reviews from '../components/Reviews';
+import { optimizedImageUrl } from '../lib/imageUrl';
 import styles from './Shop.module.css';
 
 export default function Shop() {
@@ -70,7 +71,7 @@ export default function Shop() {
           <div className={styles.shopHero}>
             <div className={styles.avatar} style={{ background: shop.color + '33', color: shop.color, overflow: 'hidden' }}>
               {shop.logo_url ? (
-                <img src={shop.logo_url} alt={shop.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                <img src={optimizedImageUrl(shop.logo_url, 200)} alt={shop.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               ) : shop.initials}
             </div>
             <div className={styles.heroInfo}>

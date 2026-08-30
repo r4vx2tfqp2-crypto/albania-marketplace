@@ -18,6 +18,13 @@
   margin-bottom: 48px;
 }
 
+/* Grid items default to min-width:auto (not 0), so any wide child --
+   fixed-size thumbnails, an unbreakable long word -- stretches this column
+   past its 1fr share instead of shrinking/clipping, pushing content past
+   the page edge. min-width:0 lets the column actually respect the grid
+   track instead of growing around its content. */
+.imageSection { min-width: 0; }
+
 .imageMain {
   position: relative;
   aspect-ratio: 1;

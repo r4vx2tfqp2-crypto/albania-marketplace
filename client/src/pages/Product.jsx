@@ -4,6 +4,7 @@ import { Heart, ShoppingCart, ArrowLeft, CheckCircle, Truck, Shield } from "luci
 import { useTranslation } from "react-i18next";
 import { useCart } from "../context/CartContext";
 import { colorToHex } from "../lib/colors";
+import { optimizedImageUrl } from "../lib/imageUrl";
 import { CATEGORY_LABELS } from "../data/productCategoryData";
 import { supabase } from "../lib/supabase";
 import { Helmet } from "react-helmet-async";
@@ -122,7 +123,7 @@ export default function Product() {
           <div className={styles.imageSection}>
             <div className={styles.imageMain} style={{ background: BG_COLORS[idx] }}>
               {hasImages ? (
-                <img src={product.images[activeImage]} alt={product.name} style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "var(--radius-xl)" }} />
+                <img src={optimizedImageUrl(product.images[activeImage], 800)} alt={product.name} style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "var(--radius-xl)" }} />
               ) : (
                 <span className={styles.imageEmoji} style={{ color: TEXT_COLORS[idx] }}>
                   {product.category === "shoes" ? "👟" : product.category === "clothes" ? "👕" : product.category === "electronics" ? "📱" : product.category === "beauty" ? "💄" : product.category === "home" ? "🏠" : "🛍️"}
@@ -131,12 +132,20 @@ export default function Product() {
               {product.trending && <span className="badge badge-deal" style={{ position: "absolute", top: 16, left: 16 }}>{t("trending")}</span>}
             </div>
             {hasImages && product.images.length > 1 && (
-              <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
+              /* Was a plain flex row with no wrap -- a product with more than
+                 ~5-6 photos forced this row (fixed 60px tiles) wider than
+                 the grid column that holds it, and since CSS grid items
+                 default to min-width:auto (not 0), the column stretched to
+                 fit it instead of clipping, pushing photos past the page
+                 edge. flexWrap fixes it here; .imageSection also gets
+                 min-width:0 below as a general safeguard against the same
+                 grid-overflow trap from any other wide content. */
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 10 }}>
                 {product.images.map((img, i) => (
-                  <img key={i} src={img} alt={`${product.name} - foto ${i + 1}`} onClick={() => setActiveImage(i)}
+                  <img key={i} src={optimizedImageUrl(img, 120)} alt={`${product.name} - foto ${i + 1}`} onClick={() => setActiveImage(i)}
                     role="button" tabIndex={0} aria-pressed={activeImage === i}
                     onKeyDown={e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setActiveImage(i); } }}
-                    style={{ width: 60, height: 60, objectFit: "cover", borderRadius: 8, cursor: "pointer",
+                    style={{ width: 60, height: 60, objectFit: "cover", borderRadius: 8, cursor: "pointer", flexShrink: 0,
                       border: activeImage === i ? "2px solid var(--text-1)" : "2px solid transparent",
                       opacity: activeImage === i ? 1 : 0.6, transition: "all 0.15s" }} />
                 ))}
@@ -218,13 +227,17 @@ export default function Product() {
                       </div>
                       {options ? (
                         <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-                          {/* Informational only (this spec has multiple comma-separated
-                              values, e.g. available colorways) -- not a real button
-                              since there's no click handler, so it's rendered as
-                              non-interactive to avoid a focusable no-op control. */}
+                          {/* Was reusing .sizeBtn -- a fixed 44x44px SQUARE meant for
+                              short size labels like "42" or "M". Spec values (e.g.
+                              "Fillestar", "I ri me etikete") are longer text and
+                              overflowed/got clipped inside that fixed box, the same
+                              square-holding-text bug already fixed for the color
+                              picker but missed here. Informational only (no click
+                              handler), so rendered as a non-interactive, auto-width
+                              pill instead of a fixed square button. */}
                           {options.map(opt => (
-                            <span key={opt} className={styles.sizeBtn}
-                              style={{ fontSize: 13 }}>
+                            <span key={opt}
+                              style={{ padding: "8px 14px", borderRadius: "var(--radius-sm)", border: "1px solid var(--border-strong)", fontSize: 13, fontWeight: 500, color: "var(--text-2)" }}>
                               {opt}
                             </span>
                           ))}
@@ -276,7 +289,7 @@ export default function Product() {
               <Link to={"/shop/" + shop.id} className={styles.shopCard}>
                 <div className={styles.shopAvatar} style={{ background: shop.color + "22", color: shop.color }}>
                   {shop.logo_url ? (
-                    <img src={shop.logo_url} alt={shop.name} style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "var(--radius-md)" }} />
+                    <img src={optimizedImageUrl(shop.logo_url, 96)} alt={shop.name} style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "var(--radius-md)" }} />
                   ) : shop.initials}
                 </div>
                 <div className={styles.shopInfo}>

@@ -6,6 +6,7 @@ import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 import { ADMIN_EMAIL } from '../lib/constants';
 import QRCode from 'qrcode';
+import { optimizedImageUrl } from '../lib/imageUrl';
 import styles from './SellerDashboard.module.css';
 
 export default function SellerDashboard() {
@@ -213,7 +214,7 @@ export default function SellerDashboard() {
                   <Link to={"/shop/" + shop.id} style={{ display: "flex", alignItems: "center", gap: 12, flex: 1, textDecoration: "none" }}>
                     <div style={{ width: 44, height: 44, borderRadius: "var(--radius-md)", background: shop.color + "22", color: shop.color, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 16, overflow: "hidden" }}>
                       {shop.logo_url ? (
-                        <img src={shop.logo_url} alt={shop.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                        <img src={optimizedImageUrl(shop.logo_url, 96)} alt={shop.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                       ) : shop.initials}
                     </div>
                     <div>

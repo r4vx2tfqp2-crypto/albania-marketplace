@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Heart, ShoppingCart, Share2, Store } from "lucide-react";
 import { useCart } from "../context/CartContext";
 import { supabase } from "../lib/supabase";
+import { optimizedImageUrl } from "../lib/imageUrl";
 
 export default function Feed() {
   const navigate = useNavigate();
@@ -99,7 +100,7 @@ export default function Feed() {
       <div style={{ position: "absolute", inset: 0, transition: "opacity 0.25s ease, transform 0.25s ease",
         opacity, transform: sliding ? (slideDir === "up" ? "translateY(30px)" : "translateY(-30px)") : "translateY(0)" }}>
         {hasImage ? (
-          <img src={product.images[0]} alt={product.name}
+          <img src={optimizedImageUrl(product.images[0], 828)} alt={product.name}
             style={{ width: "100%", height: "100%", objectFit: "cover" }} />
         ) : (
           <div style={{ width: "100%", height: "100%", background: "linear-gradient(135deg, #1A1916, #2A2926)",
@@ -162,7 +163,7 @@ export default function Feed() {
           <button onClick={() => navigate("/shop/" + shop.id)}
             style={{ display: "flex", alignItems: "center", gap: 8, background: "none", border: "none", cursor: "pointer", marginBottom: 10, padding: 0 }}>
             <div style={{ width: 32, height: 32, borderRadius: "50%", background: shop.color + "44", color: shop.color, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 700, border: "2px solid " + shop.color, overflow: "hidden" }}>
-              {shop.logo_url ? <img src={shop.logo_url} style={{ width: "100%", height: "100%", objectFit: "cover" }} alt="" /> : shop.initials}
+              {shop.logo_url ? <img src={optimizedImageUrl(shop.logo_url, 64)} style={{ width: "100%", height: "100%", objectFit: "cover" }} alt="" /> : shop.initials}
             </div>
             <span style={{ color: "#fff", fontSize: 13, fontWeight: 600 }}>@{shop.name}</span>
             {shop.verified && <span style={{ background: "#1D9E75", color: "#fff", fontSize: 10, padding: "2px 6px", borderRadius: 10 }}>✓</span>}

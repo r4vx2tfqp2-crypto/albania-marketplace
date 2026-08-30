@@ -3,6 +3,7 @@ import { Minus, Plus, Trash2, ArrowRight, ShoppingCart } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useCart } from '../context/CartContext';
 import { colorToHex } from '../lib/colors';
+import { optimizedImageUrl } from '../lib/imageUrl';
 import styles from './Cart.module.css';
 
 const COLORS = ['#E1F5EE','#E6F1FB','#FBEAF0','#FAEEDA','#EAF3DE','#EEEDFE'];
@@ -39,7 +40,7 @@ export default function Cart() {
                     present on every cart item -- addToCart spreads the
                     full product object -- it was just never read here. */}
                 {item.images && item.images.length > 0 ? (
-                  <img src={item.images[0]} alt={item.name} className={styles.itemImage} style={{ objectFit: 'cover' }} />
+                  <img src={optimizedImageUrl(item.images[0], 144)} alt={item.name} className={styles.itemImage} style={{ objectFit: 'cover' }} />
                 ) : (
                   <div className={styles.itemImage} style={{ background: COLORS[i % COLORS.length] }}>
                     <span>
