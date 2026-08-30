@@ -5,6 +5,7 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import { ErrorBoundary, lazyImport } from './components/ErrorBoundary';
 import Navbar from './components/Navbar';
 import BottomNav from './components/BottomNav';
+import InstallPrompt from './components/InstallPrompt';
 import Home from './pages/Home';
 import Search from './pages/Search';
 import Product from './pages/Product';
@@ -100,6 +101,7 @@ function MainLayout() {
   return (
     <div style={{ paddingBottom: '72px' }}>
       <Navbar />
+      <InstallPrompt />
       <Suspense fallback={<RouteFallback />}>
         <Routes>
           <Route path="/" element={<Home />} />

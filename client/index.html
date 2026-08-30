@@ -3,7 +3,18 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#1A1916" />
+    <!-- Standalone/installable app behavior (see client/src/lib/installPrompt.js
+         and the manifest's display:standalone) -- these three are iOS Safari's
+         own older mechanism for the same thing, still required there since
+         iOS only partially honors the Web App Manifest for this. -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Tregu" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>Tregu — Te gjitha dyqanet shqiptare ne nje vend</title>
     <meta name="description" content="Tregu.store — Platforma e pare shqiptare e tregtise elektronike. Zbulo produkte nga dyqane lokale te verifikuara. Krahaso cmimet, porosit online, pagesa me dorezim." />
     <meta name="keywords" content="dyqane online shqiperi, blej online shqiperi, tregu shqiptar, ecommerce albania, dyqane tirana" />

@@ -9,6 +9,7 @@ import styles from "./Checkout.module.css";
 const CITIES = ["Tirana", "Durres", "Shkoder", "Vlore", "Korce", "Fier", "Berat", "Lushnje"];
 const ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9ubmd1cG92eGFlcXVlcXBsaWt4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcxNTUzODUsImV4cCI6MjA5MjczMTM4NX0.aTiKdVjl02JenqpQzbg2qcniscHMJyml9LMdmRsqqKg";
 const FUNCTION_URL = "https://onngupovxaequeqplikx.supabase.co/functions/v1/order-notification";
+const PUSH_FUNCTION_URL = "https://onngupovxaequeqplikx.supabase.co/functions/v1/send-push";
 const MAPS_API_KEY = "AIzaSyC3SYQJZ-bj3ktJy_ypTpGIGg12BQTGhYs";
 
 // Google Maps (Places) used to load globally on every page via a <script>
@@ -135,7 +136,8 @@ export default function Checkout() {
     if (!validate()) return;
     setLoading(true);
     const pin = Math.floor(1000 + Math.random() * 9000).toString();
-    const { data: { user: currentUser } } = await supabase.auth.getUser();
+    const { data: { session } } = await supabase.auth.getSession();
+    const currentUser = session?.user;
     if (!currentUser) { navigate("/login"); return; }
     const { data: orderData, error } = await supabase.from("orders").insert({
       customer_name: form.name, customer_email: form.email, customer_phone: form.phone,
@@ -153,6 +155,17 @@ export default function Checkout() {
         body: JSON.stringify({ order: orderData }),
       });
     } catch (err) { console.error("Email error:", err); }
+    // Best-effort: notifies the seller's device via push if they have one
+    // registered (Settings > Njoftimet push). Never blocks placing the
+    // order -- a seller with notifications off, or this request failing,
+    // shouldn't stop the purchase from completing.
+    try {
+      await fetch(PUSH_FUNCTION_URL, {
+        method: "POST",
+        headers: { "Authorization": "Bearer " + session.access_token, "Content-Type": "application/json" },
+        body: JSON.stringify({ orderId: orderData.id, event: "new_order" }),
+      });
+    } catch (err) { console.error("Push error:", err); }
     setPlaced(true);
     setTimeout(() => navigate("/orders"), 2500);
   };

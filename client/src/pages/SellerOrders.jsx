@@ -71,8 +71,20 @@ export default function SellerOrders() {
   const updateStatus = async (orderId, status) => {
     setUpdating(orderId);
     const { error } = await supabase.from("orders").update({ status }).eq("id", orderId);
-    if (error) window.alert("Perditesimi deshtoi. Provoni perseri.");
-    else patchOrder(orderId, { status });
+    if (error) { window.alert("Perditesimi deshtoi. Provoni perseri."); setUpdating(null); return; }
+    patchOrder(orderId, { status });
+    // Best-effort push to the buyer's device, if they've enabled
+    // notifications -- never blocks the status update itself on failure.
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        await fetch("https://onngupovxaequeqplikx.supabase.co/functions/v1/send-push", {
+          method: "POST",
+          headers: { "Authorization": "Bearer " + session.access_token, "Content-Type": "application/json" },
+          body: JSON.stringify({ orderId, event: "status_changed" }),
+        });
+      }
+    } catch (err) { console.error("Push error:", err); }
     setUpdating(null);
   };
 

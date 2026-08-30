@@ -1,0 +1,61 @@
+.banner {
+  position: sticky;
+  top: var(--nav-h);
+  z-index: 90;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--text-1);
+  color: #fff;
+  padding: 10px 16px;
+  animation: slideDown 0.25s ease;
+}
+@keyframes slideDown {
+  from { transform: translateY(-100%); }
+  to { transform: translateY(0); }
+}
+
+.iconWrap {
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  border-radius: var(--radius-sm);
+  background: rgba(255,255,255,0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.text { flex: 1; min-width: 0; }
+.title { font-size: 13px; font-weight: 600; }
+.sub { font-size: 12px; color: rgba(255,255,255,0.65); margin-top: 1px; }
+.sub strong { color: #fff; font-weight: 600; }
+
+.installBtn {
+  flex-shrink: 0;
+  background: #fff;
+  color: var(--text-1);
+  padding: 8px 16px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 600;
+  font-family: var(--font-body);
+  white-space: nowrap;
+}
+.installBtn:hover { background: var(--green-light); }
+
+.closeBtn {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255,255,255,0.6);
+  border-radius: var(--radius-sm);
+}
+.closeBtn:hover { color: #fff; background: rgba(255,255,255,0.12); }
+
+@media (max-width: 600px) {
+  .sub { display: none; }
+}

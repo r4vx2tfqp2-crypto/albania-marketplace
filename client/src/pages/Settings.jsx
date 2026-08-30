@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Bell, BellOff } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
+import { pushSupported, notificationPermission, isPushEnabled, enablePush, disablePush } from '../lib/push';
 import styles from './AddProduct.module.css';
 
 export default function Settings() {
@@ -21,6 +22,29 @@ export default function Settings() {
     email: user?.email || '',
     newPassword: '',
   });
+
+  const [pushOn, setPushOn] = useState(false);
+  const [pushLoading, setPushLoading] = useState(false);
+  const [pushError, setPushError] = useState('');
+
+  useEffect(() => { isPushEnabled().then(setPushOn); }, []);
+
+  const togglePush = async () => {
+    setPushLoading(true);
+    setPushError('');
+    try {
+      if (pushOn) {
+        await disablePush();
+        setPushOn(false);
+      } else {
+        await enablePush();
+        setPushOn(true);
+      }
+    } catch (err) {
+      setPushError(err.message || 'Dicka shkoi keq.');
+    }
+    setPushLoading(false);
+  };
 
   const handleSave = async (e) => {
     e.preventDefault();
@@ -105,6 +129,42 @@ export default function Settings() {
             </button>
           </div>
         </form>
+
+        {/* Push notifications */}
+        <div style={{ marginTop: 24, padding: 20, background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-xl)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <div style={{ width: 40, height: 40, borderRadius: 10, background: pushOn ? 'var(--green-light)' : 'var(--surface-2)', color: pushOn ? 'var(--green-dark)' : 'var(--text-3)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                {pushOn ? <Bell size={18} /> : <BellOff size={18} />}
+              </div>
+              <div>
+                <div style={{ fontSize: 15, fontWeight: 500, color: 'var(--text-1)' }}>Njoftimet push</div>
+                <div style={{ fontSize: 13, color: 'var(--text-3)' }}>
+                  {pushSupported()
+                    ? 'Merr njoftime per porosite direkt ne telefon, edhe kur Tregu nuk eshte hapur.'
+                    : 'Ky shfletues nuk mbeshtet njoftimet push.'}
+                </div>
+              </div>
+            </div>
+            {pushSupported() && (
+              <button type="button" onClick={togglePush} disabled={pushLoading}
+                role="switch" aria-checked={pushOn} aria-label="Aktivizo njoftimet push"
+                style={{ flexShrink: 0, width: 46, height: 26, borderRadius: 13, border: 'none', cursor: 'pointer', position: 'relative', background: pushOn ? 'var(--green)' : 'var(--border-strong)', transition: 'background 0.15s' }}>
+                <span style={{ position: 'absolute', top: 3, left: pushOn ? 23 : 3, width: 20, height: 20, borderRadius: '50%', background: '#fff', transition: 'left 0.15s', boxShadow: '0 1px 3px rgba(0,0,0,0.2)' }} />
+              </button>
+            )}
+          </div>
+          {pushError && (
+            <div role="alert" style={{ marginTop: 12, background: 'var(--red-light)', color: 'var(--red)', padding: '10px 14px', borderRadius: 8, fontSize: 13 }}>
+              {pushError}
+            </div>
+          )}
+          {notificationPermission() === 'denied' && (
+            <div style={{ marginTop: 12, fontSize: 12, color: 'var(--text-3)' }}>
+              Njoftimet jane te bllokuara per Tregu ne shfletuesin tuaj. Per t'i aktivizuar, ndryshoni lejet e sajtit nga cilesimet e shfletuesit.
+            </div>
+          )}
+        </div>
 
         {/* Delete account */}
         <div style={{ marginTop: 40, padding: 24, background: 'var(--red-light)', border: '1px solid var(--red)', borderRadius: 'var(--radius-xl)' }}>
