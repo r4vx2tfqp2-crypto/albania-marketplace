@@ -60,7 +60,8 @@
   flex: 1;
   border: none;
   outline: none;
-  font-size: 15px;
+  /* Below 16px, iOS Safari auto-zooms the whole page on focus. */
+  font-size: 16px;
   color: var(--text-1);
   background: transparent;
   min-width: 0;

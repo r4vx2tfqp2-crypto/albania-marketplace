@@ -786,7 +786,7 @@ export default function AdminPanel() {
                 <label htmlFor="announce-recipient" style={{ fontSize: 13, fontWeight: 500, color: 'var(--text-2)', display: 'block', marginBottom: 6 }}>Email i perdoruesit</label>
                 <input id="announce-recipient" type="email" value={announceRecipientEmail} onChange={e => setAnnounceRecipientEmail(e.target.value)}
                   placeholder="perdoruesi@example.com"
-                  style={{ width: '100%', padding: '10px 14px', borderRadius: 10, border: '1px solid var(--border-strong)', fontSize: 14, fontFamily: 'var(--font-body)', background: 'var(--surface)', color: 'var(--text-1)', boxSizing: 'border-box' }} />
+                  style={{ width: '100%', padding: '10px 14px', borderRadius: 10, border: '1px solid var(--border-strong)', fontSize: 16, fontFamily: 'var(--font-body)', background: 'var(--surface)', color: 'var(--text-1)', boxSizing: 'border-box' }} />
                 <p style={{ fontSize: 12, color: 'var(--text-3)', marginTop: 6 }}>
                   Dergohet vetem nese kjo eshte email-i i llogarise se regjistruar te perdoruesit ne Tregu -- nuk mund t'i dergosh nje adrese arbitrare.
                 </p>
@@ -811,14 +811,14 @@ export default function AdminPanel() {
               <label htmlFor="announce-subject" style={{ fontSize: 13, fontWeight: 500, color: 'var(--text-2)', display: 'block', marginBottom: 6 }}>Subjekti</label>
               <input id="announce-subject" value={announceSubject} onChange={e => setAnnounceSubject(e.target.value)}
                 placeholder="p.sh. Ndryshim i rendesishem ne Tregu"
-                style={{ width: '100%', padding: '10px 14px', borderRadius: 10, border: '1px solid var(--border-strong)', fontSize: 14, fontFamily: 'var(--font-body)', background: 'var(--surface)', color: 'var(--text-1)', boxSizing: 'border-box' }} />
+                style={{ width: '100%', padding: '10px 14px', borderRadius: 10, border: '1px solid var(--border-strong)', fontSize: 16, fontFamily: 'var(--font-body)', background: 'var(--surface)', color: 'var(--text-1)', boxSizing: 'border-box' }} />
             </div>
 
             <div style={{ marginBottom: 16 }}>
               <label htmlFor="announce-message" style={{ fontSize: 13, fontWeight: 500, color: 'var(--text-2)', display: 'block', marginBottom: 6 }}>Mesazhi</label>
               <textarea id="announce-message" rows={8} value={announceMessage} onChange={e => setAnnounceMessage(e.target.value)}
                 placeholder="Shkruaj mesazhin tend ketu..."
-                style={{ width: '100%', padding: '10px 14px', borderRadius: 10, border: '1px solid var(--border-strong)', fontSize: 14, fontFamily: 'var(--font-body)', background: 'var(--surface)', color: 'var(--text-1)', resize: 'vertical', boxSizing: 'border-box' }} />
+                style={{ width: '100%', padding: '10px 14px', borderRadius: 10, border: '1px solid var(--border-strong)', fontSize: 16, fontFamily: 'var(--font-body)', background: 'var(--surface)', color: 'var(--text-1)', resize: 'vertical', boxSizing: 'border-box' }} />
             </div>
 
             {announceResult && (

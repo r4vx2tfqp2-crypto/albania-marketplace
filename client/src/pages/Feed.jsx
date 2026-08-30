@@ -113,7 +113,13 @@ export default function Feed() {
       </div>
 
       {/* TOP BAR */}
-      <div style={{ position: "absolute", top: 0, left: 0, right: 0, padding: "16px 20px", display: "flex", alignItems: "center", justifyContent: "space-between", zIndex: 10 }}>
+      {/* Feed is a full-screen route outside MainLayout (see App.jsx --
+          it never renders the shared Navbar), so it never inherited that
+          component's --safe-top padding. Its own "Kthehu" back button was
+          sitting directly under/behind the iOS status bar the same way
+          Navbar did before that fix -- needs the same treatment here,
+          independently, since there's no shared header to fix it once for. */}
+      <div style={{ position: "absolute", top: 0, left: 0, right: 0, padding: "calc(env(safe-area-inset-top, 0px) + 16px) 20px 16px", display: "flex", alignItems: "center", justifyContent: "space-between", zIndex: 10 }}>
         <button onClick={() => navigate("/")}
           style={{ background: "rgba(0,0,0,0.4)", border: "none", borderRadius: 20, padding: "6px 14px", color: "#fff", fontSize: 13, cursor: "pointer" }}>
           ← Kthehu

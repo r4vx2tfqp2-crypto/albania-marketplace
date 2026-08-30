@@ -24,7 +24,9 @@
   border: none;
   outline: none;
   background: transparent;
-  font-size: 15px;
+  /* Below 16px, iOS Safari auto-zooms the whole page on focus -- this
+     was the "zooms in when clicking search bar" bug. */
+  font-size: 16px;
   color: var(--text-1);
 }
 
@@ -99,7 +101,7 @@
   padding: 8px 12px;
   border-radius: var(--radius-sm);
   border: 1px solid var(--border-strong);
-  font-size: 14px;
+  font-size: 16px;
   color: var(--text-1);
   background: var(--surface);
   outline: none;

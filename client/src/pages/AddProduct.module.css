@@ -53,11 +53,14 @@
 .field { display: flex; flex-direction: column; gap: 6px; }
 .label { font-size: 13px; font-weight: 500; color: var(--text-2); }
 
+/* This module is shared by AddProduct, EditProduct, AddShop, and
+   Settings -- font-size below 16px triggers iOS Safari's auto-zoom on
+   focus for every text field on all four pages. */
 .input, .select {
   padding: 11px 14px;
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-md);
-  font-size: 15px;
+  font-size: 16px;
   font-family: var(--font-body);
   color: var(--text-1);
   background: var(--bg);
@@ -70,7 +73,7 @@
   padding: 11px 14px;
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-md);
-  font-size: 15px;
+  font-size: 16px;
   font-family: var(--font-body);
   color: var(--text-1);
   background: var(--bg);

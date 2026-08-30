@@ -6,7 +6,14 @@
 // fetched, serve it back if the network fails) gets most of the same
 // benefit without that staleness problem.
 
-const CACHE_NAME = "tregu-v1";
+// Bump this on any deploy where stale cached pages/assets could cause a
+// real visible bug (not just routine content updates) -- the activate
+// handler below deletes any cache whose name doesn't match this string,
+// so changing it forces every installed app to discard its old cache on
+// next launch instead of continuing to serve stale HTML/JS behind the
+// new deploy. Bumped here because Search/Profile could otherwise keep
+// serving a pre-safe-area-fix cached version indefinitely.
+const CACHE_NAME = "tregu-v2";
 
 self.addEventListener("install", () => {
   self.skipWaiting();

@@ -114,7 +114,7 @@ export default function Reviews({ productId, shopId, type = "product", onReviewA
           )}
           <div style={{ marginBottom: 12 }}>
             <label htmlFor="review-author" style={{ fontSize: 13, fontWeight: 500, color: "var(--text-2)", display: "block", marginBottom: 6 }}>Emri juaj</label>
-            <input id="review-author" style={{ width: "100%", padding: "8px 12px", borderRadius: 8, border: "1px solid var(--border-strong)", fontSize: 14, fontFamily: "var(--font-body)", background: "var(--surface)", color: "var(--text-1)", boxSizing: "border-box" }}
+            <input id="review-author" style={{ width: "100%", padding: "8px 12px", borderRadius: 8, border: "1px solid var(--border-strong)", fontSize: 16, fontFamily: "var(--font-body)", background: "var(--surface)", color: "var(--text-1)", boxSizing: "border-box" }}
               placeholder="p.sh. Erion B." value={form.author}
               onChange={e => setForm({...form, author: e.target.value})} />
           </div>
@@ -132,7 +132,7 @@ export default function Reviews({ productId, shopId, type = "product", onReviewA
           </div>
           <div style={{ marginBottom: 12 }}>
             <label htmlFor="review-text" style={{ fontSize: 13, fontWeight: 500, color: "var(--text-2)", display: "block", marginBottom: 6 }}>Komenti (opsional)</label>
-            <textarea id="review-text" style={{ width: "100%", padding: "8px 12px", borderRadius: 8, border: "1px solid var(--border-strong)", fontSize: 14, fontFamily: "var(--font-body)", background: "var(--surface)", color: "var(--text-1)", resize: "vertical", boxSizing: "border-box" }}
+            <textarea id="review-text" style={{ width: "100%", padding: "8px 12px", borderRadius: 8, border: "1px solid var(--border-strong)", fontSize: 16, fontFamily: "var(--font-body)", background: "var(--surface)", color: "var(--text-1)", resize: "vertical", boxSizing: "border-box" }}
               rows={3} placeholder="Cfar mendoni per kete produkt?"
               value={form.text} onChange={e => setForm({...form, text: e.target.value})} />
           </div>

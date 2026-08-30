@@ -257,7 +257,7 @@ export default function Checkout() {
                       </button>
                     </div>
                     <input ref={searchBoxRef} type="text" placeholder="🔍 Kërko adresën tuaj..." aria-label="Kerko adresen tuaj"
-                      style={{ width: "100%", padding: "10px 14px", borderRadius: "var(--radius-md)", border: "1px solid var(--border-strong)", fontSize: 14, fontFamily: "var(--font-body)", boxSizing: "border-box" }} />
+                      style={{ width: "100%", padding: "10px 14px", borderRadius: "var(--radius-md)", border: "1px solid var(--border-strong)", fontSize: 16, fontFamily: "var(--font-body)", boxSizing: "border-box" }} />
                   </div>
                   <div ref={mapRef} style={{ flex: 1, width: "100%" }} />
                   {pinLocation && (

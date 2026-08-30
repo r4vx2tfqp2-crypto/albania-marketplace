@@ -413,7 +413,7 @@ export default function SellerOrders() {
                     <div style={{ display: "flex", gap: 8 }}>
                       <input defaultValue={order.tracking_number || ""} placeholder="Shkruaj numrin e gjurmimit..."
                         onBlur={async (e) => { if (e.target.value !== order.tracking_number) { const { error } = await supabase.from("orders").update({ tracking_number: e.target.value }).eq("id", order.id); if (error) window.alert("Perditesimi deshtoi."); else patchOrder(order.id, { tracking_number: e.target.value }); } }}
-                        style={{ flex: 1, padding: "8px 12px", borderRadius: 8, border: "1px solid var(--border-strong)", fontSize: 13, fontFamily: "var(--font-body)", background: "var(--surface)", color: "var(--text-1)" }} />
+                        style={{ flex: 1, padding: "8px 12px", borderRadius: 8, border: "1px solid var(--border-strong)", fontSize: 16, fontFamily: "var(--font-body)", background: "var(--surface)", color: "var(--text-1)" }} />
                       {order.tracking_number && (
                         <a href={order.courier_name === "Albanian Courier" ? "https://al.albaniancourier.al/en/track/?code=" + order.tracking_number :
                             order.courier_name === "DHL" ? "https://www.dhl.com/al-en/home/tracking.html?tracking-id=" + order.tracking_number :

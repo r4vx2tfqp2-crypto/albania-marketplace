@@ -235,7 +235,7 @@ export default function DeliveryConfirm() {
                 <div style={{ fontSize: 13, fontWeight: 600, color: "var(--text-2)", marginBottom: 8 }}>Emri i fqinjit *</div>
                 <input value={neighbourName} onChange={e => setNeighbourName(e.target.value)}
                   placeholder="p.sh. Arben Hoxha, Kati 2..."
-                  style={{ width: "100%", padding: "10px 14px", borderRadius: 10, border: "1px solid var(--border-strong)", fontSize: 14, fontFamily: "var(--font-body)", background: "var(--bg)", color: "var(--text-1)", boxSizing: "border-box", marginBottom: 12, outline: "none" }} />
+                  style={{ width: "100%", padding: "10px 14px", borderRadius: 10, border: "1px solid var(--border-strong)", fontSize: 16, fontFamily: "var(--font-body)", background: "var(--bg)", color: "var(--text-1)", boxSizing: "border-box", marginBottom: 12, outline: "none" }} />
                 <div style={{ fontSize: 13, fontWeight: 600, color: "var(--text-2)", marginBottom: 8 }}>Firma e fqinjit</div>
                 <div style={{ border: "1px solid var(--border-strong)", borderRadius: 10, overflow: "hidden", background: "#fff", marginBottom: 8, position: "relative" }}>
                   <canvas ref={canvasRef} width={280} height={100}
