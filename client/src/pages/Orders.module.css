@@ -1,4 +1,4 @@
-.page { padding: 32px 0 60px; min-height: 100vh; }
+.page { padding: 32px 0 60px; min-height: 100vh; min-height: 100dvh; }
 
 .title {
   font-family: var(--font-display);

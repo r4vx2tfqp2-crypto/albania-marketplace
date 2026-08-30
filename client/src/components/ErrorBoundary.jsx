@@ -68,7 +68,7 @@ export class ErrorBoundary extends Component {
   render() {
     if (this.state.hasError) {
       return (
-        <div style={{ minHeight: "60vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 14, padding: 40, textAlign: "center" }}>
+        <div style={{ minHeight: "60dvh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 14, padding: 40, textAlign: "center" }}>
           <div style={{ fontSize: 17, fontWeight: 600, color: "var(--text-1)" }}>Dicka shkoi keq.</div>
           <div style={{ fontSize: 14, color: "var(--text-3)", maxWidth: 320 }}>Faqja hasi ne nje problem. Provoni ta rifreskoni.</div>
           <button onClick={() => window.location.reload()}

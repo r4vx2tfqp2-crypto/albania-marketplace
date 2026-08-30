@@ -143,7 +143,7 @@ export default function Legal() {
   const page = SECTIONS[activePage];
 
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--bg)', paddingBottom: 60 }}>
+    <div style={{ minHeight: '100dvh', background: 'var(--bg)', paddingBottom: 60 }}>
       <div style={{ background: 'var(--text-1)', padding: '40px 20px 0' }}>
         <div style={{ maxWidth: 800, margin: '0 auto' }}>
           <button onClick={() => navigate(-1)} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 14, color: 'rgba(255,255,255,0.5)', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-body)', marginBottom: 24 }}>

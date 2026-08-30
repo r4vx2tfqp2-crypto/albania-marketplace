@@ -255,7 +255,7 @@ export default function AddProduct() {
 
   if (saved) {
     return (
-      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "60vh", gap: 12, textAlign: "center", color: "var(--green)" }}>
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "60dvh", gap: 12, textAlign: "center", color: "var(--green)" }}>
         <CheckCircle size={64} strokeWidth={1.5} />
         <h2 style={{ fontFamily: "var(--font-display)", fontSize: 24, fontWeight: 700, color: "var(--text-1)" }}>Produkti u publikua!</h2>
         {failedImageCount > 0 && (

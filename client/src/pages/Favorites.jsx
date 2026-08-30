@@ -15,7 +15,7 @@ export default function Favorites() {
           {t('saved_title')}
         </h1>
         {savedItems.length === 0 ? (
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '80px 20px', gap: 12, textAlign: 'center' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '60dvh', padding: '80px 20px', gap: 12, textAlign: 'center' }}>
             <Heart size={48} strokeWidth={1} style={{ color: 'var(--text-3)' }} />
             <div style={{ fontSize: 18, fontWeight: 500 }}>{t('no_saved')}</div>
             <p style={{ fontSize: 14, color: 'var(--text-3)' }}>{t('no_saved_sub')}</p>

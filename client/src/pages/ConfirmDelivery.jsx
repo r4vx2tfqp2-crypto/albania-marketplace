@@ -63,7 +63,7 @@ export default function ConfirmDelivery() {
   };
 
   const s = {
-    page: { minHeight: "100vh", background: "var(--text-1)", display: "flex", alignItems: "center", justifyContent: "center", padding: 20, fontFamily: "var(--font-body)" },
+    page: { minHeight: "100dvh", background: "var(--text-1)", display: "flex", alignItems: "center", justifyContent: "center", padding: 20, fontFamily: "var(--font-body)" },
     card: { background: "var(--surface)", borderRadius: 24, padding: "40px 36px", width: "100%", maxWidth: 420, textAlign: "center" },
     logo: { display: "flex", alignItems: "center", gap: 10, marginBottom: 32, justifyContent: "center" },
     logoMark: { width: 36, height: 36, background: "var(--text-1)", color: "#fff", borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 20 },

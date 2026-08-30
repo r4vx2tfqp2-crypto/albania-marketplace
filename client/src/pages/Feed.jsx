@@ -63,13 +63,13 @@ export default function Feed() {
   };
 
   if (loading) return (
-    <div style={{ height: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#000" }}>
+    <div style={{ height: "100dvh", display: "flex", alignItems: "center", justifyContent: "center", background: "#000" }}>
       <div style={{ color: "#fff", fontSize: 16 }}>Duke ngarkuar...</div>
     </div>
   );
 
   if (products.length === 0) return (
-    <div style={{ height: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#000" }}>
+    <div style={{ height: "100dvh", display: "flex", alignItems: "center", justifyContent: "center", background: "#000" }}>
       <div style={{ color: "#fff", fontSize: 16, textAlign: "center" }}>
         <div style={{ fontSize: 48, marginBottom: 16 }}>🛍️</div>
         Nuk ka produkte ende
@@ -93,7 +93,7 @@ export default function Feed() {
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
       onWheel={handleWheel}
-      style={{ height: "100vh", width: "100%", background: "#000", position: "relative", overflow: "hidden" }}>
+      style={{ height: "100dvh", width: "100%", background: "#000", position: "relative", overflow: "hidden" }}>
 
       {/* BACKGROUND IMAGE */}
       <div style={{ position: "absolute", inset: 0, transition: "opacity 0.25s ease, transform 0.25s ease",

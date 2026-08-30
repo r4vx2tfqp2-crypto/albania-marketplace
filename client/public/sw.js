@@ -13,7 +13,7 @@
 // next launch instead of continuing to serve stale HTML/JS behind the
 // new deploy. Bumped here because Search/Profile could otherwise keep
 // serving a pre-safe-area-fix cached version indefinitely.
-const CACHE_NAME = "tregu-v2";
+const CACHE_NAME = "tregu-v3";
 
 self.addEventListener("install", () => {
   self.skipWaiting();

@@ -1,4 +1,4 @@
-.page { padding: 24px 0 40px; min-height: 100vh; }
+.page { padding: 24px 0 40px; min-height: 100vh; min-height: 100dvh; }
 
 .back {
   display: inline-flex;

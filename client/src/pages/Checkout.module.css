@@ -1,4 +1,4 @@
-.page { padding: 32px 0 60px; min-height: 100vh; }
+.page { padding: 32px 0 60px; min-height: 100vh; min-height: 100dvh; }
 
 .title {
   font-family: var(--font-display);
@@ -131,6 +131,7 @@
   align-items: center;
   justify-content: center;
   min-height: 70vh;
+  min-height: 70dvh;
   text-align: center;
   gap: 12px;
   color: var(--green);

@@ -1,4 +1,11 @@
-.page { padding: 32px 0 40px; min-height: 100vh; }
+/* min-height: 100vh uses the LARGEST possible viewport on mobile Safari
+   (as if the browser/status-bar chrome were always hidden), not the
+   actually-visible one -- on a short page (an empty cart needs very
+   little content height), that mismatch is what made the fixed
+   BottomNav appear to shift/jump. 100dvh tracks the real visible
+   viewport correctly; kept the vh line first as a fallback for browsers
+   that don't support dvh, which simply ignore the second declaration. */
+.page { padding: 32px 0 40px; min-height: 100vh; min-height: 100dvh; }
 
 .title {
   font-family: var(--font-display);
@@ -175,6 +182,7 @@
   align-items: center;
   justify-content: center;
   min-height: 60vh;
+  min-height: 60dvh;
   text-align: center;
   padding: 40px;
   gap: 8px;
