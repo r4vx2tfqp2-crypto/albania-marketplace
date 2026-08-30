@@ -2,17 +2,11 @@ import { memo } from "react";
 import { Link } from "react-router-dom";
 import { Heart, ShoppingCart } from "lucide-react";
 import { useCart } from "../context/CartContext";
+import { colorToHex } from "../lib/colors";
 import styles from "./ProductCard.module.css";
 
 const BG_COLORS = ["#E1F5EE","#E6F1FB","#FBEAF0","#FAEEDA","#EAF3DE","#EEEDFE"];
 const TEXT_COLORS = ["#0F6E56","#185FA5","#99355A","#854F0B","#3B6D11","#3C3489"];
-
-const COLOR_MAP = {
-  "e zeze": "#1A1916", "e bardhe": "#FFFFFF", "gri": "#9A9890",
-  "kafe": "#8B4513", "e kuqe": "#E53E3E", "blu": "#3182CE",
-  "e gjelber": "#38A169", "verdhe": "#D69E2E", "portokalli": "#DD6B20",
-  "rozë": "#ED64A6", "vjollce": "#805AD5", "ari": "#B7791F", "argjend": "#A0AEC0"
-};
 
 function ProductCard({ product, index = 0 }) {
   const { toggleSaved, isSaved, addToCart } = useCart();
@@ -84,7 +78,7 @@ function ProductCard({ product, index = 0 }) {
         {colors.length > 0 && (
           <div className={styles.colorDots}>
             {colors.slice(0, 6).map(c => {
-              const hex = COLOR_MAP[c.toLowerCase()] || "#9A9890";
+              const hex = colorToHex(c);
               return (
                 <div key={c} title={c} style={{ width: 12, height: 12, borderRadius: "50%", background: hex, border: "1px solid var(--border)", flexShrink: 0 }} />
               );

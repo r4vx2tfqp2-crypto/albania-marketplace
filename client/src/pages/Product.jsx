@@ -3,6 +3,7 @@ import { useParams, Link, useNavigate } from "react-router-dom";
 import { Heart, ShoppingCart, ArrowLeft, CheckCircle, Truck, Shield } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useCart } from "../context/CartContext";
+import { colorToHex } from "../lib/colors";
 import { supabase } from "../lib/supabase";
 import { Helmet } from "react-helmet-async";
 import Reviews from "../components/Reviews";
@@ -173,18 +174,31 @@ export default function Product() {
               </div>
             )}
 
-            {/* 3. COLOR PICKER */}
+            {/* 3. COLOR PICKER -- an actual visual swatch per color, not
+                the size-picker's fixed-size square button reused for
+                text: color names (e.g. "Portokalli") don't fit that
+                pattern the way a size like "42" does, and a shopper
+                choosing a color wants to see the color itself. */}
             {colors.length > 0 && (
               <div className={styles.sizeSection}>
                 <div className={styles.sizeLabel}>Ngjyra</div>
-                <div className={styles.sizes}>
-                  {colors.map(color => (
-                    <button key={color}
-                      className={styles.sizeBtn + (selectedColor === color ? " " + styles.sizeSelected : "")}
-                      onClick={() => setSelectedColor(color)}>
-                      {color}
-                    </button>
-                  ))}
+                <div style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
+                  {colors.map(color => {
+                    const hex = colorToHex(color);
+                    const selected = selectedColor === color;
+                    return (
+                      <button key={color} type="button" onClick={() => setSelectedColor(color)} title={color}
+                        style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6, background: "none", border: "none", cursor: "pointer", padding: 0 }}>
+                        <span style={{
+                          width: 34, height: 34, borderRadius: "50%", background: hex,
+                          border: hex.toLowerCase() === "#ffffff" ? "1px solid var(--border-strong)" : "1px solid var(--border)",
+                          boxShadow: selected ? "0 0 0 2px var(--surface), 0 0 0 4px var(--text-1)" : "none",
+                          transition: "box-shadow 0.15s",
+                        }} />
+                        <span style={{ fontSize: 11, color: selected ? "var(--text-1)" : "var(--text-3)", fontWeight: selected ? 600 : 400 }}>{color}</span>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             )}

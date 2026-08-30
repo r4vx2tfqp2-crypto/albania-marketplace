@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { ArrowLeft, CheckCircle, Upload, X, Plus } from "lucide-react";
 import { supabase } from "../lib/supabase";
 import { resizeImage } from "../lib/resizeImage";
+import { colorToHex } from "../lib/colors";
 import styles from "./AddProduct.module.css";
 
 const DRAFT_KEY = "tregu_add_product_draft";
@@ -440,10 +441,11 @@ export default function AddProduct() {
             <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 12 }}>
               {PRESET_COLORS.map(color => (
                 <button key={color} type="button" onClick={() => toggleColor(color)}
-                  style={{ padding: "6px 12px", borderRadius: 20, border: "1px solid", fontSize: 12, fontWeight: 500, cursor: "pointer", fontFamily: "var(--font-body)", transition: "all 0.15s",
+                  style={{ display: "flex", alignItems: "center", gap: 6, padding: "6px 12px 6px 8px", borderRadius: 20, border: "1px solid", fontSize: 12, fontWeight: 500, cursor: "pointer", fontFamily: "var(--font-body)", transition: "all 0.15s",
                     borderColor: selectedColors.includes(color) ? "var(--text-1)" : "var(--border-strong)",
                     background: selectedColors.includes(color) ? "var(--text-1)" : "transparent",
                     color: selectedColors.includes(color) ? "#fff" : "var(--text-2)" }}>
+                  <span style={{ width: 12, height: 12, borderRadius: "50%", background: colorToHex(color), border: "1px solid rgba(0,0,0,0.15)", flexShrink: 0 }} />
                   {color}
                 </button>
               ))}
@@ -461,7 +463,8 @@ export default function AddProduct() {
             {selectedColors.length > 0 && (
               <div style={{ marginTop: 10, display: "flex", gap: 6, flexWrap: "wrap" }}>
                 {selectedColors.map(c => (
-                  <span key={c} style={{ background: "var(--blue-light)", color: "var(--blue)", padding: "4px 10px", borderRadius: 20, fontSize: 12, fontWeight: 500, display: "flex", alignItems: "center", gap: 4 }}>
+                  <span key={c} style={{ background: "var(--blue-light)", color: "var(--blue)", padding: "4px 10px", borderRadius: 20, fontSize: 12, fontWeight: 500, display: "flex", alignItems: "center", gap: 6 }}>
+                    <span style={{ width: 10, height: 10, borderRadius: "50%", background: colorToHex(c), border: "1px solid rgba(0,0,0,0.15)", flexShrink: 0 }} />
                     {c}
                     <button type="button" onClick={() => toggleColor(c)} style={{ background: "none", border: "none", cursor: "pointer", color: "inherit", padding: 0, lineHeight: 1 }}>×</button>
                   </span>
