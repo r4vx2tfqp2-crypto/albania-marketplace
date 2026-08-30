@@ -225,15 +225,16 @@ export default function SellerOrders() {
       doc.text((i + 1) + ".", ml + 2, y + 2);
       doc.setTextColor(...BLACK);
       doc.setFont("helvetica", "bold");
-      const name = item.name + (item.size ? " (" + item.size + ")" : "");
+      const variant = [item.size, item.color].filter(Boolean).join(", ");
+      const name = item.name + (variant ? " (" + variant + ")" : "");
       doc.text(name.length > 42 ? name.slice(0, 42) + "..." : name, ml + 10, y + 2);
       doc.setFont("helvetica", "normal");
       doc.setTextColor(...DARK);
       doc.text("" + item.qty, ml + cW - 50, y + 2);
-      doc.text(item.price?.toLocaleString() + " L", ml + cW - 33, y + 2);
+      doc.text(item.price?.toLocaleString("sq-AL") + " L", ml + cW - 33, y + 2);
       doc.setFont("helvetica", "bold");
       doc.setTextColor(...BLACK);
-      doc.text(lineTotal.toLocaleString() + " L", ml + cW, y + 2, { align: "right" });
+      doc.text(lineTotal.toLocaleString("sq-AL") + " L", ml + cW, y + 2, { align: "right" });
       y += 11;
     });
 
@@ -249,20 +250,28 @@ export default function SellerOrders() {
     doc.setTextColor(...GRAY);
     doc.text("Nentotali:", tX, y);
     doc.setTextColor(...BLACK);
-    doc.text(subtotal.toLocaleString() + " L", ml + cW, y, { align: "right" });
+    doc.text(subtotal.toLocaleString("sq-AL") + " L", ml + cW, y, { align: "right" });
     y += 7;
 
+    // Previously hardcoded to "300 L" regardless of the shop's actual
+    // delivery_fee (AddShop.jsx lets sellers set any value) or what this
+    // specific order actually charged -- derived from the real numbers
+    // instead: order.total is subtotal + delivery fee (TVSH is a
+    // decorative "already included in price" breakdown, not an added
+    // charge), so total - subtotal IS the real delivery fee actually
+    // billed on this order.
+    const deliveryFee = Math.max(0, Math.round((order.total || 0) - subtotal));
     doc.setTextColor(...GRAY);
     doc.text("Tarifa e dorezimit:", tX, y);
     doc.setTextColor(...BLACK);
-    doc.text("300 L", ml + cW, y, { align: "right" });
+    doc.text(deliveryFee.toLocaleString("sq-AL") + " L", ml + cW, y, { align: "right" });
     y += 7;
 
     const tvsh = Math.round(subtotal * 0.20);
     doc.setTextColor(...GRAY);
     doc.text("TVSH 20% (e perfshire):", tX, y);
     doc.setTextColor(...BLACK);
-    doc.text(tvsh.toLocaleString() + " L", ml + cW, y, { align: "right" });
+    doc.text(tvsh.toLocaleString("sq-AL") + " L", ml + cW, y, { align: "right" });
     y += 10;
 
     // Total row
@@ -272,7 +281,7 @@ export default function SellerOrders() {
     doc.setFontSize(9);
     doc.setFont("helvetica", "bold");
     doc.text("TOTALI:", tX, y + 4);
-    doc.text(order.total?.toLocaleString() + " L", ml + cW - 2, y + 4, { align: "right" });
+    doc.text(order.total?.toLocaleString("sq-AL") + " L", ml + cW - 2, y + 4, { align: "right" });
     y += 16;
 
     // Payment badge
@@ -360,7 +369,7 @@ export default function SellerOrders() {
                     <div className={styles.orderItems}>
                       {order.items.map((item, i) => (
                         <div key={i} className={styles.orderItem}>
-                          {item.name} {item.size ? "(" + item.size + ")" : ""} x{item.qty} — {item.price?.toLocaleString()} L
+                          {item.name} {[item.size, item.color].filter(Boolean).length > 0 ? "(" + [item.size, item.color].filter(Boolean).join(", ") + ")" : ""} x{item.qty} — {item.price?.toLocaleString("sq-AL")} L
                         </div>
                       ))}
                     </div>

@@ -15,6 +15,14 @@ export function CartProvider({ children }) {
   // Keep the cart single-shop: adding a product from a different shop than
   // what's already in the cart asks to clear it first, same pattern most
   // single-vendor-cart marketplaces use.
+  // selectedColor was accepted as a parameter here but never actually
+  // stored on the cart item (both branches below only kept selectedSize)
+  // -- a buyer's color choice vanished the instant it entered the cart:
+  // never shown in Cart.jsx, never sent to Checkout's order record, never
+  // reaching the seller. Now stored and included in every match/identity
+  // check below, the same way selectedSize already was -- otherwise
+  // adding the same product/size in two different colors would still
+  // silently merge into one line under the old size-only match.
   const addToCart = (product, selectedSize = null, selectedColor = null) => {
     const conflictsWithOtherShop = cartItems.length > 0 && product.shop_id &&
       cartItems.some(i => i.shop_id && i.shop_id !== product.shop_id);
@@ -23,28 +31,28 @@ export function CartProvider({ children }) {
         "Shporta juaj ka produkte nga nje dyqan tjeter. Ta zbrazim shporten dhe te shtojme kete produkt?"
       );
       if (!confirmed) return false;
-      setCartItems([{ ...product, qty: 1, selectedSize }]);
+      setCartItems([{ ...product, qty: 1, selectedSize, selectedColor }]);
       return true;
     }
     setCartItems(prev => {
-      const existing = prev.find(i => i.id === product.id && i.selectedSize === selectedSize);
+      const existing = prev.find(i => i.id === product.id && i.selectedSize === selectedSize && i.selectedColor === selectedColor);
       if (existing) {
-        return prev.map(i => i.id === product.id && i.selectedSize === selectedSize
+        return prev.map(i => i.id === product.id && i.selectedSize === selectedSize && i.selectedColor === selectedColor
           ? { ...i, qty: i.qty + 1 } : i);
       }
-      return [...prev, { ...product, qty: 1, selectedSize }];
+      return [...prev, { ...product, qty: 1, selectedSize, selectedColor }];
     });
     return true;
   };
 
-  const removeFromCart = (productId, selectedSize) => {
-    setCartItems(prev => prev.filter(i => !(i.id === productId && i.selectedSize === selectedSize)));
+  const removeFromCart = (productId, selectedSize, selectedColor = null) => {
+    setCartItems(prev => prev.filter(i => !(i.id === productId && i.selectedSize === selectedSize && i.selectedColor === selectedColor)));
   };
 
-  const updateQty = (productId, selectedSize, qty) => {
-    if (qty < 1) { removeFromCart(productId, selectedSize); return; }
+  const updateQty = (productId, selectedSize, qty, selectedColor = null) => {
+    if (qty < 1) { removeFromCart(productId, selectedSize, selectedColor); return; }
     setCartItems(prev => prev.map(i =>
-      i.id === productId && i.selectedSize === selectedSize ? { ...i, qty } : i
+      i.id === productId && i.selectedSize === selectedSize && i.selectedColor === selectedColor ? { ...i, qty } : i
     ));
   };
 

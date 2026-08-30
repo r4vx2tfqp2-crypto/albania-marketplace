@@ -18,7 +18,7 @@ export default function Profile() {
     { icon: Package, label: t('my_orders_menu'), sub: t('my_orders_sub'), to: '/orders' },
     { icon: Heart, label: t('saved_items'), sub: t('saved_items_sub'), to: '/favorites' },
     { icon: Store, label: t('seller_dashboard'), sub: t('seller_dashboard_sub'), to: '/seller' },
-    { icon: Truck, label: 'Delivery confirmation', sub: 'For delivery drivers', to: '/delivery' },
+    { icon: Truck, label: t('delivery_confirmation'), sub: t('delivery_confirmation_sub'), to: '/delivery' },
     { icon: Settings, label: t('settings'), sub: t('settings_sub'), to: '/settings' },
   ];
 
@@ -26,13 +26,20 @@ export default function Profile() {
     <div className={styles.page}>
       <div className="container">
         <div className={styles.profileCard}>
-          <div className={styles.avatar}>
-            <User size={28} strokeWidth={1.5} style={{ color: 'var(--text-3)' }} />
+          <div className={styles.avatar} style={{ overflow: 'hidden' }}>
+            {/* Google OAuth sign-in (see Login.jsx) populates avatar_url or
+                picture on user_metadata depending on provider config -- this
+                previously always showed the generic icon and ignored both. */}
+            {(user?.user_metadata?.avatar_url || user?.user_metadata?.picture) ? (
+              <img src={user.user_metadata.avatar_url || user.user_metadata.picture} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            ) : (
+              <User size={28} strokeWidth={1.5} style={{ color: 'var(--text-3)' }} />
+            )}
           </div>
           <div>
             {user ? (
               <>
-                <div className={styles.name}>{user.user_metadata?.name || 'Seller'}</div>
+                <div className={styles.name}>{user.user_metadata?.name || t('account_holder')}</div>
                 <div className={styles.email}>{user.email}</div>
               </>
             ) : (

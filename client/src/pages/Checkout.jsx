@@ -145,7 +145,7 @@ export default function Checkout() {
       total, status: "confirmed", delivery_pin: pin, buyer_id: currentUser.id,
       latitude: pinLocation?.lat || null, longitude: pinLocation?.lng || null,
       shop_id: cartItems[0]?.shop_id || null,
-      items: cartItems.map(i => ({ id: i.id, name: i.name, price: i.price, qty: i.qty, size: i.selectedSize })),
+      items: cartItems.map(i => ({ id: i.id, name: i.name, price: i.price, qty: i.qty, size: i.selectedSize, color: i.selectedColor })),
     }).select().single();
     if (error) { setErrors({ submit: t("something_went_wrong") }); setLoading(false); return; }
     try {
@@ -310,9 +310,10 @@ export default function Checkout() {
           <div className={styles.orderSummary}>
             <h2 className={styles.sectionTitle}>{t("checkout")} ({cartCount} {t("items")})</h2>
             {cartItems.map(item => (
-              <div key={item.id + "-" + item.selectedSize} className={styles.orderItem}>
+              <div key={item.id + "-" + item.selectedSize + "-" + item.selectedColor} className={styles.orderItem}>
                 <span className={styles.orderItemName}>{item.name}</span>
                 {item.selectedSize && <span className={styles.orderItemSize}>{t("size")} {item.selectedSize}</span>}
+                {item.selectedColor && <span className={styles.orderItemSize}>{item.selectedColor}</span>}
                 <span className={styles.orderItemQty}>x{item.qty}</span>
                 <span className={styles.orderItemPrice}>{formatPrice(item.price * item.qty)}</span>
               </div>

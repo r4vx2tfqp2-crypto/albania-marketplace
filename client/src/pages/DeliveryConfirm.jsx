@@ -199,7 +199,7 @@ export default function DeliveryConfirm() {
                 </>
               )}
               <div style={{ borderTop: '1px solid var(--border)', margin: '10px 0' }} />
-              <div style={{ fontSize: 15, fontWeight: 600 }}>Total: {order.total?.toLocaleString()} L</div>
+              <div style={{ fontSize: 15, fontWeight: 600 }}>Total: {order.total?.toLocaleString("sq-AL")} L</div>
             </div>
 
             {/* Navigation button */}

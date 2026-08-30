@@ -168,6 +168,7 @@ export default function Orders() {
                         <a href={
                             order.courier_name === "Albanian Courier" ? "https://al.albaniancourier.al/en/track/?code=" + order.tracking_number :
                             order.courier_name === "DHL" ? "https://www.dhl.com/al-en/home/tracking.html?tracking-id=" + order.tracking_number :
+                            order.courier_name === "Posta Shqiptare" ? "https://www.postashqiptare.al/gjurmo" :
                             "https://www.google.com/search?q=" + order.tracking_number + "+tracking"}
                           target="_blank" rel="noopener noreferrer"
                           style={{ marginLeft: "auto", fontSize: 12, color: "var(--green)", fontWeight: 500, textDecoration: "none" }}>
@@ -180,7 +181,7 @@ export default function Orders() {
                   <div className={styles.orderFooter}>
                     <span className={styles.orderTotal}>{t("total")}: {formatPrice(order.total)}</span>
                     {order.status === "delivered" && (
-                      <button className={styles.reviewBtn}>{t("leave_review")}</button>
+                      <button className={styles.reviewBtn} onClick={() => navigate(`/shop/${order.shop_id}?tab=reviews`)}>{t("leave_review")}</button>
                     )}
                   </div>
                 </div>

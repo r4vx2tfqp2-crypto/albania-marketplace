@@ -127,6 +127,7 @@ export default {
   
       // Profile
       guest_user: "Vizitor",
+      account_holder: "Përdorues",
       sign_in_prompt: "Kyçu për të hyrë në llogarinë tënde",
       sign_in: "Kyçu",
       sign_out: "Dil",
@@ -136,6 +137,8 @@ export default {
       saved_items_sub: "Të preferuarat tuaja",
       seller_dashboard: "Paneli i shitësit",
       seller_dashboard_sub: "Menaxho dyqanin tënd",
+      delivery_confirmation: "Konfirmim dërgese",
+      delivery_confirmation_sub: "Për transportuesit",
       settings: "Cilësimet",
       settings_sub: "Preferencat e llogarisë",
   

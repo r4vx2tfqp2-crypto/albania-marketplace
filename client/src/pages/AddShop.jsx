@@ -28,7 +28,11 @@ export default function AddShop() {
   const [logoPreview, setLogoPreview] = useState(null);
   const [draftRestored, setDraftRestored] = useState(!!draft);
   const [form, setForm] = useState(draft || {
-    name: "", description: "", category: "Clothes & Fashion",
+    // Was "Clothes & Fashion" -- an English string matching none of the
+    // real Albanian CATEGORIES options, so the <select> looked like it
+    // showed the first option while state actually held a value that
+    // didn't match anything, until the seller manually re-picked one.
+    name: "", description: "", category: CATEGORIES[0],
     location: "Tirana", phone: "", email: "", color: "#1D9E75", delivery_fee: 300,
   });
 

@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
+import { CATEGORY_LABELS } from '../data/productCategoryData';
 
 const PLANS = [
   { key: 'free', label: 'Free', price: 0 },
@@ -26,11 +27,6 @@ const STATUS_COLORS = {
   delivered: { bg: 'var(--green-light)', color: 'var(--green-dark)' },
 };
 
-const CATEGORY_LABELS = {
-  shoes: 'Kepuce & Sandale', clothes: 'Rroba & Mode', electronics: 'Elektronike',
-  beauty: 'Bukuri & Kozmetike', home: 'Shtepi & Jetese', sports: 'Sporte & Fitness',
-  gifts: 'Dhurata', construction: 'Vegla & Ndertim',
-};
 
 // last N whole calendar days, oldest first, each as a [start, end) range
 function lastNDays(n) {
@@ -281,7 +277,9 @@ export default function AdminPanel() {
     const maxProductUnits = Math.max(1, ...topProducts.map(p => p.units));
 
     const categoryCounts = {};
-    products.forEach(p => { categoryCounts[p.category] = (categoryCounts[p.category] || 0) + 1; });
+    // Guard against products with no category set -- without this, a null/undefined
+    // category rendered the literal string "undefined"/"null" as a bar label below.
+    products.forEach(p => { if (!p.category) return; categoryCounts[p.category] = (categoryCounts[p.category] || 0) + 1; });
     const categoryList = Object.entries(categoryCounts).sort((a, b) => b[1] - a[1]);
     const maxCategoryCount = Math.max(1, ...categoryList.map(c => c[1]));
 
@@ -390,8 +388,8 @@ export default function AdminPanel() {
                 </div>
                 {pendingShops.map(shop => (
                   <div key={shop.id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 0', borderBottom: '1px solid var(--border)' }}>
-                    <div style={{ width: 38, height: 38, borderRadius: 8, background: (shop.color || '#1D9E75') + '22', color: shop.color || '#1D9E75', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 14 }}>
-                      {shop.initials}
+                    <div style={{ width: 38, height: 38, borderRadius: 8, background: (shop.color || '#1D9E75') + '22', color: shop.color || '#1D9E75', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 14, overflow: 'hidden' }}>
+                      {shop.logo_url ? <img src={shop.logo_url} alt={shop.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : shop.initials}
                     </div>
                     <div style={{ flex: 1 }}>
                       <div style={{ fontSize: 14, fontWeight: 500 }}>{shop.name}</div>
@@ -457,7 +455,9 @@ export default function AdminPanel() {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                   {ORDER_STATUSES.map(status => (
                     <div key={status} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                      <div style={{ width: 90, fontSize: 12, color: 'var(--text-2)', textTransform: 'capitalize' }}>{status.replace('_', ' ')}</div>
+                      {/* replace('_',' ') only swaps the FIRST underscore -- "on_the_way" (a real
+                          status value) rendered as "on the_way". replaceAll fixes every status. */}
+                      <div style={{ width: 90, fontSize: 12, color: 'var(--text-2)', textTransform: 'capitalize' }}>{status.replaceAll('_', ' ')}</div>
                       <Bar pct={(statusCounts[status] / maxStatusCount) * 100} color={STATUS_COLORS[status]?.color || 'var(--text-3)'} />
                       <div style={{ width: 24, fontSize: 12, fontWeight: 600, textAlign: 'right' }}>{statusCounts[status]}</div>
                     </div>
@@ -495,8 +495,8 @@ export default function AdminPanel() {
                     {topShops.map(({ shop, revenue, orderCount }) => (
                       <div key={shop.id}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, marginBottom: 4 }}>
-                          <span style={{ fontWeight: 500 }}>{shop.name}</span>
-                          <span style={{ color: 'var(--text-3)' }}>{formatPrice(revenue)} · {orderCount} porosi</span>
+                          <span style={{ fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 200 }}>{shop.name}</span>
+                          <span style={{ color: 'var(--text-3)', flexShrink: 0 }}>{formatPrice(revenue)} · {orderCount} porosi</span>
                         </div>
                         <Bar pct={(revenue / maxShopRevenue) * 100} color="var(--green)" />
                       </div>
@@ -571,8 +571,8 @@ export default function AdminPanel() {
             ) : pendingShops.map(shop => (
               <div key={shop.id} style={{ background: 'var(--surface)', border: '1px solid var(--amber)', borderRadius: 16, padding: 20 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-                  <div style={{ width: 48, height: 48, borderRadius: 10, background: (shop.color || '#1D9E75') + '22', color: shop.color || '#1D9E75', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 18, flexShrink: 0 }}>
-                    {shop.initials}
+                  <div style={{ width: 48, height: 48, borderRadius: 10, background: (shop.color || '#1D9E75') + '22', color: shop.color || '#1D9E75', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 18, flexShrink: 0, overflow: 'hidden' }}>
+                    {shop.logo_url ? <img src={shop.logo_url} alt={shop.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : shop.initials}
                   </div>
                   <div style={{ flex: 1 }}>
                     <div style={{ fontSize: 16, fontWeight: 600 }}>{shop.name}</div>
@@ -606,8 +606,8 @@ export default function AdminPanel() {
               {shops.map(shop => (
                 <div key={shop.id} style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 14, padding: 18, opacity: shop.subscription_active ? 1 : 0.6 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
-                    <div style={{ width: 42, height: 42, borderRadius: 8, background: (shop.color || '#1D9E75') + '22', color: shop.color || '#1D9E75', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 15, flexShrink: 0 }}>
-                      {shop.initials}
+                    <div style={{ width: 42, height: 42, borderRadius: 8, background: (shop.color || '#1D9E75') + '22', color: shop.color || '#1D9E75', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 15, flexShrink: 0, overflow: 'hidden' }}>
+                      {shop.logo_url ? <img src={shop.logo_url} alt={shop.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : shop.initials}
                     </div>
                     <div style={{ flex: 1 }}>
                       <div style={{ fontSize: 14, fontWeight: 500 }}>{shop.name}</div>
@@ -628,7 +628,7 @@ export default function AdminPanel() {
                     <span style={{ fontSize: 12, color: 'var(--text-3)', marginRight: 4 }}>Plan:</span>
                     {PLANS.map(plan => (
                       <button key={plan.key} onClick={() => setPlan(shop, plan)} disabled={saving === shop.id} style={{ padding: '3px 10px', borderRadius: 20, border: '1px solid', fontSize: 11, fontWeight: 500, cursor: 'pointer', fontFamily: 'var(--font-body)', borderColor: shop.subscription_plan === plan.key ? 'var(--text-1)' : 'var(--border-strong)', background: shop.subscription_plan === plan.key ? 'var(--text-1)' : 'transparent', color: shop.subscription_plan === plan.key ? '#fff' : 'var(--text-2)' }}>
-                        {plan.label} {plan.price > 0 ? `${plan.price.toLocaleString()} L/mo` : 'Free'}
+                        {plan.label} {plan.price > 0 ? `${plan.price.toLocaleString("sq-AL")} L/mo` : 'Free'}
                       </button>
                     ))}
                   </div>
@@ -701,7 +701,7 @@ export default function AdminPanel() {
                     <span style={{ fontSize: 12, color: 'var(--text-3)', marginRight: 4 }}>Status:</span>
                     {ORDER_STATUSES.map(status => (
                       <button key={status} onClick={() => updateOrderStatus(order.id, status)} disabled={saving === order.id} style={{ padding: '3px 10px', borderRadius: 20, border: '1px solid', fontSize: 11, fontWeight: 500, cursor: 'pointer', fontFamily: 'var(--font-body)', borderColor: order.status === status ? 'var(--text-1)' : 'var(--border-strong)', background: order.status === status ? 'var(--text-1)' : 'transparent', color: order.status === status ? '#fff' : 'var(--text-2)', textTransform: 'capitalize' }}>
-                        {status.replace('_', ' ')}
+                        {status.replaceAll('_', ' ')}
                       </button>
                     ))}
                   </div>
@@ -721,7 +721,7 @@ export default function AdminPanel() {
                 <div key={plan.key} style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 14, padding: 20 }}>
                   <div style={{ fontSize: 18, fontWeight: 700, fontFamily: 'var(--font-display)', marginBottom: 4 }}>{plan.label}</div>
                   <div style={{ fontSize: 22, fontWeight: 800, color: 'var(--green)', fontFamily: 'var(--font-display)' }}>
-                    {plan.price === 0 ? 'Free' : `${plan.price.toLocaleString()} L/mo`}
+                    {plan.price === 0 ? 'Free' : `${plan.price.toLocaleString("sq-AL")} L/mo`}
                   </div>
                   <div style={{ fontSize: 13, color: 'var(--text-3)', marginTop: 8 }}>
                     {shops.filter(s => s.subscription_plan === plan.key || (!s.subscription_plan && plan.key === 'free')).length} shops on this plan
@@ -736,8 +736,8 @@ export default function AdminPanel() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               {approvedShops.map(shop => (
                 <div key={shop.id} style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16, display: 'flex', alignItems: 'center', gap: 12 }}>
-                  <div style={{ width: 38, height: 38, borderRadius: 8, background: (shop.color || '#1D9E75') + '22', color: shop.color || '#1D9E75', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 14, flexShrink: 0 }}>
-                    {shop.initials}
+                  <div style={{ width: 38, height: 38, borderRadius: 8, background: (shop.color || '#1D9E75') + '22', color: shop.color || '#1D9E75', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 14, flexShrink: 0, overflow: 'hidden' }}>
+                    {shop.logo_url ? <img src={shop.logo_url} alt={shop.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : shop.initials}
                   </div>
                   <div style={{ flex: 1 }}>
                     <div style={{ fontSize: 14, fontWeight: 500 }}>{shop.name}</div>

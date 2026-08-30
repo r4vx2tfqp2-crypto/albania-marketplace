@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, MapPin, CheckCircle, Truck } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import ProductCard from '../components/ProductCard';
@@ -12,7 +12,12 @@ export default function Shop() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const [tab, setTab] = useState('products');
+  const [searchParams] = useSearchParams();
+  // Lets links like /shop/:id?tab=reviews (e.g. Orders.jsx's "leave a
+  // review" button) land directly on the right tab instead of always
+  // opening on Products.
+  const initialTab = searchParams.get('tab');
+  const [tab, setTab] = useState(['products', 'reviews', 'info'].includes(initialTab) ? initialTab : 'products');
   const [shop, setShop] = useState(null);
   const [products, setProducts] = useState([]);
   const [reviews, setReviews] = useState([]);
@@ -52,9 +57,9 @@ export default function Shop() {
         <div className="container">
           <Helmet>
           <title>{shop.name} — Dyqan Online | Tregu.store</title>
-          <meta name="description" content={shop.description?.slice(0, 155) + " | Bli online ne Tregu.store."} />
+          <meta name="description" content={(shop.description || "").slice(0, 155) + " | Bli online ne Tregu.store."} />
           <meta property="og:title" content={shop.name + " | Tregu.store"} />
-          <meta property="og:description" content={shop.description?.slice(0, 155)} />
+          <meta property="og:description" content={(shop.description || "").slice(0, 155)} />
           {shop.logo_url && <meta property="og:image" content={shop.logo_url} />}
           <meta property="og:url" content={"https://www.tregu.store/shop/" + shop.id} />
           <link rel="canonical" href={"https://www.tregu.store/shop/" + shop.id} />
@@ -71,7 +76,7 @@ export default function Shop() {
             <div className={styles.heroInfo}>
               <div className={styles.nameRow}>
                 <h1 className={styles.name}>{shop.name}</h1>
-                {shop.verified && <span className="badge badge-verified"><CheckCircle size={11} strokeWidth={2.5} /> Verified</span>}
+                {shop.verified && <span className="badge badge-verified"><CheckCircle size={11} strokeWidth={2.5} /> {t('verified_seller_status')}</span>}
               </div>
               <p className={styles.description}>{shop.description}</p>
               <div className={styles.metaRow}>

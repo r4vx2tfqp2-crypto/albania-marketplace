@@ -176,11 +176,11 @@ export default function SellerDashboard() {
                         <div className={styles.productName}>{p.name}</div>
                         <div className={styles.productMeta}>{p.in_stock ? t("in_stock") : t("out_of_stock")} · {p.category}</div>
                       </div>
-                      <div className={styles.productPrice}>{p.price?.toLocaleString()} L</div>
+                      <div className={styles.productPrice}>{p.price?.toLocaleString("sq-AL")} L</div>
                       <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
                         <button onClick={() => navigate("/seller/edit-product/" + p.id)}
-                          style={{ padding: "5px 10px", borderRadius: 8, border: "1px solid var(--border-strong)", fontSize: 12, cursor: "pointer", background: "var(--surface)", fontFamily: "var(--font-body)", color: "var(--text-2)" }}>
-                          Edit
+                          style={{ padding: "10px 14px", borderRadius: 8, border: "1px solid var(--border-strong)", fontSize: 13, cursor: "pointer", background: "var(--surface)", fontFamily: "var(--font-body)", color: "var(--text-2)", minHeight: 44 }}>
+                          Ndrysho
                         </button>
                         <button
   onClick={() => handleDeleteProduct(p.id)}
@@ -211,8 +211,10 @@ export default function SellerDashboard() {
               {shops.map(shop => (
                 <div key={shop.id} style={{ display: "flex", alignItems: "center", gap: 12, background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--radius-lg)", padding: 16 }}>
                   <Link to={"/shop/" + shop.id} style={{ display: "flex", alignItems: "center", gap: 12, flex: 1, textDecoration: "none" }}>
-                    <div style={{ width: 44, height: 44, borderRadius: "var(--radius-md)", background: shop.color + "22", color: shop.color, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 16 }}>
-                      {shop.initials}
+                    <div style={{ width: 44, height: 44, borderRadius: "var(--radius-md)", background: shop.color + "22", color: shop.color, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 16, overflow: "hidden" }}>
+                      {shop.logo_url ? (
+                        <img src={shop.logo_url} alt={shop.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                      ) : shop.initials}
                     </div>
                     <div>
                       <div style={{ display: "flex", alignItems: "center", gap: 8 }}>

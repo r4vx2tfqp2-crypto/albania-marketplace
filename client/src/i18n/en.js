@@ -127,6 +127,7 @@ export default {
   
       // Profile
       guest_user: "Guest User",
+      account_holder: "User",
       sign_in_prompt: "Sign in to access your account",
       sign_in: "Sign in",
       sign_out: "Sign out",
@@ -136,6 +137,8 @@ export default {
       saved_items_sub: "Your favorites",
       seller_dashboard: "Seller dashboard",
       seller_dashboard_sub: "Manage your shop",
+      delivery_confirmation: "Delivery confirmation",
+      delivery_confirmation_sub: "For delivery drivers",
       settings: "Settings",
       settings_sub: "Account preferences",
   

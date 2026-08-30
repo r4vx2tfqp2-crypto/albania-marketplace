@@ -4,6 +4,7 @@ import { Heart, ShoppingCart, ArrowLeft, CheckCircle, Truck, Shield } from "luci
 import { useTranslation } from "react-i18next";
 import { useCart } from "../context/CartContext";
 import { colorToHex } from "../lib/colors";
+import { CATEGORY_LABELS } from "../data/productCategoryData";
 import { supabase } from "../lib/supabase";
 import { Helmet } from "react-helmet-async";
 import Reviews from "../components/Reviews";
@@ -145,7 +146,9 @@ export default function Product() {
 
           <div className={styles.infoSection}>
             <div className={styles.topMeta}>
-              <span className={styles.category}>{product.category}</span>
+              {/* product.category is stored as a raw English slug (e.g. "shoes")
+                  -- was rendered as-is to buyers instead of its Albanian label. */}
+              <span className={styles.category}>{CATEGORY_LABELS[product.category] || product.category}</span>
               {!product.in_stock && <span className="badge badge-out">{t("out_of_stock")}</span>}
             </div>
             <h1 className={styles.name}>{product.name}</h1>

@@ -49,7 +49,10 @@
 .itemInfo { flex: 1; min-width: 0; }
 .itemName { font-size: 15px; font-weight: 500; color: var(--text-1); display: block; }
 .itemName:hover { color: var(--green-dark); }
-.itemSize { font-size: 12px; color: var(--text-3); margin-top: 2px; }
+.itemMeta { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 2px; }
+.itemSize { font-size: 12px; color: var(--text-3); }
+.itemColor { display: flex; align-items: center; gap: 5px; font-size: 12px; color: var(--text-3); }
+.itemColorDot { width: 10px; height: 10px; border-radius: 50%; border: 1px solid var(--border-strong); flex-shrink: 0; }
 .itemPrice { font-size: 14px; color: var(--text-2); margin-top: 4px; }
 
 .qtyControl {
@@ -192,5 +195,13 @@
 
 @media (max-width: 768px) {
   .layout { grid-template-columns: 1fr; }
-  .qtyControl { display: none; }
+  /* Previously hid the qty stepper entirely on mobile with no
+     replacement control -- on the default e-commerce-majority viewport,
+     that left no way to change an item's quantity from the cart at all
+     (only remove-and-re-add). Wrap instead of hide: the row is already
+     flexible enough (itemInfo has min-width:0) to flow onto a second
+     line rather than needing a full mobile-specific redesign. */
+  .item { flex-wrap: wrap; row-gap: 10px; }
+  .itemInfo { flex-basis: 100%; }
+  .itemTotal { margin-left: auto; }
 }

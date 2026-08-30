@@ -2,6 +2,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Minus, Plus, Trash2, ArrowRight, ShoppingCart } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useCart } from '../context/CartContext';
+import { colorToHex } from '../lib/colors';
 import styles from './Cart.module.css';
 
 const COLORS = ['#E1F5EE','#E6F1FB','#FBEAF0','#FAEEDA','#EAF3DE','#EEEDFE'];
@@ -33,27 +34,42 @@ export default function Cart() {
         <div className={styles.layout}>
           <div className={styles.items}>
             {cartItems.map((item, i) => (
-              <div key={`${item.id}-${item.selectedSize}`} className={styles.item}>
-                <div className={styles.itemImage} style={{ background: COLORS[i % COLORS.length] }}>
-                  <span>
-                    {item.category === 'shoes' ? '👟' :
-                     item.category === 'clothes' ? '👕' :
-                     item.category === 'electronics' ? '📱' :
-                     item.category === 'beauty' ? '💄' : '🛍️'}
-                  </span>
-                </div>
+              <div key={`${item.id}-${item.selectedSize}-${item.selectedColor}`} className={styles.item}>
+                {/* item.images (the real uploaded product photos) is
+                    present on every cart item -- addToCart spreads the
+                    full product object -- it was just never read here. */}
+                {item.images && item.images.length > 0 ? (
+                  <img src={item.images[0]} alt={item.name} className={styles.itemImage} style={{ objectFit: 'cover' }} />
+                ) : (
+                  <div className={styles.itemImage} style={{ background: COLORS[i % COLORS.length] }}>
+                    <span>
+                      {item.category === 'shoes' ? '👟' :
+                       item.category === 'clothes' ? '👕' :
+                       item.category === 'electronics' ? '📱' :
+                       item.category === 'beauty' ? '💄' : '🛍️'}
+                    </span>
+                  </div>
+                )}
                 <div className={styles.itemInfo}>
                   <Link to={`/product/${item.id}`} className={styles.itemName}>{item.name}</Link>
-                  {item.selectedSize && <div className={styles.itemSize}>{t('size')}: {item.selectedSize}</div>}
+                  <div className={styles.itemMeta}>
+                    {item.selectedSize && <span className={styles.itemSize}>{t('size')}: {item.selectedSize}</span>}
+                    {item.selectedColor && (
+                      <span className={styles.itemColor}>
+                        <span className={styles.itemColorDot} style={{ background: colorToHex(item.selectedColor) }} />
+                        {item.selectedColor}
+                      </span>
+                    )}
+                  </div>
                   <div className={styles.itemPrice}>{formatPrice(item.price)}</div>
                 </div>
                 <div className={styles.qtyControl}>
-                  <button onClick={() => updateQty(item.id, item.selectedSize, item.qty - 1)} aria-label={"Pakeso sasine per " + item.name}><Minus size={13} /></button>
+                  <button onClick={() => updateQty(item.id, item.selectedSize, item.qty - 1, item.selectedColor)} aria-label={"Pakeso sasine per " + item.name}><Minus size={13} /></button>
                   <span aria-live="polite">{item.qty}</span>
-                  <button onClick={() => updateQty(item.id, item.selectedSize, item.qty + 1)} aria-label={"Rrit sasine per " + item.name}><Plus size={13} /></button>
+                  <button onClick={() => updateQty(item.id, item.selectedSize, item.qty + 1, item.selectedColor)} aria-label={"Rrit sasine per " + item.name}><Plus size={13} /></button>
                 </div>
                 <div className={styles.itemTotal}>{formatPrice(item.price * item.qty)}</div>
-                <button className={styles.removeBtn} onClick={() => removeFromCart(item.id, item.selectedSize)} aria-label={"Hiq " + item.name + " nga shporta"}>
+                <button className={styles.removeBtn} onClick={() => removeFromCart(item.id, item.selectedSize, item.selectedColor)} aria-label={"Hiq " + item.name + " nga shporta"}>
                   <Trash2 size={15} />
                 </button>
               </div>

@@ -185,7 +185,7 @@ export default function Feed() {
         )}
 
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          <span style={{ color: "#fff", fontSize: 22, fontWeight: 800 }}>{product.price?.toLocaleString()} L</span>
+          <span style={{ color: "#fff", fontSize: 22, fontWeight: 800 }}>{product.price?.toLocaleString("sq-AL")} L</span>
           <button onClick={() => navigate("/product/" + product.id)}
             style={{ background: "#1D9E75", color: "#fff", border: "none", borderRadius: 24, padding: "9px 20px", fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: "var(--font-body)" }}>
             Shiko →
@@ -194,8 +194,14 @@ export default function Feed() {
       </div>
 
       {/* SWIPE HINT */}
+      {/* Was bottom:80 -- the bottom-info block above it (bottom:70) stacks
+          its content upward from that anchor, so its price/CTA row (the
+          last element in that stack) sits right around 70-110px from the
+          bottom, directly behind this hint on the first card. Anchored
+          higher, clear of both the price row and the right-side action
+          icons (which start at bottom:200), so it never overlaps content. */}
       {current === 0 && (
-        <div style={{ position: "absolute", bottom: 80, left: "50%", transform: "translateX(-50%)", zIndex: 10, textAlign: "center" }}>
+        <div style={{ position: "absolute", bottom: 220, left: "50%", transform: "translateX(-50%)", zIndex: 10, textAlign: "center" }}>
           <div style={{ color: "rgba(255,255,255,0.4)", fontSize: 11 }}>↑ Rrëshqit lart</div>
         </div>
       )}
