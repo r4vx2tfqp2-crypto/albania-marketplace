@@ -110,8 +110,12 @@ serve(async (req) => {
   if (event === 'status_changed') {
     // Only the shop that owns this order may announce its own status
     // change -- prevents any random logged-in user from pinging a
-    // stranger's order.
-    if (!shop || shop.user_id !== caller.id) return json({ error: 'Forbidden' }, 403)
+    // stranger's order. Checked as two distinct cases (shop missing vs.
+    // caller isn't its owner) so a data-integrity edge case (order
+    // references a since-deleted shop) doesn't read as if the real
+    // owner were being denied access to their own order.
+    if (!shop) return json({ error: 'Shop not found for this order' }, 404)
+    if (shop.user_id !== caller.id) return json({ error: 'Forbidden' }, 403)
     if (!order.buyer_id) return json({ sent: 0, failed: 0, note: 'Guest order, no account to notify' })
 
     const label = STATUS_LABELS[order.status] || 'u perditesua'

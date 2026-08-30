@@ -17,12 +17,18 @@ function isStandalone() {
   return window.matchMedia?.("(display-mode: standalone)").matches || window.navigator.standalone === true;
 }
 
-function isIos() {
-  return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+function isIphoneOrIpod() {
+  return /iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
 }
 
-// iPadOS 13+ reports its UA as desktop Safari (no "iPad" substring), the
-// one reliable way left to tell it apart from a real Mac is touch support.
+// iPadOS 13+ reports its UA as desktop Safari by default (no "iPad"
+// substring at all -- looks identical to a real Mac's UA), so this has
+// to be checked independently via touch support, not treated as a
+// fallback nested inside an iPhone/iPod-only regex check. It used to be
+// checked only after an isIos() gate that required "iPad|iPhone|iPod" in
+// the UA -- which a default-UA iPad never matches -- so this heuristic
+// was unreachable dead code and every real iPad got misclassified as
+// desktop, landing on impossible-to-follow Mac-only instructions.
 function isIpad() {
   return /iPad/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
 }
@@ -41,7 +47,8 @@ function getBrowser() {
 }
 
 function getPlatform() {
-  if (isIos()) return isIpad() ? "ipad" : "iphone";
+  if (isIpad()) return "ipad";
+  if (isIphoneOrIpod()) return "iphone";
   if (isAndroid()) return "android";
   return "desktop";
 }
@@ -81,9 +88,11 @@ function getSteps(platform, browser) {
       };
     }
     return {
-      note: "Ne Chrome ose Samsung Internet, kjo eshte zakonisht dy prekje.",
+      note: browser === "edge"
+        ? "Ne Edge per Android, kjo eshte zakonisht dy prekje."
+        : "Ne Chrome ose Samsung Internet, kjo eshte zakonisht dy prekje.",
       steps: [
-        { icon: <Menu size={18} />, text: <>Prekni menune (tre pika, lart djathtas ne Chrome).</> },
+        { icon: <Menu size={18} />, text: <>Prekni menune (tre pika, lart djathtas).</> },
         { icon: <PlusSquare size={18} />, text: <>Prekni <strong>"Instalo aplikacionin"</strong> ose <strong>"Shto ne ekranin kryesor"</strong>.</> },
       ],
     };
@@ -130,6 +139,7 @@ export default function InstallPrompt() {
   const [visible, setVisible] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [waitedForAutoPrompt, setWaitedForAutoPrompt] = useState(false);
+  const [installing, setInstalling] = useState(false);
   const platform = getPlatform();
   const browser = getBrowser();
   const isIosPlatform = platform === "iphone" || platform === "ipad";
@@ -167,10 +177,25 @@ export default function InstallPrompt() {
   };
 
   const install = async () => {
-    if (!deferredPrompt) return;
-    deferredPrompt.prompt();
-    await deferredPrompt.userChoice;
+    // Guards against a rapid double-tap calling prompt() a second time on
+    // the same already-used event object, which the spec doesn't support
+    // and which previously had no guard against.
+    if (!deferredPrompt || installing) return;
+    setInstalling(true);
+    try {
+      deferredPrompt.prompt();
+      await deferredPrompt.userChoice;
+    } catch {
+      // Declining/dismissing the native prompt isn't an error -- nothing
+      // to surface, just fall through to the cleanup below either way.
+    }
+    // Persist even on decline, same as the X button -- previously only
+    // dismiss() wrote this, so someone who explicitly said "no" to the
+    // native install prompt would see this same banner again on their
+    // very next reload instead of being remembered for DISMISS_DAYS.
+    localStorage.setItem(DISMISS_KEY, String(Date.now()));
     setDeferredPrompt(null);
+    setInstalling(false);
     setVisible(false);
   };
 
@@ -198,7 +223,7 @@ export default function InstallPrompt() {
           </div>
         </div>
         {hasOneClick ? (
-          <button className={styles.installBtn} onClick={install}>Instalo</button>
+          <button className={styles.installBtn} onClick={install} disabled={installing}>Instalo</button>
         ) : (
           <button className={styles.installBtn} onClick={() => setShowModal(true)}>Shiko si</button>
         )}

@@ -76,13 +76,23 @@ self.addEventListener("notificationclick", (event) => {
   const targetUrl = event.notification.data?.url || "/";
 
   event.waitUntil(
-    self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((clients) => {
+    self.clients.matchAll({ type: "window", includeUncontrolled: true }).then(async (clients) => {
       // Focus an already-open Tregu tab/window instead of opening a new
-      // one, navigating it to the relevant page.
+      // one, navigating it to the relevant page. navigate() can reject
+      // (e.g. the client navigated away/closed between matchAll() and
+      // here) -- previously unawaited, so a failure there silently left
+      // an unhandled rejection AND still returned client.focus()
+      // unconditionally, meaning the openWindow() fallback below could
+      // never run as long as any focusable client existed, even one
+      // navigate() had just failed on.
       for (const client of clients) {
         if ("focus" in client) {
-          client.navigate(targetUrl);
-          return client.focus();
+          try {
+            await client.navigate(targetUrl);
+            return client.focus();
+          } catch {
+            continue; // try the next open client, or fall through to openWindow
+          }
         }
       }
       return self.clients.openWindow(targetUrl);

@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
+import { disablePush } from '../lib/push';
 
 const AuthContext = createContext();
 
@@ -21,6 +22,15 @@ export function AuthProvider({ children }) {
   }, []);
 
   const signOut = async () => {
+    // Must run BEFORE auth.signOut() -- push_subscriptions' RLS delete
+    // policy requires an active session matching the row's user_id.
+    // Without this, a shared/handed-off device keeps this account's
+    // browser-level push subscription alive after sign-out: the next
+    // person to sign in on the same device and enable push would either
+    // hit an RLS conflict trying to claim the same endpoint, or (if that
+    // failed silently) this account would keep quietly receiving push
+    // notifications meant for it on what's now someone else's device.
+    await disablePush().catch(() => {}); // best-effort -- never block sign-out on this
     await supabase.auth.signOut();
     setUser(null);
   };
