@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, CheckCircle, Upload, X, Plus } from "lucide-react";
+import { ArrowLeft, CheckCircle, Upload, X, Plus, Sparkles } from "lucide-react";
 import { supabase } from "../lib/supabase";
 import { resizeImage } from "../lib/resizeImage";
 import { colorToHex } from "../lib/colors";
+import { generateListing } from "../lib/aiListing";
 import { CATEGORIES, PRESET_SIZES, PRESET_COLORS, CATEGORY_DETAILS } from "../data/productCategoryData";
 import styles from "./AddProduct.module.css";
 
@@ -28,6 +29,8 @@ export default function AddProduct() {
   const [uploadProgress, setUploadProgress] = useState(0);
   const [failedImageCount, setFailedImageCount] = useState(0);
   const [step, setStep] = useState(1);
+  const [aiGenerating, setAiGenerating] = useState(false);
+  const [aiError, setAiError] = useState("");
   const [selectedSizes, setSelectedSizes] = useState(draft?.selectedSizes || []);
   const [selectedColors, setSelectedColors] = useState(draft?.selectedColors || []);
   const [customSize, setCustomSize] = useState("");
@@ -118,6 +121,25 @@ export default function AddProduct() {
     }
     setFailedImageCount(failed);
     return urls;
+  };
+
+  const handleGenerateAI = async () => {
+    if (!form.name.trim()) { setAiError("Shkruaj emrin e produktit se pari."); return; }
+    setAiGenerating(true);
+    setAiError("");
+    try {
+      const result = await generateListing({
+        name: form.name,
+        category: form.category,
+        existingDescription: form.description,
+        imageFile: images[0], // first/cover photo, still a local File at this stage
+      });
+      if (result.description) setForm(f => ({ ...f, description: result.description }));
+      if (result.details) setDetails(d => ({ ...d, ...result.details }));
+    } catch {
+      setAiError("Gjenerimi me AI deshtoi. Provo perseri.");
+    }
+    setAiGenerating(false);
   };
 
   const handleSubmit = async (e) => {
@@ -271,10 +293,21 @@ export default function AddProduct() {
             </div>
 
             <div className={styles.field}>
-              <label className={styles.label} htmlFor="product-description">Pershkrimi *</label>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, marginBottom: 6 }}>
+                <label className={styles.label} htmlFor="product-description" style={{ marginBottom: 0 }}>Pershkrimi *</label>
+                <button type="button" onClick={handleGenerateAI} disabled={aiGenerating || !form.name.trim()}
+                  title={images.length === 0 ? "Shto nje foto per rezultate me te sakta" : ""}
+                  style={{ display: "flex", alignItems: "center", gap: 5, padding: "5px 12px", borderRadius: 20, border: "1px solid var(--green)", background: "var(--green-light)", color: "var(--green-dark)", fontSize: 12, fontWeight: 600, cursor: form.name.trim() ? "pointer" : "not-allowed", fontFamily: "var(--font-body)", opacity: form.name.trim() ? 1 : 0.5, flexShrink: 0 }}>
+                  <Sparkles size={12} /> {aiGenerating ? "Duke gjeneruar..." : "Gjenero me AI"}
+                </button>
+              </div>
               <textarea id="product-description" required className={styles.textarea} rows={3}
                 placeholder="Pershkruaj produktin — materiali, veçorite kryesore, gjendja..."
                 value={form.description} onChange={e => setForm({...form, description: e.target.value})} />
+              {aiError && <div style={{ fontSize: 12, color: "var(--red)", marginTop: 4 }}>{aiError}</div>}
+              {!aiError && images.length === 0 && (
+                <div style={{ fontSize: 11.5, color: "var(--text-3)", marginTop: 4 }}>Këshillë: shto nje foto para se te gjenerosh me AI per pershkrim dhe detaje me te sakta.</div>
+              )}
             </div>
           </div>
 
