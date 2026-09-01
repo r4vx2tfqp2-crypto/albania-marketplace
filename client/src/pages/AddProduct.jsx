@@ -113,10 +113,14 @@ export default function AddProduct() {
     let failed = 0;
     for (let i = 0; i < images.length; i++) {
       const resized = await resizeImage(images[i]);
-      const ext = resized.name.split(".").pop();
-      const path = productId + "/" + i + "." + ext;
-      const url = await uploadOne(resized, path);
-      if (url) urls.push(url); else failed++;
+      if (resized) {
+        const ext = resized.name.split(".").pop();
+        const path = productId + "/" + i + "." + ext;
+        const url = await uploadOne(resized, path);
+        if (url) urls.push(url); else failed++;
+      } else {
+        failed++; // e.g. an unconvertible HEIC photo -- never uploaded, so it can't show as broken
+      }
       setUploadProgress(Math.round(((i + 1) / images.length) * 100));
     }
     setFailedImageCount(failed);
@@ -174,7 +178,7 @@ export default function AddProduct() {
         <h2 style={{ fontFamily: "var(--font-display)", fontSize: 24, fontWeight: 700, color: "var(--text-1)" }}>Produkti u publikua!</h2>
         {failedImageCount > 0 && (
           <p style={{ color: "#854F0B", fontSize: 13, background: "var(--amber-light)", padding: "8px 14px", borderRadius: 8, maxWidth: 360 }}>
-            {failedImageCount} nga fotot nuk u ngarkuan dot (lidhje e paqendrueshme). Mund t'i shtoni me vone duke redaktuar produktin.
+            {failedImageCount} nga fotot nuk u ngarkuan dot (lidhje e paqendrueshme ose format i pasuportuar, p.sh. HEIC). Provoni t'i konvertoni ne JPG dhe shtoni me vone duke redaktuar produktin.
           </p>
         )}
         <p style={{ color: "var(--text-3)", fontSize: 14 }}>Duke u ridrejtuar...</p>

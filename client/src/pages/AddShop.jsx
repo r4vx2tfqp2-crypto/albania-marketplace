@@ -61,6 +61,7 @@ export default function AddShop() {
   const uploadLogo = async (shopId) => {
     if (!logoFile) return null;
     const resized = await resizeImage(logoFile, { maxDimension: 800, quality: 0.85 });
+    if (!resized) return null; // e.g. an unconvertible HEIC photo -- skip the logo rather than crash the shop creation
     const ext = resized.name.split(".").pop();
     const path = "logos/" + shopId + "." + ext;
     const { error } = await supabase.storage.from("product-images").upload(path, resized, { upsert: true });
