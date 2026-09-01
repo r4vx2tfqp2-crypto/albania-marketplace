@@ -40,7 +40,7 @@ export default function Cart() {
                     present on every cart item -- addToCart spreads the
                     full product object -- it was just never read here. */}
                 {item.images && item.images.length > 0 ? (
-                  <img src={optimizedImageUrl(item.images[0], 144)} alt={item.name} className={styles.itemImage} style={{ objectFit: 'cover' }} />
+                  <img src={optimizedImageUrl(item.images[0], 200)} alt={item.name} className={styles.itemImage} style={{ objectFit: 'cover' }} />
                 ) : (
                   <div className={styles.itemImage} style={{ background: COLORS[i % COLORS.length] }}>
                     <span>

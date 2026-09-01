@@ -172,7 +172,7 @@ export default function SellerDashboard() {
                     <div key={p.id} className={styles.productRow}>
                       <div className={styles.productImg} style={{ background: COLORS[i % 4] }}>
                         {p.images && p.images.length > 0 ? (
-                          <img src={optimizedImageUrl(p.images[0], 80)} alt={p.name} loading="lazy" decoding="async" style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "inherit" }} />
+                          <img src={optimizedImageUrl(p.images[0], 96)} alt={p.name} loading="lazy" decoding="async" style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "inherit" }} />
                         ) : (
                           p.category === "shoes" ? "👟" : p.category === "clothes" ? "👕" : p.category === "electronics" ? "📱" : "📦"
                         )}

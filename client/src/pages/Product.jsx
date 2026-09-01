@@ -123,7 +123,7 @@ export default function Product() {
           <div className={styles.imageSection}>
             <div className={styles.imageMain} style={{ background: BG_COLORS[idx] }}>
               {hasImages ? (
-                <img src={optimizedImageUrl(product.images[activeImage], 800)} alt={product.name} style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "var(--radius-xl)" }} />
+                <img src={optimizedImageUrl(product.images[activeImage], 828)} alt={product.name} style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "var(--radius-xl)" }} />
               ) : (
                 <span className={styles.imageEmoji} style={{ color: TEXT_COLORS[idx] }}>
                   {product.category === "shoes" ? "👟" : product.category === "clothes" ? "👕" : product.category === "electronics" ? "📱" : product.category === "beauty" ? "💄" : product.category === "home" ? "🏠" : "🛍️"}
@@ -142,7 +142,7 @@ export default function Product() {
                  grid-overflow trap from any other wide content. */
               <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 10 }}>
                 {product.images.map((img, i) => (
-                  <img key={i} src={optimizedImageUrl(img, 120)} alt={`${product.name} - foto ${i + 1}`} onClick={() => setActiveImage(i)}
+                  <img key={i} src={optimizedImageUrl(img, 128)} alt={`${product.name} - foto ${i + 1}`} onClick={() => setActiveImage(i)}
                     role="button" tabIndex={0} aria-pressed={activeImage === i}
                     onKeyDown={e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setActiveImage(i); } }}
                     style={{ width: 60, height: 60, objectFit: "cover", borderRadius: 8, cursor: "pointer", flexShrink: 0,

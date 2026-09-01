@@ -15,6 +15,16 @@
 // an image outright.
 const OPTIMIZED_HOST = "onngupovxaequeqplikx.supabase.co";
 
+// Must mirror vercel.json's images.sizes exactly -- the endpoint 400s on
+// any `w` that isn't one of these, which silently breaks the <img> (blank
+// box with a broken-image icon, no console error a caller would notice).
+// Snapping every request to the nearest allowed size here means a caller
+// passing an arbitrary pixel value can't accidentally ship a broken image.
+const ALLOWED_WIDTHS = [64, 96, 128, 200, 256, 400, 640, 828, 1080, 1600];
+function snapWidth(width) {
+  return ALLOWED_WIDTHS.find(w => w >= width) || ALLOWED_WIDTHS[ALLOWED_WIDTHS.length - 1];
+}
+
 export function optimizedImageUrl(url, width, quality = 75) {
   if (!url || typeof url !== "string") return url;
   try {
@@ -23,5 +33,5 @@ export function optimizedImageUrl(url, width, quality = 75) {
   } catch {
     return url;
   }
-  return `/_vercel/image?url=${encodeURIComponent(url)}&w=${width}&q=${quality}`;
+  return `/_vercel/image?url=${encodeURIComponent(url)}&w=${snapWidth(width)}&q=${quality}`;
 }
