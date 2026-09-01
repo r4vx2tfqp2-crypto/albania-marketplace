@@ -5,15 +5,33 @@
 // unreliable on mobile data. This shrinks anything over maxDimension and
 // re-encodes as JPEG at a sane quality, typically landing well under 500KB.
 //
-// Falls back to the original file if the browser can't decode it (e.g.
-// HEIC in a non-Safari browser) so a resize failure never blocks the
-// upload entirely -- it just skips compression for that one file.
-export function resizeImage(file, { maxDimension = 1600, quality = 0.82 } = {}) {
+// iPhones default to shooting HEIC, which only Safari can decode via
+// <img>/canvas -- on every other browser it used to fall through untouched
+// and get uploaded as a raw .heic file that just doesn't render for buyers.
+// heic2any (WASM libheif, works everywhere) converts it to JPEG first so
+// the resize step below always has something every browser can decode.
+const HEIC_TYPES = ["image/heic", "image/heif"];
+async function toDecodable(file) {
+  const isHeic = HEIC_TYPES.includes(file.type) || /\.hei[cf]$/i.test(file.name);
+  if (!isHeic) return file;
+  try {
+    const { default: heic2any } = await import("heic2any");
+    const blob = await heic2any({ blob: file, toType: "image/jpeg", quality: 0.9 });
+    return new File([blob], file.name.replace(/\.\w+$/, ".jpg"), { type: "image/jpeg" });
+  } catch {
+    return null; // conversion failed -- caller decides how to handle an undecodable photo
+  }
+}
+
+export async function resizeImage(file, { maxDimension = 1600, quality = 0.82 } = {}) {
+  const source = await toDecodable(file);
+  if (!source) return null; // signals "this photo can't be shown in a browser, don't upload it"
+
   return new Promise((resolve) => {
     const img = new Image();
-    const url = URL.createObjectURL(file);
+    const url = URL.createObjectURL(source);
 
-    const fallback = () => { URL.revokeObjectURL(url); resolve(file); };
+    const fallback = () => { URL.revokeObjectURL(url); resolve(source); };
 
     img.onload = () => {
       let { width, height } = img;
@@ -34,7 +52,7 @@ export function resizeImage(file, { maxDimension = 1600, quality = 0.82 } = {}) 
       ctx.drawImage(img, 0, 0, width, height);
       canvas.toBlob((blob) => {
         URL.revokeObjectURL(url);
-        if (!blob || blob.size >= file.size) { resolve(file); return; }
+        if (!blob || blob.size >= source.size) { resolve(source); return; }
         const resized = new File([blob], file.name.replace(/\.\w+$/, ".jpg"), { type: "image/jpeg" });
         resolve(resized);
       }, "image/jpeg", quality);

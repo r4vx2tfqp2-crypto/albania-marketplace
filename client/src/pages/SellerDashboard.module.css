@@ -129,6 +129,7 @@
   justify-content: center;
   font-size: 18px;
   flex-shrink: 0;
+  overflow: hidden;
 }
 
 .productInfo { flex: 1; min-width: 0; }
