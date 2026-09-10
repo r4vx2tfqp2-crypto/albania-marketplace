@@ -26,6 +26,12 @@ const DEFAULT_TITLE = 'Tregu — Te gjitha dyqanet shqiptare ne nje vend';
 const DEFAULT_DESC =
   'Tregu.store — Platforma e pare shqiptare e tregtise elektronike. Zbulo produkte nga dyqane lokale te verifikuara. Krahaso cmimet, porosit online, pagesa me dorezim.';
 
+// Present in the real index.html (see client/index.html) but was missing
+// from these bot-only responses -- since Googlebot's own UA matches
+// BOT_RE, any homepage crawl Google uses to (re-)check Search Console
+// ownership hits this page and previously found no verification tag.
+const SITE_VERIFICATION = 'WwhPH6Ju9eGROec2lvHApqb0E0o51g9wJJ_xuqiLpjo';
+
 const SUPABASE_URL = 'https://onngupovxaequeqplikx.supabase.co';
 const SUPABASE_ANON_KEY =
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9ubmd1cG92eGFlcXVlcXBsaWt4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcxNTUzODUsImV4cCI6MjA5MjczMTM4NX0.aTiKdVjl02JenqpQzbg2qcniscHMJyml9LMdmRsqqKg';
@@ -133,21 +139,26 @@ async function productResponse(id: string): Promise<Response | undefined> {
 
   // Product rich-result schema -- lets price/availability/rating show up
   // directly in Google search results instead of just a plain blue link.
+  // Google's structured-data validator rejects an Offer that has
+  // priceCurrency but no price, so only attach offers at all when a real
+  // price exists instead of emitting a half-populated (invalid) one.
   const jsonLd: Record<string, any> = {
     '@context': 'https://schema.org/',
     '@type': 'Product',
     name: product.name,
     image: product.images?.length ? product.images : [DEFAULT_IMAGE],
     description: product.description || desc,
-    offers: {
-      '@type': 'Offer',
-      url: canonical,
-      priceCurrency: 'ALL',
-      price: product.price ?? undefined,
-      availability: product.in_stock === false
-        ? 'https://schema.org/OutOfStock'
-        : 'https://schema.org/InStock',
-    },
+    ...(product.price != null ? {
+      offers: {
+        '@type': 'Offer',
+        url: canonical,
+        priceCurrency: 'ALL',
+        price: product.price,
+        availability: product.in_stock === false
+          ? 'https://schema.org/OutOfStock'
+          : 'https://schema.org/InStock',
+      },
+    } : {}),
   };
   if (product.rating && product.review_count) {
     jsonLd.aggregateRating = {
@@ -207,8 +218,8 @@ function notFoundResponse(): Response {
 }
 
 function pageResponse(opts: { title: string; desc: string; canonical: string; image?: string; refresh?: boolean; jsonLd?: Record<string, any> }): Response {
-  const title = esc(opts.title);
-  const desc = esc(opts.desc);
+  const title = esc(oneLine(opts.title));
+  const desc = esc(oneLine(opts.desc));
   const image = esc(opts.image ?? DEFAULT_IMAGE);
   const canonical = opts.canonical;
   const jsonLdTag = opts.jsonLd
@@ -219,9 +230,11 @@ function pageResponse(opts: { title: string; desc: string; canonical: string; im
 <html lang="sq">
 <head>
 <meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>${title}</title>
 <meta name="description" content="${desc}"/>
 <meta name="robots" content="index, follow"/>
+<meta name="google-site-verification" content="${SITE_VERIFICATION}"/>
 <link rel="canonical" href="${canonical}"/>
 <meta property="og:type"        content="website"/>
 <meta property="og:site_name"   content="Tregu"/>
@@ -247,6 +260,14 @@ ${opts.refresh ? `<meta http-equiv="refresh" content="0;url=${canonical}"/>\n` :
       'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400',
     },
   });
+}
+
+// Product/shop title and description come straight from user-entered DB
+// text, which can contain raw newlines (e.g. a shop's multi-line "about"
+// blurb) -- dropped directly into a meta content="..." attribute that
+// produces a broken-looking, multi-line snippet in search results.
+function oneLine(s: string): string {
+  return s.replace(/\s+/g, ' ').trim();
 }
 
 function esc(s: string): string {
